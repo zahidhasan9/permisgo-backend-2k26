@@ -18,7 +18,7 @@ import {
   register,
   login,
   me,
-  // logoutUser,
+  logout,
   // sessionUser,
   // getUsers,
   // getUserById,
@@ -39,7 +39,7 @@ const router = express.Router();
 router.post("/register", register);
 router.post("/login", login);
 router.get("/me", protect, me);
-// router.post("/logout", logout);
+router.post("/logout", logout);
 
 // router.post("/resetPasswordRequest", resetPasswordRequest);
 // router.post("/reset-password/:id/:token", resetPassword);
