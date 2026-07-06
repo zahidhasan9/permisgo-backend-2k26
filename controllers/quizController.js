@@ -355,11 +355,133 @@ export const getQuizAttemptReview = asyncHandler(async (req, res) => {
 // Admin Quiz Management
 // =======================
 export const getAdminQuizzes = asyncHandler(async (req, res) => {
-  const quizzes = await Quiz.find({ status: { $ne: "deleted" } }).sort({
-    order: 1,
-    createdAt: -1,
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
+  const skip = (page - 1) * limit;
+
+  const { search, type, status, isPaid } = req.query;
+
+  const filter = {
+    status: { $ne: "deleted" },
+  };
+
+  if (status && status !== "all") {
+    filter.status = status;
+  }
+
+  if (type && type !== "all") {
+    filter.type = type;
+  }
+
+  if (isPaid === "true") {
+    filter.isPaid = true;
+  }
+
+  if (isPaid === "false") {
+    filter.isPaid = false;
+  }
+
+  if (search && search.trim()) {
+    const regex = new RegExp(search.trim(), "i");
+
+    filter.$or = [
+      { title: regex },
+      { slug: regex },
+      { description: regex },
+      { type: regex },
+    ];
+  }
+
+  const [quizzes, total] = await Promise.all([
+    Quiz.find(filter)
+      .sort({ order: 1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+
+    Quiz.countDocuments(filter),
+  ]);
+
+  sendResponse(res, 200, "Admin quizzes fetched.", {
+    quizzes,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+      hasNextPage: page * limit < total,
+      hasPrevPage: page > 1,
+    },
   });
-  sendResponse(res, 200, "Admin quizzes fetched.", quizzes);
+});
+
+export const getAdminQuizStats = asyncHandler(async (req, res) => {
+  const [
+    totalQuizzes,
+    activeQuizzes,
+    inactiveQuizzes,
+    paidQuizzes,
+    freeQuizzes,
+    totalQuestions,
+    activeQuestions,
+    totalAttempts,
+    completedAttempts,
+    passedAttempts,
+    averageScoreResult,
+    quizzesByType,
+  ] = await Promise.all([
+    Quiz.countDocuments({ status: { $ne: "deleted" } }),
+    Quiz.countDocuments({ status: "active" }),
+    Quiz.countDocuments({ status: "inactive" }),
+    Quiz.countDocuments({ status: { $ne: "deleted" }, isPaid: true }),
+    Quiz.countDocuments({ status: { $ne: "deleted" }, isPaid: false }),
+
+    Question.countDocuments({ status: { $ne: "deleted" } }),
+    Question.countDocuments({ status: "active" }),
+
+    QuizAttempt.countDocuments({}),
+    QuizAttempt.countDocuments({ status: "completed" }),
+    QuizAttempt.countDocuments({ status: "completed", passed: true }),
+
+    QuizAttempt.aggregate([
+      { $match: { status: "completed" } },
+      {
+        $group: {
+          _id: null,
+          averageScore: { $avg: "$percentage" },
+        },
+      },
+    ]),
+
+    Quiz.aggregate([
+      { $match: { status: { $ne: "deleted" } } },
+      {
+        $group: {
+          _id: "$type",
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]),
+  ]);
+
+  const failedAttempts = Math.max(completedAttempts - passedAttempts, 0);
+
+  sendResponse(res, 200, "Admin quiz stats fetched.", {
+    totalQuizzes,
+    activeQuizzes,
+    inactiveQuizzes,
+    paidQuizzes,
+    freeQuizzes,
+    totalQuestions,
+    activeQuestions,
+    totalAttempts,
+    completedAttempts,
+    passedAttempts,
+    failedAttempts,
+    averageScore: Math.round(averageScoreResult?.[0]?.averageScore || 0),
+    quizzesByType,
+  });
 });
 
 export const createQuiz = asyncHandler(async (req, res) => {
@@ -617,4 +739,5 @@ export default {
   getAdminAttempts,
   getRoadSigns,
   createRoadSign,
+  getAdminQuizStats,
 };

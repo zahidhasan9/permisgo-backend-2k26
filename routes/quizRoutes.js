@@ -2,6 +2,7 @@ import express from "express";
 import {
   getQuizzes,
   getQuiz,
+  getAdminQuizStats,
   getQuestions,
   startQuizAttempt,
   submitQuizAnswer,
@@ -38,6 +39,7 @@ router.post(
 
 // Admin quiz management
 router.get("/admin/all", protect, authorize("admin"), getAdminQuizzes);
+router.get("/admin/stats", protect, authorize("admin"), getAdminQuizStats);
 router.get("/admin/attempts", protect, authorize("admin"), getAdminAttempts);
 router.post("/", protect, authorize("admin"), upload.any(), createQuiz);
 router.patch("/:quizId", protect, authorize("admin"), upload.any(), updateQuiz);
