@@ -13,6 +13,8 @@ import { connectDB } from "./config/db.js";
 import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
 
 import AuthRoutes from "./routes/authRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import quizRoutes from "./routes/quizRoutes.js";
 // import studentRoutes from"./routes/studentRoutes";
 // import teacherRoutes from"./routes/teacherRoutes";
 // import offerRoutes from"./routes/offerRoutes";
@@ -27,9 +29,8 @@ import AuthRoutes from "./routes/authRoutes.js";
 // import notificationRoutes from"./routes/notificationRoutes";
 // import reviewRoutes from"./routes/reviewRoutes";
 // import referralRoutes from"./routes/referralRoutes";
-import quizRoutes from "./routes/quizRoutes.js";
+
 // import examRoutes from"./routes/examRoutes";
-// import adminRoutes from"./routes./adminRoutes";
 
 connectDB();
 
@@ -98,6 +99,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", AuthRoutes);
+app.use("/api/quizzes", quizRoutes);
+app.use("/api/admin", adminRoutes);
 //app.use("/api/students", studentRoutes);
 //app.use("/api/teachers", teacherRoutes);
 //app.use("/api/offers", offerRoutes);
@@ -112,7 +115,7 @@ app.use("/api/auth", AuthRoutes);
 //app.use("/api/notifications", notificationRoutes);
 //app.use("/api/reviews", reviewRoutes);
 //app.use("/api/referrals", referralRoutes);
-app.use("/api/quizzes", quizRoutes);
+
 //app.use("/api/exams", examRoutes);
 //app.use("/api/admin", adminRoutes);
 
