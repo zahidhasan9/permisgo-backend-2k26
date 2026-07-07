@@ -15,6 +15,7 @@ import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
 import AuthRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import quizRoutes from "./routes/quizRoutes.js";
+import learningContentRoutes from "./routes/learningContentRoutes.js";
 // import studentRoutes from"./routes/studentRoutes";
 // import teacherRoutes from"./routes/teacherRoutes";
 // import offerRoutes from"./routes/offerRoutes";
@@ -101,6 +102,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", AuthRoutes);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/learning", learningContentRoutes);
 //app.use("/api/students", studentRoutes);
 //app.use("/api/teachers", teacherRoutes);
 //app.use("/api/offers", offerRoutes);
