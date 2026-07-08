@@ -3,7 +3,11 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
     email: {
       type: String,
@@ -37,6 +41,54 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    designation: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    gender: {
+      type: String,
+      enum: ["", "male", "female", "other"],
+      default: "",
+    },
+
+    dateOfBirth: {
+      type: Date,
+      default: null,
+    },
+
+    address: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    city: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    country: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    language: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    bio: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 500,
+    },
+
     isEmailVerified: {
       type: Boolean,
       default: false,
@@ -54,15 +106,17 @@ const userSchema = new mongoose.Schema(
     },
 
     resetPasswordToken: String,
-
     resetPasswordExpire: Date,
-
     lastLoginAt: Date,
   },
   {
     timestamps: true,
   },
 );
+
+userSchema.methods.matchPassword = async function (enteredPassword) {
+  return bcrypt.compare(enteredPassword, this.password);
+};
 
 const User = mongoose.model("User", userSchema);
 

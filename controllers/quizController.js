@@ -8,6 +8,90 @@ import sendResponse from "../utils/ApiResponse.js";
 import QuizRetakePermission from "../models/QuizRetakePermission.js";
 import User from "../models/User.js";
 
+// ===============================Helper controller=======================
+const getQuizDurationSeconds = (quiz) => {
+  return Math.max(Number(quiz?.durationMinutes || 30), 1) * 60;
+};
+
+const getRemainingSeconds = (attempt, quiz) => {
+  if (!attempt?.startedAt) return getQuizDurationSeconds(quiz);
+
+  const durationSeconds = getQuizDurationSeconds(quiz);
+  const startedAtMs = new Date(attempt.startedAt).getTime();
+  const endAtMs = startedAtMs + durationSeconds * 1000;
+  const remainingMs = endAtMs - Date.now();
+
+  return Math.max(Math.ceil(remainingMs / 1000), 0);
+};
+
+const getAnsweredQuestionIds = (attempt) => {
+  return (attempt?.answers || []).map((answer) => String(answer.question));
+};
+
+const getSelectedAnswersMap = (attempt) => {
+  const selectedAnswers = {};
+
+  (attempt?.answers || []).forEach((answer) => {
+    selectedAnswers[String(answer.question)] = answer.selectedOptionIndex;
+  });
+
+  return selectedAnswers;
+};
+
+const getResumeIndex = (questions, attempt) => {
+  const answeredSet = new Set(getAnsweredQuestionIds(attempt));
+
+  const nextUnansweredIndex = questions.findIndex(
+    (question) => !answeredSet.has(String(question._id)),
+  );
+
+  if (nextUnansweredIndex !== -1) return nextUnansweredIndex;
+
+  return Math.max(questions.length - 1, 0);
+};
+
+const buildStudentAttemptPayload = ({
+  attempt,
+  quiz,
+  questions,
+  resumed = false,
+  retakePermissionUsed = false,
+}) => {
+  return {
+    attempt,
+    quiz,
+    questions: questions.map(sanitizeQuestionForStudent),
+    answeredQuestionIds: getAnsweredQuestionIds(attempt),
+    selectedAnswers: getSelectedAnswersMap(attempt),
+    resumeIndex: getResumeIndex(questions, attempt),
+    remainingSeconds: getRemainingSeconds(attempt, quiz),
+    resumed,
+    retakePermissionUsed,
+  };
+};
+
+const finishAttemptByServer = async (attempt, quiz) => {
+  if (!attempt || attempt.status !== "in_progress") return attempt;
+
+  calculateAttemptResult(attempt, quiz);
+  await attempt.save();
+
+  return attempt;
+};
+
+const finishAttemptIfTimeExpired = async (attempt, quiz) => {
+  if (!attempt || attempt.status !== "in_progress") return false;
+
+  const remainingSeconds = getRemainingSeconds(attempt, quiz);
+
+  if (remainingSeconds > 0) return false;
+
+  await finishAttemptByServer(attempt, quiz);
+  return true;
+};
+
+// ============================================helper====================================
+
 const toPublicFilePath = (file) => (file ? `/uploads/${file.filename}` : "");
 
 const getFileByField = (req, fieldname) => {
@@ -191,7 +275,6 @@ export const startQuizAttempt = asyncHandler(async (req, res) => {
     throw new Error("This quiz has no active questions.");
   }
 
-  // Browser refresh / accidental close hole same running attempt resume korbe
   const existingInProgressAttempt = await QuizAttempt.findOne({
     student: req.user._id,
     quiz: quiz._id,
@@ -199,15 +282,30 @@ export const startQuizAttempt = asyncHandler(async (req, res) => {
   }).sort({ createdAt: -1 });
 
   if (existingInProgressAttempt) {
-    return sendResponse(res, 200, "Existing quiz attempt resumed.", {
-      attempt: existingInProgressAttempt,
+    const timeExpired = await finishAttemptIfTimeExpired(
+      existingInProgressAttempt,
       quiz,
-      questions: questions.map(sanitizeQuestionForStudent),
-      resumed: true,
-    });
+    );
+
+    const allQuestionsAnswered =
+      existingInProgressAttempt.answers.length >= questions.length;
+
+    if (!timeExpired && allQuestionsAnswered) {
+      await finishAttemptByServer(existingInProgressAttempt, quiz);
+    }
+
+    if (!timeExpired && !allQuestionsAnswered) {
+      return sendResponse(res, 200, "Existing quiz attempt resumed.", {
+        ...buildStudentAttemptPayload({
+          attempt: existingInProgressAttempt,
+          quiz,
+          questions,
+          resumed: true,
+        }),
+      });
+    }
   }
 
-  // Student ei quiz age complete koreche kina check
   const latestCompletedAttempt = await QuizAttempt.findOne({
     student: req.user._id,
     quiz: quiz._id,
@@ -216,7 +314,6 @@ export const startQuizAttempt = asyncHandler(async (req, res) => {
 
   let activeRetakePermission = null;
 
-  // Age complete kore thakle retake permission must
   if (latestCompletedAttempt) {
     activeRetakePermission = await QuizRetakePermission.findOne({
       student: req.user._id,
@@ -228,9 +325,10 @@ export const startQuizAttempt = asyncHandler(async (req, res) => {
       return sendResponse(
         res,
         409,
-        "Retake is locked. Please contact admin to allow retake.",
+        "Quiz time is over or this quiz is already completed. Please contact admin to allow retake.",
         {
           retakeLocked: true,
+          timeExpired: true,
           latestAttempt: latestCompletedAttempt,
           quiz,
         },
@@ -246,7 +344,6 @@ export const startQuizAttempt = asyncHandler(async (req, res) => {
     status: "in_progress",
   });
 
-  // Admin permission thakle only ekbar use hobe
   if (activeRetakePermission) {
     activeRetakePermission.status = "used";
     activeRetakePermission.usedAttempt = attempt._id;
@@ -255,10 +352,13 @@ export const startQuizAttempt = asyncHandler(async (req, res) => {
   }
 
   sendResponse(res, 201, "Quiz attempt started.", {
-    attempt,
-    quiz,
-    questions: questions.map(sanitizeQuestionForStudent),
-    retakePermissionUsed: Boolean(activeRetakePermission),
+    ...buildStudentAttemptPayload({
+      attempt,
+      quiz,
+      questions,
+      resumed: false,
+      retakePermissionUsed: Boolean(activeRetakePermission),
+    }),
   });
 });
 
