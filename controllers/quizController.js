@@ -5,6 +5,8 @@ import QuizAttempt from "../models/QuizAttempt.js";
 import RoadSign from "../models/RoadSign.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/ApiResponse.js";
+import QuizRetakePermission from "../models/QuizRetakePermission.js";
+import User from "../models/User.js";
 
 const toPublicFilePath = (file) => (file ? `/uploads/${file.filename}` : "");
 
@@ -169,7 +171,11 @@ export const getQuestions = asyncHandler(async (req, res) => {
 export const startQuizAttempt = asyncHandler(async (req, res) => {
   assertObjectId(req.params.quizId, "Invalid quiz id.");
 
-  const quiz = await Quiz.findOne({ _id: req.params.quizId, status: "active" });
+  const quiz = await Quiz.findOne({
+    _id: req.params.quizId,
+    status: "active",
+  });
+
   if (!quiz) {
     res.statusCode = 404;
     throw new Error("Active quiz not found.");
@@ -179,9 +185,57 @@ export const startQuizAttempt = asyncHandler(async (req, res) => {
     quiz: quiz._id,
     status: "active",
   }).sort({ order: 1, createdAt: 1 });
+
   if (!questions.length) {
     res.statusCode = 400;
     throw new Error("This quiz has no active questions.");
+  }
+
+  // Browser refresh / accidental close hole same running attempt resume korbe
+  const existingInProgressAttempt = await QuizAttempt.findOne({
+    student: req.user._id,
+    quiz: quiz._id,
+    status: "in_progress",
+  }).sort({ createdAt: -1 });
+
+  if (existingInProgressAttempt) {
+    return sendResponse(res, 200, "Existing quiz attempt resumed.", {
+      attempt: existingInProgressAttempt,
+      quiz,
+      questions: questions.map(sanitizeQuestionForStudent),
+      resumed: true,
+    });
+  }
+
+  // Student ei quiz age complete koreche kina check
+  const latestCompletedAttempt = await QuizAttempt.findOne({
+    student: req.user._id,
+    quiz: quiz._id,
+    status: "completed",
+  }).sort({ finishedAt: -1, createdAt: -1 });
+
+  let activeRetakePermission = null;
+
+  // Age complete kore thakle retake permission must
+  if (latestCompletedAttempt) {
+    activeRetakePermission = await QuizRetakePermission.findOne({
+      student: req.user._id,
+      quiz: quiz._id,
+      status: "active",
+    }).sort({ createdAt: -1 });
+
+    if (!activeRetakePermission) {
+      return sendResponse(
+        res,
+        409,
+        "Retake is locked. Please contact admin to allow retake.",
+        {
+          retakeLocked: true,
+          latestAttempt: latestCompletedAttempt,
+          quiz,
+        },
+      );
+    }
   }
 
   const attempt = await QuizAttempt.create({
@@ -192,10 +246,19 @@ export const startQuizAttempt = asyncHandler(async (req, res) => {
     status: "in_progress",
   });
 
+  // Admin permission thakle only ekbar use hobe
+  if (activeRetakePermission) {
+    activeRetakePermission.status = "used";
+    activeRetakePermission.usedAttempt = attempt._id;
+    activeRetakePermission.usedAt = new Date();
+    await activeRetakePermission.save();
+  }
+
   sendResponse(res, 201, "Quiz attempt started.", {
     attempt,
     quiz,
     questions: questions.map(sanitizeQuestionForStudent),
+    retakePermissionUsed: Boolean(activeRetakePermission),
   });
 });
 
@@ -698,6 +761,168 @@ export const getAdminAttempts = asyncHandler(async (req, res) => {
   sendResponse(res, 200, "Admin attempts fetched.", attempts);
 });
 
+export const grantQuizRetakePermission = asyncHandler(async (req, res) => {
+  const { studentId, quizId, attemptId, reason = "" } = req.body;
+
+  assertObjectId(studentId, "Invalid student id.");
+  assertObjectId(quizId, "Invalid quiz id.");
+
+  if (attemptId) {
+    assertObjectId(attemptId, "Invalid attempt id.");
+  }
+
+  const student = await User.findOne({
+    _id: studentId,
+    role: "student",
+    status: { $ne: "blocked" },
+  });
+
+  if (!student) {
+    res.statusCode = 404;
+    throw new Error("Student not found.");
+  }
+
+  const quiz = await Quiz.findOne({
+    _id: quizId,
+    status: { $ne: "deleted" },
+  });
+
+  if (!quiz) {
+    res.statusCode = 404;
+    throw new Error("Quiz not found.");
+  }
+
+  if (attemptId) {
+    const attempt = await QuizAttempt.findOne({
+      _id: attemptId,
+      student: studentId,
+      quiz: quizId,
+    });
+
+    if (!attempt) {
+      res.statusCode = 404;
+      throw new Error("Attempt not found for this student and quiz.");
+    }
+  }
+
+  const existingActivePermission = await QuizRetakePermission.findOne({
+    student: studentId,
+    quiz: quizId,
+    status: "active",
+  })
+    .populate("student", "name email phone role")
+    .populate("quiz", "title type passingScore durationMinutes")
+    .populate("allowedBy", "name email role");
+
+  if (existingActivePermission) {
+    return sendResponse(
+      res,
+      200,
+      "Retake permission is already active for this student.",
+      existingActivePermission,
+    );
+  }
+
+  const permission = await QuizRetakePermission.create({
+    student: studentId,
+    quiz: quizId,
+    attempt: attemptId || null,
+    allowedBy: req.user._id,
+    reason,
+    status: "active",
+  });
+
+  const populatedPermission = await QuizRetakePermission.findById(
+    permission._id,
+  )
+    .populate("student", "name email phone role")
+    .populate("quiz", "title type passingScore durationMinutes")
+    .populate("attempt")
+    .populate("allowedBy", "name email role");
+
+  sendResponse(
+    res,
+    201,
+    "Retake permission enabled successfully.",
+    populatedPermission,
+  );
+});
+
+export const getAdminRetakePermissions = asyncHandler(async (req, res) => {
+  const { status = "all" } = req.query;
+
+  const filter = {};
+  if (status !== "all") {
+    filter.status = status;
+  }
+
+  const permissions = await QuizRetakePermission.find(filter)
+    .populate("student", "name email phone role")
+    .populate("quiz", "title type passingScore durationMinutes")
+    .populate("attempt")
+    .populate("usedAttempt")
+    .populate("allowedBy", "name email role")
+    .populate("revokedBy", "name email role")
+    .sort({ createdAt: -1 })
+    .limit(300);
+
+  sendResponse(res, 200, "Retake permissions fetched.", permissions);
+});
+
+export const getMyRetakePermissions = asyncHandler(async (req, res) => {
+  const permissions = await QuizRetakePermission.find({
+    student: req.user._id,
+    status: "active",
+  })
+    .populate("quiz", "title type coverImage passingScore durationMinutes")
+    .sort({ createdAt: -1 });
+
+  sendResponse(res, 200, "My active retake permissions fetched.", permissions);
+});
+
+export const revokeQuizRetakePermission = asyncHandler(async (req, res) => {
+  assertObjectId(req.params.permissionId, "Invalid permission id.");
+
+  const permission = await QuizRetakePermission.findById(
+    req.params.permissionId,
+  );
+
+  if (!permission) {
+    res.statusCode = 404;
+    throw new Error("Retake permission not found.");
+  }
+
+  if (permission.status !== "active") {
+    return sendResponse(
+      res,
+      400,
+      "Only active retake permission can be revoked.",
+      permission,
+    );
+  }
+
+  permission.status = "revoked";
+  permission.revokedBy = req.user._id;
+  permission.revokedAt = new Date();
+
+  await permission.save();
+
+  const populatedPermission = await QuizRetakePermission.findById(
+    permission._id,
+  )
+    .populate("student", "name email phone role")
+    .populate("quiz", "title type passingScore durationMinutes")
+    .populate("allowedBy", "name email role")
+    .populate("revokedBy", "name email role");
+
+  sendResponse(
+    res,
+    200,
+    "Retake permission revoked successfully.",
+    populatedPermission,
+  );
+});
+
 // =======================
 // Existing Road Signs
 // =======================
@@ -740,4 +965,8 @@ export default {
   getRoadSigns,
   createRoadSign,
   getAdminQuizStats,
+  grantQuizRetakePermission,
+  getAdminRetakePermissions,
+  getMyRetakePermissions,
+  revokeQuizRetakePermission,
 };

@@ -1,0 +1,2842 @@
+{
+  "quizzes": [
+    {
+      "title": "Road Sign Recognition Quiz",
+      "slug": "road-sign-recognition",
+      "type": "road-sign",
+      "description": "Test your knowledge of common road signs including warning, regulatory, and informational signs used on public roads.",
+      "durationMinutes": 20,
+      "totalMarks": 36,
+      "passPercentage": 60,
+      "status": "published",
+      "coverImage": "",
+      "instructions": "Read each question carefully and select the correct sign meaning. Each question carries marks based on difficulty. There is no negative marking."
+    },
+    {
+      "title": "Traffic Rules Basics Quiz",
+      "slug": "traffic-rules-basics",
+      "type": "traffic-rule",
+      "description": "A quiz covering essential traffic rules every driver must follow, including speed limits, lane discipline, and signal rules.",
+      "durationMinutes": 20,
+      "totalMarks": 36,
+      "passPercentage": 60,
+      "status": "published",
+      "coverImage": "",
+      "instructions": "Answer all questions based on standard traffic laws. Choose the single best answer for each question."
+    },
+    {
+      "title": "Parking Rules Mastery Quiz",
+      "slug": "parking-rules-mastery",
+      "type": "parking-rule",
+      "description": "Learn and test your understanding of legal and safe parking practices in different road situations.",
+      "durationMinutes": 20,
+      "totalMarks": 36,
+      "passPercentage": 60,
+      "status": "published",
+      "coverImage": "",
+      "instructions": "Select the most appropriate answer for each parking scenario described in the questions."
+    },
+    {
+      "title": "Right of Way and Priority Rules Quiz",
+      "slug": "right-of-way-priority",
+      "type": "priority-rule",
+      "description": "Understand who has the right of way at intersections, roundabouts, and other priority situations on the road.",
+      "durationMinutes": 20,
+      "totalMarks": 36,
+      "passPercentage": 60,
+      "status": "published",
+      "coverImage": "",
+      "instructions": "Think about real driving situations while answering these priority and right-of-way questions."
+    },
+    {
+      "title": "Driving Safety Essentials Quiz",
+      "slug": "driving-safety-essentials",
+      "type": "safety-rule",
+      "description": "Test your knowledge of safe driving habits, hazard awareness, and accident prevention techniques.",
+      "durationMinutes": 20,
+      "totalMarks": 36,
+      "passPercentage": 60,
+      "status": "published",
+      "coverImage": "",
+      "instructions": "Choose the safest and most correct option for each question based on standard driving safety guidelines."
+    }
+  ],
+  "learningContents": [
+    {
+      "type": "road-sign",
+      "title": "Understanding Regulatory Road Signs",
+      "subtitle": "Signs that tell you what you must or must not do",
+      "description": "Learn how to identify and understand regulatory signs such as stop, yield, and no entry signs.",
+      "category": "Road Signs",
+      "topicCode": "R",
+      "image": "",
+      "videoUrl": "",
+      "content": "Regulatory signs inform drivers of laws and regulations that must be obeyed. They are usually circular and have red borders for prohibitions or blue backgrounds for mandatory actions. Common examples include Stop, Give Way, No Entry, and Speed Limit signs. Ignoring these signs can lead to fines or accidents.",
+      "relatedQuizSlug": "road-sign-recognition",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "road-sign",
+      "title": "Warning Signs on the Road",
+      "subtitle": "Triangular signs that alert you to hazards ahead",
+      "description": "A guide to recognizing warning signs like slippery road, narrow bridge, and pedestrian crossing signs.",
+      "category": "Road Signs",
+      "topicCode": "R",
+      "image": "",
+      "videoUrl": "",
+      "content": "Warning signs are usually triangular with a red border and yellow or white background. They alert drivers to potential hazards such as sharp curves, slippery roads, or school zones ahead. Recognizing these signs early allows drivers to slow down and react safely.",
+      "relatedQuizSlug": "road-sign-recognition",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "road-sign",
+      "title": "Mandatory and Informational Signs Explained",
+      "subtitle": "Blue signs that guide your driving direction",
+      "description": "A video explanation of mandatory direction signs and informational signs like parking and hospital signs.",
+      "category": "Road Signs",
+      "topicCode": "R",
+      "image": "",
+      "videoUrl": "https://example.com/videos/mandatory-signs.mp4",
+      "content": "This video explains the difference between mandatory signs, which drivers must obey, and informational signs, which provide helpful guidance such as directions to hospitals, parking areas, or fuel stations.",
+      "relatedQuizSlug": "road-sign-recognition",
+      "status": "published",
+      "contentKind": "video"
+    },
+    {
+      "type": "road-sign",
+      "title": "Quick Tips to Remember Road Signs",
+      "subtitle": "Simple memory tricks for new drivers",
+      "description": "Easy tips to help beginners remember the meaning of common road signs.",
+      "category": "Road Signs",
+      "topicCode": "R",
+      "image": "",
+      "videoUrl": "",
+      "content": "Remember: red circles mean prohibition, triangles mean warning, and blue circles mean instruction. Practicing with flashcards and real road observation helps reinforce sign recognition over time.",
+      "relatedQuizSlug": "road-sign-recognition",
+      "status": "published",
+      "contentKind": "tip"
+    },
+    {
+      "type": "road-sign",
+      "title": "Speed Limit and School Zone Signs",
+      "subtitle": "Know your limits in sensitive areas",
+      "description": "Understand speed limit signs and special rules near schools and residential zones.",
+      "category": "Road Signs",
+      "topicCode": "R",
+      "image": "",
+      "videoUrl": "",
+      "content": "Speed limit signs display the maximum legal speed for a road section. Near schools and residential areas, reduced speed limits are enforced during specific hours to protect pedestrians, especially children.",
+      "relatedQuizSlug": "road-sign-recognition",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "traffic-rule",
+      "title": "Following Distance and Safe Speed",
+      "subtitle": "Why space matters between vehicles",
+      "description": "Learn the importance of maintaining a safe following distance based on speed and road conditions.",
+      "category": "Traffic Rules",
+      "topicCode": "D",
+      "image": "",
+      "videoUrl": "",
+      "content": "Maintaining a safe following distance gives drivers enough time to react to sudden stops. The general rule is to keep at least a two-second gap in normal conditions, increasing this gap in rain, fog, or heavy traffic.",
+      "relatedQuizSlug": "traffic-rules-basics",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "traffic-rule",
+      "title": "Lane Discipline for Safe Driving",
+      "subtitle": "Stay in your lane, stay safe",
+      "description": "A guide to proper lane usage, overtaking rules, and lane markings.",
+      "category": "Traffic Rules",
+      "topicCode": "D",
+      "image": "",
+      "videoUrl": "",
+      "content": "Lane discipline means staying within marked lanes, using indicators before changing lanes, and overtaking only from permitted sides. Poor lane discipline is a major cause of road accidents.",
+      "relatedQuizSlug": "traffic-rules-basics",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "traffic-rule",
+      "title": "Traffic Light Rules Explained",
+      "subtitle": "Red, yellow, and green explained simply",
+      "description": "A short video explaining how to respond correctly to traffic light signals.",
+      "category": "Traffic Rules",
+      "topicCode": "D",
+      "image": "",
+      "videoUrl": "https://example.com/videos/traffic-lights.mp4",
+      "content": "This video covers the meaning of red, yellow, and green traffic lights, along with special rules for flashing signals and turning during red lights where permitted.",
+      "relatedQuizSlug": "traffic-rules-basics",
+      "status": "published",
+      "contentKind": "video"
+    },
+    {
+      "type": "traffic-rule",
+      "title": "Avoiding Distracted Driving",
+      "subtitle": "Keep your focus on the road",
+      "description": "Simple tips to avoid mobile phone use and other distractions while driving.",
+      "category": "Traffic Rules",
+      "topicCode": "D",
+      "image": "",
+      "videoUrl": "",
+      "content": "Avoid using your phone, eating, or adjusting devices while driving. Even a few seconds of distraction can lead to serious accidents. Use hands-free devices only when absolutely necessary.",
+      "relatedQuizSlug": "traffic-rules-basics",
+      "status": "published",
+      "contentKind": "tip"
+    },
+    {
+      "type": "traffic-rule",
+      "title": "Seatbelt and Safety Equipment Laws",
+      "subtitle": "Buckle up every time",
+      "description": "Understand the legal requirements for seatbelts and safety equipment while driving.",
+      "category": "Traffic Rules",
+      "topicCode": "D",
+      "image": "",
+      "videoUrl": "",
+      "content": "Wearing a seatbelt is mandatory for drivers and passengers in most countries. Seatbelts significantly reduce the risk of injury or death in the event of a collision.",
+      "relatedQuizSlug": "traffic-rules-basics",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "parking-rule",
+      "title": "Where You Cannot Park",
+      "subtitle": "Understanding no-parking zones",
+      "description": "Learn about common no-parking zones such as near fire hydrants, crossings, and junctions.",
+      "category": "Parking",
+      "topicCode": "P",
+      "image": "",
+      "videoUrl": "",
+      "content": "Parking is prohibited near fire hydrants, pedestrian crossings, bus stops, and road junctions. These restrictions ensure clear access for emergency vehicles and safe visibility for other road users.",
+      "relatedQuizSlug": "parking-rules-mastery",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "parking-rule",
+      "title": "How to Parallel Park Safely",
+      "subtitle": "Step by step parallel parking guide",
+      "description": "A visual guide showing the correct technique for parallel parking.",
+      "category": "Parking",
+      "topicCode": "P",
+      "image": "",
+      "videoUrl": "https://example.com/videos/parallel-parking.mp4",
+      "content": "This video demonstrates the correct steps for parallel parking, including positioning, steering angles, and checking mirrors and blind spots before completing the maneuver.",
+      "relatedQuizSlug": "parking-rules-mastery",
+      "status": "published",
+      "contentKind": "video"
+    },
+    {
+      "type": "parking-rule",
+      "title": "Parking on Hills and Slopes",
+      "subtitle": "Special precautions for uphill and downhill parking",
+      "description": "Learn how to safely park your vehicle on inclines to prevent rolling accidents.",
+      "category": "Parking",
+      "topicCode": "P",
+      "image": "",
+      "videoUrl": "",
+      "content": "When parking on a hill, turn your wheels toward the curb if facing downhill, and away from the curb if facing uphill. Always apply the handbrake to prevent the vehicle from rolling.",
+      "relatedQuizSlug": "parking-rules-mastery",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "parking-rule",
+      "title": "Disabled Parking Etiquette",
+      "subtitle": "Respecting reserved parking spaces",
+      "description": "Understand the rules around disabled parking permits and reserved spaces.",
+      "category": "Parking",
+      "topicCode": "P",
+      "image": "",
+      "videoUrl": "",
+      "content": "Disabled parking spaces are reserved for vehicles displaying a valid permit. Parking in these spots without authorization is illegal and can result in fines.",
+      "relatedQuizSlug": "parking-rules-mastery",
+      "status": "published",
+      "contentKind": "tip"
+    },
+    {
+      "type": "parking-rule",
+      "title": "Night Parking Safety",
+      "subtitle": "Staying visible after dark",
+      "description": "Learn the rules for parking safely and visibly during nighttime hours.",
+      "category": "Parking",
+      "topicCode": "P",
+      "image": "",
+      "videoUrl": "",
+      "content": "When parking at night, use parking lights if required by local law, and avoid parking on unlit roads or blind curves. Visibility is key to preventing collisions with parked vehicles.",
+      "relatedQuizSlug": "parking-rules-mastery",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "priority-rule",
+      "title": "Right of Way at Uncontrolled Intersections",
+      "subtitle": "Who goes first when there are no signals",
+      "description": "Understand the standard rules for right of way at intersections without traffic lights or signs.",
+      "category": "Priority Rules",
+      "topicCode": "D",
+      "image": "",
+      "videoUrl": "",
+      "content": "At uncontrolled intersections, the general rule is to give way to traffic coming from the right, unless local laws specify otherwise. Always slow down and check all directions before proceeding.",
+      "relatedQuizSlug": "right-of-way-priority",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "priority-rule",
+      "title": "Roundabout Priority Rules",
+      "subtitle": "Navigating roundabouts safely",
+      "description": "A video explaining who has priority when entering and exiting a roundabout.",
+      "category": "Priority Rules",
+      "topicCode": "D",
+      "image": "",
+      "videoUrl": "https://example.com/videos/roundabout-priority.mp4",
+      "content": "This video explains that vehicles already inside a roundabout generally have priority over vehicles entering it. Drivers must yield and wait for a safe gap before joining.",
+      "relatedQuizSlug": "right-of-way-priority",
+      "status": "published",
+      "contentKind": "video"
+    },
+    {
+      "type": "priority-rule",
+      "title": "Priority for Emergency Vehicles",
+      "subtitle": "Always give way to sirens",
+      "description": "Learn the correct response when an emergency vehicle approaches with sirens or lights active.",
+      "category": "Priority Rules",
+      "topicCode": "D",
+      "image": "",
+      "videoUrl": "",
+      "content": "When an emergency vehicle approaches with sirens or flashing lights, drivers must safely move aside and allow it to pass. Never block or follow closely behind an emergency vehicle.",
+      "relatedQuizSlug": "right-of-way-priority",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "priority-rule",
+      "title": "Give Way Sign Explained",
+      "subtitle": "What to do when you see a give way sign",
+      "description": "A quick explanation of how to respond to give way and yield signs.",
+      "category": "Priority Rules",
+      "topicCode": "D",
+      "image": "",
+      "videoUrl": "",
+      "content": "A give way sign means you must slow down and let other traffic pass before proceeding. Stop completely if necessary to ensure it is safe to continue.",
+      "relatedQuizSlug": "right-of-way-priority",
+      "status": "published",
+      "contentKind": "tip"
+    },
+    {
+      "type": "priority-rule",
+      "title": "Pedestrian Priority at Crossings",
+      "subtitle": "Respecting pedestrian right of way",
+      "description": "Understand when pedestrians have priority over vehicles at crossings.",
+      "category": "Priority Rules",
+      "topicCode": "D",
+      "image": "",
+      "videoUrl": "",
+      "content": "Pedestrians generally have the right of way at marked crossings, especially zebra crossings. Drivers must stop and allow pedestrians to cross safely before proceeding.",
+      "relatedQuizSlug": "right-of-way-priority",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "safety-rule",
+      "title": "The Importance of Seatbelts",
+      "subtitle": "Your first line of defense in a crash",
+      "description": "Learn why seatbelts are essential for driver and passenger safety.",
+      "category": "Driving Safety",
+      "topicCode": "U",
+      "image": "",
+      "videoUrl": "",
+      "content": "Seatbelts reduce the risk of serious injury or death in a crash by keeping occupants securely in place. Always ensure all passengers are buckled up before driving.",
+      "relatedQuizSlug": "driving-safety-essentials",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "safety-rule",
+      "title": "Understanding Blind Spots",
+      "subtitle": "Areas your mirrors cannot show",
+      "description": "Learn how to identify and check blind spots before changing lanes or turning.",
+      "category": "Hazard Awareness",
+      "topicCode": "HAS",
+      "image": "",
+      "videoUrl": "",
+      "content": "Blind spots are areas around your vehicle not visible through mirrors. Always turn your head to check blind spots before changing lanes or merging into traffic.",
+      "relatedQuizSlug": "driving-safety-essentials",
+      "status": "published",
+      "contentKind": "article"
+    },
+    {
+      "type": "safety-rule",
+      "title": "Driving Safely in Rain and Fog",
+      "subtitle": "Adjusting your driving for poor weather",
+      "description": "A video guide on safe driving techniques during rain, fog, and low visibility conditions.",
+      "category": "Driving Safety",
+      "topicCode": "U",
+      "image": "",
+      "videoUrl": "https://example.com/videos/weather-driving.mp4",
+      "content": "This video explains how to adjust speed, increase following distance, and use headlights properly when driving in rain, fog, or other low visibility conditions.",
+      "relatedQuizSlug": "driving-safety-essentials",
+      "status": "published",
+      "contentKind": "video"
+    },
+    {
+      "type": "safety-rule",
+      "title": "Recognizing Driver Fatigue",
+      "subtitle": "Know the warning signs before it's too late",
+      "description": "Learn to recognize the signs of fatigue while driving and how to respond safely.",
+      "category": "Driving Safety",
+      "topicCode": "U",
+      "image": "",
+      "videoUrl": "",
+      "content": "Signs of driver fatigue include frequent yawning, difficulty focusing, and drifting between lanes. If you feel fatigued, pull over safely and rest before continuing your journey.",
+      "relatedQuizSlug": "driving-safety-essentials",
+      "status": "published",
+      "contentKind": "tip"
+    },
+    {
+      "type": "safety-rule",
+      "title": "Defensive Driving Basics",
+      "subtitle": "Anticipating hazards before they happen",
+      "description": "Learn the core principles of defensive driving to avoid accidents.",
+      "category": "Hazard Awareness",
+      "topicCode": "HAS",
+      "image": "",
+      "videoUrl": "",
+      "content": "Defensive driving involves anticipating potential hazards, maintaining safe distances, and staying alert to the actions of other road users. It helps reduce the risk of accidents caused by others' mistakes.",
+      "relatedQuizSlug": "driving-safety-essentials",
+      "status": "published",
+      "contentKind": "article"
+    }
+  ],
+  "questions": [
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Regulatory Signs",
+      "topicCode": "R",
+      "questionText": "What does a red circular sign with a white horizontal bar mean?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "No entry",
+          "image": ""
+        },
+        {
+          "text": "Stop ahead",
+          "image": ""
+        },
+        {
+          "text": "One way street",
+          "image": ""
+        },
+        {
+          "text": "Speed limit ends",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "A red circle with a white horizontal bar is the standard No Entry sign, meaning vehicles are not allowed to pass in that direction.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Regulatory Signs",
+      "topicCode": "R",
+      "questionText": "What shape is a standard Stop sign?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Triangle",
+          "image": ""
+        },
+        {
+          "text": "Octagon",
+          "image": ""
+        },
+        {
+          "text": "Square",
+          "image": ""
+        },
+        {
+          "text": "Circle",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "The Stop sign is uniquely octagon-shaped so it can be recognized even from behind or in poor visibility.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Warning Signs",
+      "topicCode": "R",
+      "questionText": "What does a triangular sign with an exclamation mark usually indicate?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Mandatory direction",
+          "image": ""
+        },
+        {
+          "text": "General warning or hazard",
+          "image": ""
+        },
+        {
+          "text": "No parking",
+          "image": ""
+        },
+        {
+          "text": "Speed limit",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "A triangular sign with an exclamation mark is a general warning sign alerting drivers to an unspecified hazard ahead.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Warning Signs",
+      "topicCode": "R",
+      "questionText": "A sign showing children walking indicates what?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "School zone or children crossing ahead",
+          "image": ""
+        },
+        {
+          "text": "Playground nearby with no traffic",
+          "image": ""
+        },
+        {
+          "text": "Pedestrian bridge ahead",
+          "image": ""
+        },
+        {
+          "text": "No pedestrians allowed",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "This sign warns drivers that they are approaching a school zone or an area where children may cross, requiring extra caution.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Mandatory Signs",
+      "topicCode": "R",
+      "questionText": "What does a blue circular sign with a white arrow pointing left mean?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "You may turn left if safe",
+          "image": ""
+        },
+        {
+          "text": "You must turn left ahead",
+          "image": ""
+        },
+        {
+          "text": "Left turn is prohibited",
+          "image": ""
+        },
+        {
+          "text": "Left lane ends soon",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Blue circular signs are mandatory instruction signs. An arrow pointing left means drivers must proceed in that direction.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Regulatory Signs",
+      "topicCode": "R",
+      "questionText": "What does a circular sign with the number 60 and a red border mean?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Minimum speed of 60",
+          "image": ""
+        },
+        {
+          "text": "Maximum speed limit of 60",
+          "image": ""
+        },
+        {
+          "text": "Distance to next town is 60 km",
+          "image": ""
+        },
+        {
+          "text": "Recommended speed of 60",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "A red-bordered circular sign with a number indicates the maximum legal speed limit for that road section.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Regulatory Signs",
+      "topicCode": "R",
+      "questionText": "An inverted triangle sign usually represents which instruction?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Stop",
+          "image": ""
+        },
+        {
+          "text": "Give way / Yield",
+          "image": ""
+        },
+        {
+          "text": "No overtaking",
+          "image": ""
+        },
+        {
+          "text": "Roundabout ahead",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "An inverted (downward-pointing) triangle is internationally recognized as a Give Way or Yield sign.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Informational Signs",
+      "topicCode": "R",
+      "questionText": "What does a blue square sign with a white 'P' usually indicate?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Pedestrian crossing",
+          "image": ""
+        },
+        {
+          "text": "Parking area",
+          "image": ""
+        },
+        {
+          "text": "Police station",
+          "image": ""
+        },
+        {
+          "text": "Petrol station",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "A blue square sign with a white 'P' is an informational sign indicating an available parking area.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Regulatory Signs",
+      "topicCode": "R",
+      "questionText": "What does a circular sign with a red border and a bicycle symbol mean?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Bicycles only lane",
+          "image": ""
+        },
+        {
+          "text": "Cyclists are prohibited",
+          "image": ""
+        },
+        {
+          "text": "Shared path for cyclists and pedestrians",
+          "image": ""
+        },
+        {
+          "text": "Bicycle parking area",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "A red-bordered circle with a bicycle symbol prohibits cyclists from entering that road or path.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Warning Signs",
+      "topicCode": "R",
+      "questionText": "A sign showing a curved arrow with a wavy line under a car usually warns of what?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Sharp curve ahead",
+          "image": ""
+        },
+        {
+          "text": "Slippery road ahead",
+          "image": ""
+        },
+        {
+          "text": "Uneven road surface",
+          "image": ""
+        },
+        {
+          "text": "Flooded road ahead",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "This warning sign alerts drivers that the road surface ahead may be slippery, often due to rain, ice, or oil.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Regulatory Signs",
+      "topicCode": "R",
+      "questionText": "What does a sign with a red circle and a car with a diagonal line through it mean?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "No motor vehicles allowed",
+          "image": ""
+        },
+        {
+          "text": "No parking",
+          "image": ""
+        },
+        {
+          "text": "No overtaking",
+          "image": ""
+        },
+        {
+          "text": "Vehicle inspection required",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "A car symbol with a diagonal line inside a red circle means motor vehicles are prohibited from entering that road.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Warning Signs",
+      "topicCode": "R",
+      "questionText": "What does a sign showing two arrows merging into one indicate?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Dual carriageway ends, lanes merge ahead",
+          "image": ""
+        },
+        {
+          "text": "Roundabout ahead",
+          "image": ""
+        },
+        {
+          "text": "Two way traffic starts",
+          "image": ""
+        },
+        {
+          "text": "U-turn permitted",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "This sign warns drivers that two lanes are merging into one, requiring caution and possibly reduced speed.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Regulatory Signs",
+      "topicCode": "R",
+      "questionText": "A rectangular sign showing a height in meters with a truck symbol indicates what?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Weight limit for trucks",
+          "image": ""
+        },
+        {
+          "text": "Maximum vehicle height allowed",
+          "image": ""
+        },
+        {
+          "text": "Minimum speed for trucks",
+          "image": ""
+        },
+        {
+          "text": "Truck parking area",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "This sign shows the maximum height a vehicle can be to safely pass under a bridge or structure ahead.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Regulatory Signs",
+      "topicCode": "R",
+      "questionText": "What does a sign with a red circle containing a U-turn arrow crossed out mean?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "U-turns are mandatory",
+          "image": ""
+        },
+        {
+          "text": "U-turns are prohibited",
+          "image": ""
+        },
+        {
+          "text": "U-turn permitted only for buses",
+          "image": ""
+        },
+        {
+          "text": "Roundabout ahead",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "A crossed-out U-turn arrow inside a red circle means drivers are not allowed to make a U-turn at that location.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Warning Signs",
+      "topicCode": "R",
+      "questionText": "A sign showing a train symbol inside a triangle warns of what?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Railway station ahead",
+          "image": ""
+        },
+        {
+          "text": "Level crossing ahead",
+          "image": ""
+        },
+        {
+          "text": "No trains allowed",
+          "image": ""
+        },
+        {
+          "text": "Train parking area",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "A train symbol in a warning triangle indicates an upcoming level crossing where a railway line crosses the road.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Regulatory Signs",
+      "topicCode": "R",
+      "questionText": "What does a sign displaying 'Keep Left' with an arrow mean at a traffic island?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Drivers must pass on the left side of the island",
+          "image": ""
+        },
+        {
+          "text": "Left turns are banned",
+          "image": ""
+        },
+        {
+          "text": "Left lane is closed",
+          "image": ""
+        },
+        {
+          "text": "Parking is allowed on the left",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "A Keep Left sign at a traffic island instructs drivers to pass the obstruction on its left-hand side.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Warning Signs",
+      "topicCode": "R",
+      "questionText": "A sign showing a narrowing road with converging lines warns drivers of what?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Road widens ahead",
+          "image": ""
+        },
+        {
+          "text": "Road narrows ahead",
+          "image": ""
+        },
+        {
+          "text": "Dead end ahead",
+          "image": ""
+        },
+        {
+          "text": "Road closed ahead",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Converging lines on a warning sign indicate that the road ahead becomes narrower, requiring drivers to slow down and be cautious.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Regulatory Signs",
+      "topicCode": "R",
+      "questionText": "What does a sign showing a weight limit of 5 tonnes on a bridge mean?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Only vehicles under 5 tonnes may cross",
+          "image": ""
+        },
+        {
+          "text": "Only vehicles over 5 tonnes may cross",
+          "image": ""
+        },
+        {
+          "text": "The bridge is closed to all vehicles",
+          "image": ""
+        },
+        {
+          "text": "Speed limit on the bridge is 5 km/h",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "A weight limit sign on a bridge means only vehicles with a total weight below the stated limit are permitted to cross safely.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Warning Signs",
+      "topicCode": "R",
+      "questionText": "What does a sign showing a steep downward arrow with a percentage mean?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Speed limit percentage reduction",
+          "image": ""
+        },
+        {
+          "text": "Steep downhill gradient ahead",
+          "image": ""
+        },
+        {
+          "text": "Fuel efficiency zone",
+          "image": ""
+        },
+        {
+          "text": "Toll road ahead",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "This sign indicates the steepness of a downhill slope ahead, warning drivers to control their speed using lower gears and brakes carefully.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "road-sign-recognition",
+      "topic": "Regulatory Signs",
+      "topicCode": "R",
+      "questionText": "A sign with a red circle and the number 30 with a diagonal end line means what?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Speed limit of 30 begins",
+          "image": ""
+        },
+        {
+          "text": "End of the 30 speed limit zone",
+          "image": ""
+        },
+        {
+          "text": "Minimum speed of 30 required",
+          "image": ""
+        },
+        {
+          "text": "Distance of 30 km to destination",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "A speed sign with a diagonal line through the number indicates the end of that specific speed limit zone.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Speed Rules",
+      "topicCode": "D",
+      "questionText": "What should you do when approaching a school zone during school hours?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Maintain normal speed",
+          "image": ""
+        },
+        {
+          "text": "Reduce speed and watch for children",
+          "image": ""
+        },
+        {
+          "text": "Increase speed to pass quickly",
+          "image": ""
+        },
+        {
+          "text": "Use the horn continuously",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "School zones require reduced speed during school hours to protect children who may cross unexpectedly.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Seatbelt Rules",
+      "topicCode": "D",
+      "questionText": "Who is required to wear a seatbelt in a moving vehicle?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Only the driver",
+          "image": ""
+        },
+        {
+          "text": "Only front seat passengers",
+          "image": ""
+        },
+        {
+          "text": "All occupants where required by law",
+          "image": ""
+        },
+        {
+          "text": "No one, it is optional",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 2,
+      "explanationText": "In most jurisdictions, all occupants, including rear passengers, are legally required to wear seatbelts while the vehicle is moving.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Signal Rules",
+      "topicCode": "D",
+      "questionText": "What should you do when the traffic light turns yellow while you are approaching the intersection?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Speed up to cross before it turns red",
+          "image": ""
+        },
+        {
+          "text": "Stop safely if it is possible to do so",
+          "image": ""
+        },
+        {
+          "text": "Ignore the signal and continue",
+          "image": ""
+        },
+        {
+          "text": "Reverse the vehicle immediately",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "A yellow light warns that the signal is about to turn red. Drivers should stop safely if they can do so without sudden braking.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Overtaking Rules",
+      "topicCode": "D",
+      "questionText": "From which side should you normally overtake another vehicle?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "From the right side",
+          "image": ""
+        },
+        {
+          "text": "From the left side",
+          "image": ""
+        },
+        {
+          "text": "From either side equally",
+          "image": ""
+        },
+        {
+          "text": "Only from behind",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "In most right-hand traffic countries, overtaking should be done from the right side unless road markings indicate otherwise.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Mobile Phone Rules",
+      "topicCode": "D",
+      "questionText": "Is it legal to hold and use a mobile phone while driving?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Yes, at any time",
+          "image": ""
+        },
+        {
+          "text": "No, unless using a hands-free device",
+          "image": ""
+        },
+        {
+          "text": "Yes, only for texting",
+          "image": ""
+        },
+        {
+          "text": "Yes, only at low speed",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Holding and using a mobile phone while driving is illegal in most regions unless a hands-free device is used, as it distracts the driver.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Lane Rules",
+      "topicCode": "D",
+      "questionText": "What should you do before changing lanes?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Change immediately without checking",
+          "image": ""
+        },
+        {
+          "text": "Signal, check mirrors, and check blind spot",
+          "image": ""
+        },
+        {
+          "text": "Only use the horn",
+          "image": ""
+        },
+        {
+          "text": "Flash headlights only",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Before changing lanes, drivers must signal their intention, check mirrors, and check the blind spot to ensure it is safe to move.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Alcohol Rules",
+      "topicCode": "D",
+      "questionText": "What is the safest blood alcohol level for driving?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "As close to zero as possible",
+          "image": ""
+        },
+        {
+          "text": "Slightly above the legal limit",
+          "image": ""
+        },
+        {
+          "text": "It does not matter",
+          "image": ""
+        },
+        {
+          "text": "Only matters at night",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "The safest approach is to avoid alcohol completely before driving, as even small amounts impair reaction time and judgment.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Horn Usage",
+      "topicCode": "D",
+      "questionText": "When is it appropriate to use your vehicle horn?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Only to warn of danger",
+          "image": ""
+        },
+        {
+          "text": "Continuously in traffic jams",
+          "image": ""
+        },
+        {
+          "text": "To greet other drivers",
+          "image": ""
+        },
+        {
+          "text": "At night near hospitals",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "The horn should only be used to alert other road users of potential danger, not for unnecessary noise or greetings.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "One-Way Rules",
+      "topicCode": "D",
+      "questionText": "What should you do if you accidentally enter a one-way street from the wrong direction?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Continue driving forward quickly",
+          "image": ""
+        },
+        {
+          "text": "Stop, reverse carefully or find a safe way to exit",
+          "image": ""
+        },
+        {
+          "text": "Turn on hazard lights and stay still",
+          "image": ""
+        },
+        {
+          "text": "Drive faster to reduce risk",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "If you enter a one-way street the wrong way, you should stop, check for traffic, and carefully reverse or find a safe exit point.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Following Distance",
+      "topicCode": "D",
+      "questionText": "What is the recommended minimum following distance in normal driving conditions?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Half a second",
+          "image": ""
+        },
+        {
+          "text": "Two seconds",
+          "image": ""
+        },
+        {
+          "text": "Ten seconds",
+          "image": ""
+        },
+        {
+          "text": "No specific gap needed",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "A minimum two-second gap allows enough time to react and stop safely if the vehicle ahead brakes suddenly.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Emergency Vehicle Rules",
+      "topicCode": "D",
+      "questionText": "What should you do when an ambulance approaches from behind with its siren on?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Speed up to clear the way",
+          "image": ""
+        },
+        {
+          "text": "Safely move aside and let it pass",
+          "image": ""
+        },
+        {
+          "text": "Stop immediately in the middle of the road",
+          "image": ""
+        },
+        {
+          "text": "Ignore it if you are in a hurry",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "When an emergency vehicle approaches with sirens active, drivers should safely move aside to allow it to pass without delay.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Headlight Rules",
+      "topicCode": "D",
+      "questionText": "When should you use your vehicle's headlights?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Only during the day",
+          "image": ""
+        },
+        {
+          "text": "During night, fog, or low visibility conditions",
+          "image": ""
+        },
+        {
+          "text": "Only when parked",
+          "image": ""
+        },
+        {
+          "text": "Never, they are optional",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Headlights must be used during night driving and whenever visibility is reduced, such as in fog, rain, or heavy dust.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Turning Rules",
+      "topicCode": "D",
+      "questionText": "What must you do before making a right turn at an intersection?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Turn without signaling",
+          "image": ""
+        },
+        {
+          "text": "Signal, check traffic, and yield if required",
+          "image": ""
+        },
+        {
+          "text": "Stop completely even with a green light",
+          "image": ""
+        },
+        {
+          "text": "Use the horn instead of signaling",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Before turning right, drivers must signal their intention, check for oncoming traffic and pedestrians, and yield if necessary.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Motorway Rules",
+      "topicCode": "D",
+      "questionText": "Which lane should slower vehicles generally use on a multi-lane motorway?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "The rightmost lane",
+          "image": ""
+        },
+        {
+          "text": "The leftmost lane",
+          "image": ""
+        },
+        {
+          "text": "The middle lane only",
+          "image": ""
+        },
+        {
+          "text": "Any lane at random",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Slower vehicles should stay in the leftmost lane, keeping the right lanes free for overtaking traffic.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Tailgating",
+      "topicCode": "D",
+      "questionText": "Why is tailgating considered dangerous?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "It saves fuel",
+          "image": ""
+        },
+        {
+          "text": "It reduces reaction time in emergencies",
+          "image": ""
+        },
+        {
+          "text": "It improves visibility",
+          "image": ""
+        },
+        {
+          "text": "It is required in heavy traffic",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Tailgating, or following too closely, reduces the time a driver has to react if the vehicle ahead suddenly brakes, increasing collision risk.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Pedestrian Rules",
+      "topicCode": "D",
+      "questionText": "At a zebra crossing with a pedestrian waiting to cross, what must a driver do?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Speed up to pass before they step out",
+          "image": ""
+        },
+        {
+          "text": "Stop and allow the pedestrian to cross",
+          "image": ""
+        },
+        {
+          "text": "Honk and continue driving",
+          "image": ""
+        },
+        {
+          "text": "Only stop if a police officer is present",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Drivers must stop and give way to pedestrians waiting at or crossing a zebra crossing, as pedestrians have priority there.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Roundabout Rules",
+      "topicCode": "D",
+      "questionText": "When entering a roundabout, which vehicles generally have priority?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Vehicles entering the roundabout",
+          "image": ""
+        },
+        {
+          "text": "Vehicles already inside the roundabout",
+          "image": ""
+        },
+        {
+          "text": "Whichever vehicle arrives first",
+          "image": ""
+        },
+        {
+          "text": "Larger vehicles always have priority",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Vehicles already circulating inside a roundabout generally have priority over vehicles waiting to enter.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Indicator Rules",
+      "topicCode": "D",
+      "questionText": "How early should you signal before turning at an intersection?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Exactly at the turning point",
+          "image": ""
+        },
+        {
+          "text": "Well in advance to alert other drivers",
+          "image": ""
+        },
+        {
+          "text": "After completing the turn",
+          "image": ""
+        },
+        {
+          "text": "Only if other vehicles are nearby",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Signaling well in advance gives other road users enough time to react and understand your intended movement.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "traffic-rules-basics",
+      "topic": "Overtaking Rules",
+      "topicCode": "D",
+      "questionText": "When is overtaking considered unsafe and prohibited?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "On a straight empty road",
+          "image": ""
+        },
+        {
+          "text": "Near a bend, junction, or when visibility is poor",
+          "image": ""
+        },
+        {
+          "text": "On a motorway with clear lanes",
+          "image": ""
+        },
+        {
+          "text": "During daytime only",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Overtaking is unsafe near bends, junctions, or in poor visibility because oncoming traffic or hazards may not be seen in time.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "No-Parking Zones",
+      "topicCode": "P",
+      "questionText": "Is it legal to park directly in front of a fire hydrant?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Yes, if only for a few minutes",
+          "image": ""
+        },
+        {
+          "text": "No, it blocks emergency access",
+          "image": ""
+        },
+        {
+          "text": "Yes, if hazard lights are on",
+          "image": ""
+        },
+        {
+          "text": "Only allowed at night",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Parking near a fire hydrant is illegal because it can block emergency access needed to fight fires quickly.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Disabled Parking",
+      "topicCode": "P",
+      "questionText": "Who is allowed to park in a disabled parking space?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Anyone in a hurry",
+          "image": ""
+        },
+        {
+          "text": "Only vehicles with a valid disabled permit",
+          "image": ""
+        },
+        {
+          "text": "Only delivery vehicles",
+          "image": ""
+        },
+        {
+          "text": "Only during weekends",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Disabled parking spaces are reserved exclusively for vehicles displaying a valid disability parking permit.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Crossing Rules",
+      "topicCode": "P",
+      "questionText": "Can you park your vehicle on a pedestrian crossing?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Yes, if traffic is light",
+          "image": ""
+        },
+        {
+          "text": "No, it is illegal and dangerous",
+          "image": ""
+        },
+        {
+          "text": "Yes, for quick stops only",
+          "image": ""
+        },
+        {
+          "text": "Only allowed for taxis",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Parking on a pedestrian crossing is illegal because it blocks pedestrian visibility and safe passage.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Night Parking",
+      "topicCode": "P",
+      "questionText": "What should you do when parking on an unlit road at night?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Turn off all lights",
+          "image": ""
+        },
+        {
+          "text": "Keep parking lights on if required by law",
+          "image": ""
+        },
+        {
+          "text": "Leave headlights on full beam",
+          "image": ""
+        },
+        {
+          "text": "Use hazard lights continuously overnight",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "On unlit roads, parking lights should be kept on where required so the vehicle remains visible to other road users at night.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Loading Zones",
+      "topicCode": "P",
+      "questionText": "What is a loading zone reserved for?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "General public parking",
+          "image": ""
+        },
+        {
+          "text": "Vehicles loading or unloading goods",
+          "image": ""
+        },
+        {
+          "text": "Emergency vehicles only",
+          "image": ""
+        },
+        {
+          "text": "Motorcycles only",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Loading zones are reserved for vehicles actively loading or unloading goods and should not be used for regular parking.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Hill Parking",
+      "topicCode": "P",
+      "questionText": "Which way should you turn your wheels when parking facing downhill?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Away from the curb",
+          "image": ""
+        },
+        {
+          "text": "Toward the curb",
+          "image": ""
+        },
+        {
+          "text": "Straight ahead",
+          "image": ""
+        },
+        {
+          "text": "It does not matter",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "When facing downhill, turning wheels toward the curb ensures the vehicle rolls into the curb if the brakes fail, preventing it from rolling into traffic.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Junction Parking",
+      "topicCode": "P",
+      "questionText": "How close to a road junction is it generally unsafe to park?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Right at the junction is fine",
+          "image": ""
+        },
+        {
+          "text": "Within a specified minimum distance, often several meters",
+          "image": ""
+        },
+        {
+          "text": "Distance does not matter",
+          "image": ""
+        },
+        {
+          "text": "Only matters for trucks",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Parking too close to a junction blocks visibility for turning vehicles and pedestrians, so a minimum safe distance is required by law.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Reverse Parking",
+      "topicCode": "P",
+      "questionText": "What is an advantage of reverse parking into a space?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "It is always faster",
+          "image": ""
+        },
+        {
+          "text": "It gives better visibility when exiting the space later",
+          "image": ""
+        },
+        {
+          "text": "It avoids using mirrors",
+          "image": ""
+        },
+        {
+          "text": "It is required in all car parks",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Reverse parking allows a driver to exit the space by driving forward, which usually provides better visibility and safety.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Double Parking",
+      "topicCode": "P",
+      "questionText": "What is double parking, and why is it discouraged?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Parking in two spaces at once, it saves space",
+          "image": ""
+        },
+        {
+          "text": "Parking alongside another parked vehicle, blocking traffic flow",
+          "image": ""
+        },
+        {
+          "text": "Parking twice in the same day",
+          "image": ""
+        },
+        {
+          "text": "Parking with two drivers in the car",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Double parking means stopping alongside an already parked vehicle, which blocks traffic flow and can cause accidents.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Bus Stop Parking",
+      "topicCode": "P",
+      "questionText": "Why is parking near a bus stop typically restricted?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "It is only a suggestion, not a rule",
+          "image": ""
+        },
+        {
+          "text": "It blocks buses from stopping safely for passengers",
+          "image": ""
+        },
+        {
+          "text": "Buses do not need dedicated stopping space",
+          "image": ""
+        },
+        {
+          "text": "There is no real restriction",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Parking restrictions near bus stops ensure buses can safely pull in and out to pick up and drop off passengers.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Footpath Parking",
+      "topicCode": "P",
+      "questionText": "Is it legal to park a vehicle on a footpath or sidewalk?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Yes, if the road is narrow",
+          "image": ""
+        },
+        {
+          "text": "No, it obstructs pedestrians",
+          "image": ""
+        },
+        {
+          "text": "Yes, for less than 10 minutes",
+          "image": ""
+        },
+        {
+          "text": "Only motorcycles may do so",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Parking on a footpath is illegal in most areas because it obstructs pedestrians, especially those with strollers or wheelchairs.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Angle Parking",
+      "topicCode": "P",
+      "questionText": "What is important to check before pulling out of an angle parking space?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Only the front of the vehicle",
+          "image": ""
+        },
+        {
+          "text": "Mirrors, blind spots, and passing traffic",
+          "image": ""
+        },
+        {
+          "text": "Nothing, just reverse quickly",
+          "image": ""
+        },
+        {
+          "text": "Only the fuel gauge",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Before leaving an angle parking space, drivers should check mirrors and blind spots carefully since visibility of passing traffic can be limited.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Hazard Lights",
+      "topicCode": "P",
+      "questionText": "When should you use hazard lights while parked?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Whenever parked legally",
+          "image": ""
+        },
+        {
+          "text": "When temporarily stopped in a way that may surprise other drivers",
+          "image": ""
+        },
+        {
+          "text": "Never while parked",
+          "image": ""
+        },
+        {
+          "text": "Only during daytime",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Hazard lights should be used when a vehicle is stopped unexpectedly, such as a breakdown, to warn other drivers of the obstruction.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Parking Fines",
+      "topicCode": "P",
+      "questionText": "What typically happens if you repeatedly violate parking regulations?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Nothing, parking rules are optional",
+          "image": ""
+        },
+        {
+          "text": "Fines, towing, or penalty points depending on local law",
+          "image": ""
+        },
+        {
+          "text": "A warning letter only, with no further action",
+          "image": ""
+        },
+        {
+          "text": "License is renewed automatically",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Repeated parking violations can result in fines, vehicle towing, or penalty points depending on local traffic regulations.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "parking-rules-mastery",
+      "topic": "Curve Parking",
+      "topicCode": "P",
+      "questionText": "Why is parking on a sharp curve considered dangerous?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "It improves visibility for other drivers",
+          "image": ""
+        },
+        {
+          "text": "It reduces visibility and reaction time for approaching drivers",
+          "image": ""
+        },
+        {
+          "text": "It is required by law in some areas",
+          "image": ""
+        },
+        {
+          "text": "It has no effect on safety",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Parking on a curve reduces the visibility and reaction time for approaching drivers, increasing the risk of collision.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "Uncontrolled Intersections",
+      "topicCode": "D",
+      "questionText": "At an uncontrolled intersection with no signs, who usually has the right of way?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "The faster vehicle",
+          "image": ""
+        },
+        {
+          "text": "Traffic coming from the right, in most countries",
+          "image": ""
+        },
+        {
+          "text": "The larger vehicle",
+          "image": ""
+        },
+        {
+          "text": "Whoever honks first",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "In most right-hand traffic countries, vehicles must give way to traffic approaching from the right at uncontrolled intersections.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "Give Way Sign",
+      "topicCode": "D",
+      "questionText": "What must you do when you see a Give Way sign?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Continue at the same speed",
+          "image": ""
+        },
+        {
+          "text": "Slow down and yield to other traffic",
+          "image": ""
+        },
+        {
+          "text": "Speed up to merge quickly",
+          "image": ""
+        },
+        {
+          "text": "Stop only if a pedestrian is present",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "A Give Way sign requires drivers to slow down and let other traffic pass safely before proceeding.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "Pedestrian Priority",
+      "topicCode": "D",
+      "questionText": "Who has priority at a marked zebra crossing?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Vehicles always have priority",
+          "image": ""
+        },
+        {
+          "text": "Pedestrians crossing or about to cross",
+          "image": ""
+        },
+        {
+          "text": "Whoever arrives first",
+          "image": ""
+        },
+        {
+          "text": "Only cyclists have priority",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Pedestrians at a marked zebra crossing generally have priority, and vehicles must stop to let them cross safely.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "Emergency Vehicle Priority",
+      "topicCode": "D",
+      "questionText": "Do emergency vehicles with sirens on have priority over regular traffic?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "No, they must follow normal rules",
+          "image": ""
+        },
+        {
+          "text": "Yes, other vehicles must give way",
+          "image": ""
+        },
+        {
+          "text": "Only during the day",
+          "image": ""
+        },
+        {
+          "text": "Only on motorways",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Emergency vehicles with active sirens and lights have priority, and other drivers must safely give way to let them pass.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "Roundabout Priority",
+      "topicCode": "D",
+      "questionText": "When entering a roundabout, what should you do if a vehicle is already circulating inside?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Enter immediately regardless of the other vehicle",
+          "image": ""
+        },
+        {
+          "text": "Wait until it is safe and give way to circulating traffic",
+          "image": ""
+        },
+        {
+          "text": "Honk to make it stop",
+          "image": ""
+        },
+        {
+          "text": "Reverse away from the roundabout",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Vehicles entering a roundabout must give way to traffic already circulating inside it before joining safely.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "T-Junction Priority",
+      "topicCode": "D",
+      "questionText": "At a T-junction, which traffic generally has priority?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Traffic on the terminating road",
+          "image": ""
+        },
+        {
+          "text": "Traffic on the continuing main road",
+          "image": ""
+        },
+        {
+          "text": "Whoever is turning left",
+          "image": ""
+        },
+        {
+          "text": "It depends on vehicle color",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "At a T-junction, traffic on the continuing main road generally has priority over traffic joining from the terminating road.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "Merging Traffic",
+      "topicCode": "D",
+      "questionText": "When two lanes merge into one and no signs are present, what is the safest approach?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Force your way in front of other vehicles",
+          "image": ""
+        },
+        {
+          "text": "Use a zipper merge, alternating turns fairly",
+          "image": ""
+        },
+        {
+          "text": "Stop completely and wait indefinitely",
+          "image": ""
+        },
+        {
+          "text": "Drive on the shoulder to bypass merging",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "A zipper merge, where vehicles from each lane alternate smoothly, is the safest and most efficient way to merge without signs.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "Narrow Bridge Priority",
+      "topicCode": "D",
+      "questionText": "At a narrow bridge where only one vehicle can pass, who typically has priority?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "The vehicle already on the bridge or closer to it",
+          "image": ""
+        },
+        {
+          "text": "The larger vehicle always",
+          "image": ""
+        },
+        {
+          "text": "The faster vehicle",
+          "image": ""
+        },
+        {
+          "text": "Whoever honks first",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "At narrow bridges, the vehicle that is already on the bridge or closest to entering it typically has priority to cross first.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "Cyclist Priority",
+      "topicCode": "D",
+      "questionText": "When turning right across a bike lane, what must a driver do regarding cyclists?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Ignore cyclists and turn quickly",
+          "image": ""
+        },
+        {
+          "text": "Give way to cyclists traveling straight through",
+          "image": ""
+        },
+        {
+          "text": "Force the cyclist to stop",
+          "image": ""
+        },
+        {
+          "text": "Only give way if the cyclist honks",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Drivers turning across a bike lane must give way to cyclists who are continuing straight through the intersection.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "Priority Signs",
+      "topicCode": "D",
+      "questionText": "What does a yellow diamond-shaped sign with a black border typically indicate about priority?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "You are on a priority road",
+          "image": ""
+        },
+        {
+          "text": "You must stop completely",
+          "image": ""
+        },
+        {
+          "text": "No priority rules apply here",
+          "image": ""
+        },
+        {
+          "text": "Only pedestrians have priority",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "A yellow diamond priority sign indicates that the road you are on has priority over side roads joining it.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "Four-Way Stop Priority",
+      "topicCode": "D",
+      "questionText": "At a four-way stop intersection, who should proceed first?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "The vehicle that arrived first",
+          "image": ""
+        },
+        {
+          "text": "The largest vehicle",
+          "image": ""
+        },
+        {
+          "text": "Whoever honks first",
+          "image": ""
+        },
+        {
+          "text": "The fastest vehicle",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 0,
+      "explanationText": "At a four-way stop, the vehicle that arrives first generally has the right to proceed first, and ties are resolved by yielding to the right.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "right-of-way-priority",
+      "topic": "Broken Signal Priority",
+      "topicCode": "D",
+      "questionText": "What should drivers do at an intersection where the traffic light is not working?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Proceed without stopping",
+          "image": ""
+        },
+        {
+          "text": "Treat it as an uncontrolled intersection and apply right-of-way rules",
+          "image": ""
+        },
+        {
+          "text": "Wait indefinitely until it is repaired",
+          "image": ""
+        },
+        {
+          "text": "Only the first vehicle to arrive can pass without stopping"
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "When traffic lights are not working, drivers should treat the intersection as uncontrolled and follow standard right-of-way rules, stopping and yielding as needed.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Seatbelt Safety",
+      "topicCode": "U",
+      "questionText": "Why should you always wear a seatbelt while driving?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "It is only for comfort",
+          "image": ""
+        },
+        {
+          "text": "It reduces the risk of serious injury in a crash",
+          "image": ""
+        },
+        {
+          "text": "It is not necessary for short trips",
+          "image": ""
+        },
+        {
+          "text": "It only helps at high speed",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Seatbelts keep occupants securely in place during a collision, significantly reducing the risk of serious injury or death.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Blind Spot Awareness",
+      "topicCode": "HAS",
+      "questionText": "What should you do before changing lanes to avoid a blind spot collision?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Rely only on mirrors",
+          "image": ""
+        },
+        {
+          "text": "Turn your head to check the blind spot",
+          "image": ""
+        },
+        {
+          "text": "Change lanes quickly without checking",
+          "image": ""
+        },
+        {
+          "text": "Use the horn instead of checking",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Mirrors do not show everything, so turning your head to check the blind spot is essential before changing lanes safely.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Fatigue Driving",
+      "topicCode": "U",
+      "questionText": "What should you do if you start feeling drowsy while driving?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Increase speed to reach your destination faster",
+          "image": ""
+        },
+        {
+          "text": "Pull over safely and rest",
+          "image": ""
+        },
+        {
+          "text": "Open the window and continue driving",
+          "image": ""
+        },
+        {
+          "text": "Play loud music and keep going",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "If you feel drowsy, the safest action is to pull over in a safe location and rest before continuing your journey.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Mirror Checks",
+      "topicCode": "U",
+      "questionText": "How often should you check your mirrors while driving?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Only when changing lanes",
+          "image": ""
+        },
+        {
+          "text": "Regularly throughout the drive",
+          "image": ""
+        },
+        {
+          "text": "Only at the start of the trip",
+          "image": ""
+        },
+        {
+          "text": "Only when reversing",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Regularly checking mirrors throughout your drive helps you stay aware of surrounding traffic and react to changing conditions.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Child Safety",
+      "topicCode": "U",
+      "questionText": "What is required for transporting young children safely in a vehicle?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "No special equipment is needed",
+          "image": ""
+        },
+        {
+          "text": "An appropriate child safety seat",
+          "image": ""
+        },
+        {
+          "text": "Holding the child on your lap",
+          "image": ""
+        },
+        {
+          "text": "Letting the child sit in the front seat unrestrained",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Young children must be secured in an appropriate child safety seat suited to their age and size to protect them in a crash.",
+      "explanationImage": "",
+      "difficulty": "easy",
+      "marks": 1
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Weather Driving",
+      "topicCode": "U",
+      "questionText": "How should you adjust your driving in heavy rain?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Drive at your normal speed",
+          "image": ""
+        },
+        {
+          "text": "Reduce speed and increase following distance",
+          "image": ""
+        },
+        {
+          "text": "Turn off your headlights",
+          "image": ""
+        },
+        {
+          "text": "Drive closer to the vehicle ahead for guidance",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "In heavy rain, reducing speed and increasing following distance helps prevent skidding and allows more time to react to hazards.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Night Driving",
+      "topicCode": "U",
+      "questionText": "What is an important safety practice when driving at night?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Use high beams at all times, even with oncoming traffic",
+          "image": ""
+        },
+        {
+          "text": "Dim headlights for oncoming vehicles and reduce speed",
+          "image": ""
+        },
+        {
+          "text": "Drive without headlights to save battery",
+          "image": ""
+        },
+        {
+          "text": "Increase speed since roads are emptier",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "At night, drivers should dim their headlights for oncoming traffic to avoid blinding other drivers and reduce speed for safer reaction time.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Animal Crossing Awareness",
+      "topicCode": "HAS",
+      "questionText": "What should you do if you see an animal crossing sign on a rural road?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Ignore it, animals rarely appear",
+          "image": ""
+        },
+        {
+          "text": "Slow down and stay alert for animals crossing",
+          "image": ""
+        },
+        {
+          "text": "Speed up to pass the area quickly",
+          "image": ""
+        },
+        {
+          "text": "Use the horn continuously",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Animal crossing signs warn drivers to slow down and stay alert, as animals may suddenly cross the road in that area.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Tire Safety",
+      "topicCode": "U",
+      "questionText": "Why is it important to regularly check tire pressure and tread?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "It has no effect on safety",
+          "image": ""
+        },
+        {
+          "text": "Proper tires improve grip and reduce skidding risk",
+          "image": ""
+        },
+        {
+          "text": "It only affects fuel efficiency",
+          "image": ""
+        },
+        {
+          "text": "It is only necessary once a year"
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Well-maintained tires with correct pressure and tread depth improve road grip and significantly reduce the risk of skidding or blowouts.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Fog Driving",
+      "topicCode": "U",
+      "questionText": "What lights should you use when driving in thick fog?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "High beam headlights",
+          "image": ""
+        },
+        {
+          "text": "Fog lights and low beam headlights",
+          "image": ""
+        },
+        {
+          "text": "No lights at all",
+          "image": ""
+        },
+        {
+          "text": "Hazard lights while driving normally",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "In fog, low beam headlights and fog lights improve visibility without reflecting light back and blinding the driver, unlike high beams.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Distracted Driving",
+      "topicCode": "U",
+      "questionText": "What is the safest way to handle an incoming phone call while driving?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Answer and talk while holding the phone",
+          "image": ""
+        },
+        {
+          "text": "Let it go to voicemail or use hands-free if necessary",
+          "image": ""
+        },
+        {
+          "text": "Text back immediately",
+          "image": ""
+        },
+        {
+          "text": "Look at the phone screen while driving",
+          "image": ""
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "The safest option is to let calls go to voicemail or use a hands-free system only when truly necessary, keeping full attention on the road.",
+      "explanationImage": "",
+      "difficulty": "medium",
+      "marks": 2
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Hydroplaning Awareness",
+      "topicCode": "HAS",
+      "questionText": "What should you do if your vehicle begins to hydroplane on a wet road?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Brake hard immediately",
+          "image": ""
+        },
+        {
+          "text": "Ease off the accelerator and steer straight",
+          "image": ""
+        },
+        {
+          "text": "Turn the steering wheel sharply",
+          "image": ""
+        },
+        {
+          "text": "Accelerate to regain control"
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "During hydroplaning, easing off the accelerator and keeping the steering wheel straight helps the tires regain contact with the road safely.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Emergency Stops",
+      "topicCode": "U",
+      "questionText": "What is the correct technique for an emergency stop in a modern vehicle with ABS?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Pump the brakes repeatedly",
+          "image": ""
+        },
+        {
+          "text": "Apply firm, continuous pressure to the brake pedal",
+          "image": ""
+        },
+        {
+          "text": "Release the brake immediately after pressing",
+          "image": ""
+        },
+        {
+          "text": "Steer sharply while braking lightly"
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "With ABS, drivers should apply firm and continuous pressure to the brake pedal, allowing the system to prevent wheel lock-up automatically.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Defensive Driving",
+      "topicCode": "HAS",
+      "questionText": "What is a key principle of defensive driving?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Assume other drivers will always follow the rules",
+          "image": ""
+        },
+        {
+          "text": "Anticipate potential hazards and react early",
+          "image": ""
+        },
+        {
+          "text": "Focus only on your own vehicle's speed",
+          "image": ""
+        },
+        {
+          "text": "React only after a hazard occurs"
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "Defensive driving means anticipating potential hazards from other road users and reacting early to avoid accidents.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    },
+    {
+      "quizSlug": "driving-safety-essentials",
+      "topic": "Brake Failure Response",
+      "topicCode": "U",
+      "questionText": "What should you do first if your brakes suddenly fail while driving?",
+      "questionImage": "",
+      "options": [
+        {
+          "text": "Turn off the engine immediately",
+          "image": ""
+        },
+        {
+          "text": "Shift to a lower gear and use the handbrake gradually",
+          "image": ""
+        },
+        {
+          "text": "Jump out of the moving vehicle",
+          "image": ""
+        },
+        {
+          "text": "Accelerate to find a safe stopping area"
+        }
+      ],
+      "correctOptionIndex": 1,
+      "explanationText": "If brakes fail, shifting to a lower gear and gradually applying the handbrake helps slow the vehicle safely without locking the wheels suddenly.",
+      "explanationImage": "",
+      "difficulty": "hard",
+      "marks": 3
+    }
+  ]
+}
