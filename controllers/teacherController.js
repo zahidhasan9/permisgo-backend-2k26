@@ -86,6 +86,8 @@ import TeacherProfile from "../models/TeacherProfile.js";
 import TeacherVehicle from "../models/TeacherVehicle.js";
 import Booking from "../models/Booking.js";
 import Lesson from "../models/Lesson.js";
+import "../models/Document.js";
+
 import ApiError from "../utils/ApiError.js";
 import sendResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -167,34 +169,128 @@ export const getDashboard = asyncHandler(async (req, res) => {
 });
 
 export const getProfile = asyncHandler(async (req, res) => {
-  const profile = await TeacherProfile.findOne({
+  let profile = await TeacherProfile.findOne({
     user: req.user._id,
-  })
-    .populate("user", "name email phone avatar city address bio")
-    .populate("vehicles locations documents");
+  });
 
+  // TeacherProfile না থাকলে স্বয়ংক্রিয়ভাবে তৈরি হবে
   if (!profile) {
-    throw new ApiError(404, "Teacher profile not found.");
+    profile = await TeacherProfile.create({
+      user: req.user._id,
+    });
   }
 
-  sendResponse(res, 200, "Teacher profile fetched successfully.", profile);
+  const populatedProfile = await TeacherProfile.findById(profile._id)
+    .populate(
+      "user",
+      [
+        "name",
+        "email",
+        "phone",
+        "avatar",
+        "designation",
+        "gender",
+        "dateOfBirth",
+        "address",
+        "city",
+        "country",
+        "language",
+        "bio",
+      ].join(" "),
+    )
+    .populate("vehicles locations documents");
+
+  sendResponse(
+    res,
+    200,
+    "Teacher profile fetched successfully.",
+    populatedProfile,
+  );
 });
 
 export const updateProfile = asyncHandler(async (req, res) => {
+  const allowedFields = [
+    "bio",
+    "experienceYears",
+    "qualification",
+    "lessonTypes",
+    "hourlyRate",
+    "availabilityStatus",
+  ];
+
+  const updateData = {};
+
+  allowedFields.forEach((field) => {
+    if (req.body[field] !== undefined) {
+      updateData[field] = req.body[field];
+    }
+  });
+
+  if (
+    updateData.lessonTypes !== undefined &&
+    !Array.isArray(updateData.lessonTypes)
+  ) {
+    throw new ApiError(400, "Lesson types must be an array.");
+  }
+
+  if (updateData.experienceYears !== undefined) {
+    const experienceYears = Number(updateData.experienceYears);
+
+    if (Number.isNaN(experienceYears) || experienceYears < 0) {
+      throw new ApiError(
+        400,
+        "Experience years must be a valid positive number.",
+      );
+    }
+
+    updateData.experienceYears = experienceYears;
+  }
+
+  if (updateData.hourlyRate !== undefined) {
+    const hourlyRate = Number(updateData.hourlyRate);
+
+    if (Number.isNaN(hourlyRate) || hourlyRate < 0) {
+      throw new ApiError(400, "Hourly rate must be a valid positive number.");
+    }
+
+    updateData.hourlyRate = hourlyRate;
+  }
+
   const profile = await TeacherProfile.findOneAndUpdate(
     {
       user: req.user._id,
     },
-    req.body,
+    {
+      $set: updateData,
+      $setOnInsert: {
+        user: req.user._id,
+      },
+    },
     {
       new: true,
+      upsert: true,
       runValidators: true,
+      setDefaultsOnInsert: true,
     },
-  );
-
-  if (!profile) {
-    throw new ApiError(404, "Teacher profile not found.");
-  }
+  )
+    .populate(
+      "user",
+      [
+        "name",
+        "email",
+        "phone",
+        "avatar",
+        "designation",
+        "gender",
+        "dateOfBirth",
+        "address",
+        "city",
+        "country",
+        "language",
+        "bio",
+      ].join(" "),
+    )
+    .populate("vehicles locations documents");
 
   sendResponse(res, 200, "Teacher profile updated successfully.", profile);
 });
