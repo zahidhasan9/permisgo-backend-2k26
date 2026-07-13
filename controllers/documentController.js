@@ -2,6 +2,7 @@ import Document from "../models/Document";
 import asyncHandler from "../utils/asyncHandler";
 import sendResponse from "../utils/ApiResponse";
 import ApiError from "../utils/ApiError";
+import { getUploadedFileUrl } from "../utils/uploadHelpers.js";
 
 export const uploadDocument = asyncHandler(async (req, res) => {
   if (!req.file) throw new ApiError(400, "File is required.");
@@ -10,7 +11,7 @@ export const uploadDocument = asyncHandler(async (req, res) => {
     user: req.user._id,
     title: req.body.title || req.file.originalname,
     type: req.body.type || "other",
-    fileUrl: `/${req.file.path.replace(/\\/g, "/")}`,
+    fileUrl: getUploadedFileUrl(req.file),
     fileType: req.file.mimetype,
     fileSize: req.file.size,
   });

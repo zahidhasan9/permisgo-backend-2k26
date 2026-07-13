@@ -87,9 +87,9 @@ const apiLimiter = rateLimit({
 
 app.use("/api", apiLimiter);
 
-const __dirname = path.resolve();
+const uploadDirectory = path.resolve(process.env.UPLOAD_DIR || "uploads");
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(uploadDirectory));
 
 app.get("/", (req, res) => {
   res.status(200).json({

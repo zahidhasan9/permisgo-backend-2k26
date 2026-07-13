@@ -7,6 +7,10 @@ import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/ApiResponse.js";
 import QuizRetakePermission from "../models/QuizRetakePermission.js";
 import User from "../models/User.js";
+import {
+  getUploadedFileUrl,
+  deleteStoredFile,
+} from "../utils/uploadHelpers.js";
 
 // ===============================Helper controller=======================
 const getQuizDurationSeconds = (quiz) => {
@@ -92,7 +96,9 @@ const finishAttemptIfTimeExpired = async (attempt, quiz) => {
 
 // ============================================helper====================================
 
-const toPublicFilePath = (file) => (file ? `/uploads/${file.filename}` : "");
+const toPublicFilePath = (file) => {
+  return getUploadedFileUrl(file);
+};
 
 const getFileByField = (req, fieldname) => {
   if (!Array.isArray(req.files)) return null;
@@ -650,14 +656,16 @@ export const getAdminQuizStats = asyncHandler(async (req, res) => {
 export const createQuiz = asyncHandler(async (req, res) => {
   const coverImageFile = getFileByField(req, "coverImage");
 
+  const coverImage = coverImageFile
+    ? getUploadedFileUrl(coverImageFile)
+    : req.body.coverImage || "";
+
   const quiz = await Quiz.create({
     title: req.body.title,
     slug: req.body.slug,
     type: req.body.type || "simple_series",
     description: req.body.description || "",
-    coverImage: coverImageFile
-      ? toPublicFilePath(coverImageFile)
-      : req.body.coverImage || "",
+    coverImage,
     durationMinutes: toNumber(req.body.durationMinutes, 30),
     passingScore: toNumber(req.body.passingScore, 60),
     isPaid: req.body.isPaid === "true" || req.body.isPaid === true,
@@ -673,6 +681,7 @@ export const updateQuiz = asyncHandler(async (req, res) => {
   assertObjectId(req.params.quizId, "Invalid quiz id.");
 
   const quiz = await Quiz.findById(req.params.quizId);
+
   if (!quiz || quiz.status === "deleted") {
     res.statusCode = 404;
     throw new Error("Quiz not found.");
@@ -680,25 +689,51 @@ export const updateQuiz = asyncHandler(async (req, res) => {
 
   const coverImageFile = getFileByField(req, "coverImage");
 
+  const oldCoverImage = quiz.coverImage || "";
+
   const allowedFields = ["title", "slug", "type", "description", "status"];
+
   allowedFields.forEach((field) => {
-    if (req.body[field] !== undefined) quiz[field] = req.body[field];
+    if (req.body[field] !== undefined) {
+      quiz[field] = req.body[field];
+    }
   });
 
-  if (req.body.durationMinutes !== undefined)
+  if (req.body.durationMinutes !== undefined) {
     quiz.durationMinutes = toNumber(
       req.body.durationMinutes,
       quiz.durationMinutes,
     );
-  if (req.body.passingScore !== undefined)
+  }
+
+  if (req.body.passingScore !== undefined) {
     quiz.passingScore = toNumber(req.body.passingScore, quiz.passingScore);
-  if (req.body.order !== undefined)
+  }
+
+  if (req.body.order !== undefined) {
     quiz.order = toNumber(req.body.order, quiz.order);
-  if (req.body.isPaid !== undefined)
+  }
+
+  if (req.body.isPaid !== undefined) {
     quiz.isPaid = req.body.isPaid === "true" || req.body.isPaid === true;
-  if (coverImageFile) quiz.coverImage = toPublicFilePath(coverImageFile);
+  }
+
+  if (coverImageFile) {
+    const newCoverImage = getUploadedFileUrl(coverImageFile);
+
+    if (!newCoverImage) {
+      res.statusCode = 500;
+      throw new Error("Uploaded cover image URL could not be created.");
+    }
+
+    quiz.coverImage = newCoverImage;
+  }
 
   await quiz.save();
+  if (coverImageFile && oldCoverImage && oldCoverImage !== quiz.coverImage) {
+    await deleteStoredFile(oldCoverImage);
+  }
+
   sendResponse(res, 200, "Quiz updated.", quiz);
 });
 

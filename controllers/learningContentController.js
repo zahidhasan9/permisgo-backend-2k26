@@ -405,9 +405,13 @@
 import LearningContent from "../models/LearningContent.js";
 import LearningProgress from "../models/LearningProgress.js";
 
+import {
+  deleteStoredFile,
+  getUploadedFileUrl,
+} from "../utils/uploadHelpers.js";
+
 const getFilePath = (file) => {
-  if (!file) return "";
-  return `/uploads/${file.filename}`;
+  return getUploadedFileUrl(file);
 };
 
 const getSingleFile = (req, fieldName) => {
@@ -552,7 +556,11 @@ export const updateLearningContent = async (req, res) => {
     }
 
     const imageFile = getSingleFile(req, "image");
+
     const file = getSingleFile(req, "file");
+
+    const oldImageUrl = contentItem.image || "";
+    const oldFileUrl = contentItem.fileUrl || "";
 
     const updateData = {
       title: req.body.title,
@@ -591,29 +599,44 @@ export const updateLearningContent = async (req, res) => {
     }
 
     if (imageFile) {
-      updateData.image = getFilePath(imageFile);
+      updateData.image = getUploadedFileUrl(imageFile);
     }
 
     if (file) {
-      updateData.fileUrl = getFilePath(file);
+      updateData.fileUrl = getUploadedFileUrl(file);
     }
 
     const updated = await LearningContent.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true },
+      {
+        new: true,
+        runValidators: true,
+      },
     ).populate(
       "relatedQuiz",
       "title type totalQuestions passingScore durationMinutes",
     );
 
-    res.status(200).json({
+    /*
+    Database update সফল হওয়ার পর
+    পুরোনো files delete হবে।
+    */
+    if (imageFile && oldImageUrl && oldImageUrl !== updated.image) {
+      await deleteStoredFile(oldImageUrl);
+    }
+
+    if (file && oldFileUrl && oldFileUrl !== updated.fileUrl) {
+      await deleteStoredFile(oldFileUrl);
+    }
+
+    return res.status(200).json({
       success: true,
       message: "Learning content updated successfully",
       data: updated,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });

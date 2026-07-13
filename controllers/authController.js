@@ -444,13 +444,16 @@
 
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import fs from "fs";
-import path from "path";
+
 import User from "../models/User.js";
 import Referral from "../models/Referral.js";
+
 import generateToken from "../utils/generateToken.js";
 
-const __dirname = path.resolve();
+import {
+  deleteStoredFile,
+  getUploadedFileUrl,
+} from "../utils/uploadHelpers.js";
 
 const safeUserPayload = (user) => {
   if (!user) return null;
@@ -478,20 +481,6 @@ const safeUserPayload = (user) => {
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
-};
-
-const deleteOldLocalAvatar = (avatarPath = "") => {
-  try {
-    if (!avatarPath || !avatarPath.startsWith("/uploads/profiles/")) return;
-
-    const absolutePath = path.join(__dirname, avatarPath.replace(/^\//, ""));
-
-    if (fs.existsSync(absolutePath)) {
-      fs.unlinkSync(absolutePath);
-    }
-  } catch (error) {
-    console.log("Old profile image delete failed:", error.message);
-  }
 };
 
 const setStringField = (user, field, value, maxLength = 200) => {
@@ -816,13 +805,28 @@ export const updateProfile = async (req, res) => {
       user.dateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null;
     }
 
+    let oldAvatarToDelete = "";
+
     if (req.file) {
-      const newAvatarPath = `/uploads/profiles/${req.file.filename}`;
-      deleteOldLocalAvatar(user.avatar);
-      user.avatar = newAvatarPath;
+      const newAvatarUrl = getUploadedFileUrl(req.file);
+
+      if (!newAvatarUrl) {
+        throw new Error("Uploaded profile image URL could not be created.");
+      }
+
+      oldAvatarToDelete = user.avatar || "";
+      user.avatar = newAvatarUrl;
     }
 
+    /*
+    আগে database save হবে।
+    Save সফল হলে পুরোনো image delete হবে।
+    */
     const updatedUser = await user.save();
+
+    if (oldAvatarToDelete && oldAvatarToDelete !== updatedUser.avatar) {
+      await deleteStoredFile(oldAvatarToDelete);
+    }
 
     return res.status(200).json({
       success: true,
