@@ -1,0 +1,378 @@
+{
+  "title": "PermisGo API Docs",
+  "totalEndpoints": 62,
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/admin/dashboard",
+      "handler": "getDashboard",
+      "sourceFile": "routes/adminRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/teachers/:teacherId/verify",
+      "handler": "verifyTeacher",
+      "sourceFile": "routes/adminRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/users",
+      "handler": "getUsers",
+      "sourceFile": "routes/adminRoutes.js"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/users/:id",
+      "handler": "deleteUser",
+      "sourceFile": "routes/adminRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/users/:id",
+      "handler": "getUserById",
+      "sourceFile": "routes/adminRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/users/:id/role",
+      "handler": "updateUserRole",
+      "sourceFile": "routes/adminRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/users/:id/status",
+      "handler": "updateUserStatus",
+      "sourceFile": "routes/adminRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/auth/change-password",
+      "handler": "changePassword",
+      "sourceFile": "routes/authRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "handler": "login",
+      "sourceFile": "routes/authRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "handler": "logout",
+      "sourceFile": "routes/authRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me",
+      "handler": "me",
+      "sourceFile": "routes/authRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/auth/profile",
+      "handler": "updateProfile",
+      "sourceFile": "routes/authRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "handler": "register",
+      "sourceFile": "routes/authRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/learning/admin/contents",
+      "handler": "getAdminLearningContents",
+      "sourceFile": "routes/learningContentRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/learning/admin/contents",
+      "handler": "createLearningContent",
+      "sourceFile": "routes/learningContentRoutes.js"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/learning/admin/contents/:id",
+      "handler": "deleteLearningContent",
+      "sourceFile": "routes/learningContentRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/learning/admin/contents/:id",
+      "handler": "updateLearningContent",
+      "sourceFile": "routes/learningContentRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/learning/contents",
+      "handler": "getLearningContents",
+      "sourceFile": "routes/learningContentRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/learning/contents/:id/favorite",
+      "handler": "toggleLearningFavorite",
+      "sourceFile": "routes/learningContentRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/learning/contents/:id/progress",
+      "handler": "updateLearningProgress",
+      "sourceFile": "routes/learningContentRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/learning/summary",
+      "handler": "getLearningSummary",
+      "sourceFile": "routes/learningContentRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/lessons",
+      "handler": "getLessons",
+      "sourceFile": "routes/lessonRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/lessons",
+      "handler": "createLesson",
+      "sourceFile": "routes/lessonRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/lessons/:id",
+      "handler": "getLesson",
+      "sourceFile": "routes/lessonRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/lessons/:id",
+      "handler": "updateLesson",
+      "sourceFile": "routes/lessonRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/lessons/:id/attendance",
+      "handler": "confirmAttendance",
+      "sourceFile": "routes/lessonRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/lessons/:id/cancel",
+      "handler": "cancelLesson",
+      "sourceFile": "routes/lessonRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/lessons/:id/complete",
+      "handler": "completeLesson",
+      "sourceFile": "routes/lessonRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/lessons/:id/start",
+      "handler": "startLesson",
+      "sourceFile": "routes/lessonRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes",
+      "handler": "getQuizzes",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/quizzes",
+      "handler": "createQuiz",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/quizzes/:quizId",
+      "handler": "deleteQuiz",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/:quizId",
+      "handler": "getQuiz",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/quizzes/:quizId",
+      "handler": "updateQuiz",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/:quizId/admin-questions",
+      "handler": "getAdminQuestions",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/quizzes/:quizId/attempts/start",
+      "handler": "startQuizAttempt",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/:quizId/questions",
+      "handler": "getQuestions",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/quizzes/:quizId/questions",
+      "handler": "createQuestion",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/admin/all",
+      "handler": "getAdminQuizzes",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/admin/attempts",
+      "handler": "getAdminAttempts",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/admin/retake-permissions",
+      "handler": "getAdminRetakePermissions",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/quizzes/admin/retake-permissions",
+      "handler": "grantQuizRetakePermission",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/quizzes/admin/retake-permissions/:permissionId/revoke",
+      "handler": "revokeQuizRetakePermission",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/admin/stats",
+      "handler": "getAdminQuizStats",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/quizzes/attempts/:attemptId/answer",
+      "handler": "submitQuizAnswer",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/quizzes/attempts/:attemptId/finish",
+      "handler": "finishQuizAttempt",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/attempts/:attemptId/review",
+      "handler": "getQuizAttemptReview",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/attempts/me",
+      "handler": "getMyQuizAttempts",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/quizzes/questions/:questionId",
+      "handler": "deleteQuestion",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/questions/:questionId",
+      "handler": "getQuestionById",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/quizzes/questions/:questionId",
+      "handler": "updateQuestion",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/retake-permissions/me",
+      "handler": "getMyRetakePermissions",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/quizzes/road-signs",
+      "handler": "createRoadSign",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quizzes/road-signs/list",
+      "handler": "getRoadSigns",
+      "sourceFile": "routes/quizRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/teachers/dashboard",
+      "handler": "getDashboard",
+      "sourceFile": "routes/teacherRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/teachers/locations",
+      "handler": "getLocations",
+      "sourceFile": "routes/teacherRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/teachers/locations",
+      "handler": "addLocation",
+      "sourceFile": "routes/teacherRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/teachers/profile",
+      "handler": "getProfile",
+      "sourceFile": "routes/teacherRoutes.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/teachers/profile",
+      "handler": "updateProfile",
+      "sourceFile": "routes/teacherRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/teachers/public",
+      "handler": "getPublicTeachers",
+      "sourceFile": "routes/teacherRoutes.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/teachers/vehicles",
+      "handler": "getVehicles",
+      "sourceFile": "routes/teacherRoutes.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/teachers/vehicles",
+      "handler": "addVehicle",
+      "sourceFile": "routes/teacherRoutes.js"
+    }
+  ]
+}

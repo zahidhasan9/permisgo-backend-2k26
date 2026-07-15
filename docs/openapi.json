@@ -1,0 +1,853 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PermisGo API",
+    "version": "1.0.0",
+    "description": "Auto-generated Swagger docs from Express route files."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000"
+    }
+  ],
+  "paths": {
+    "/api/admin/dashboard": {
+      "get": {
+        "summary": "GET /api/admin/dashboard",
+        "description": "Defined in routes/adminRoutes.js (getDashboard)",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/admin/teachers/:teacherId/verify": {
+      "patch": {
+        "summary": "PATCH /api/admin/teachers/:teacherId/verify",
+        "description": "Defined in routes/adminRoutes.js (verifyTeacher)",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "summary": "GET /api/admin/users",
+        "description": "Defined in routes/adminRoutes.js (getUsers)",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/admin/users/:id": {
+      "delete": {
+        "summary": "DELETE /api/admin/users/:id",
+        "description": "Defined in routes/adminRoutes.js (deleteUser)",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "get": {
+        "summary": "GET /api/admin/users/:id",
+        "description": "Defined in routes/adminRoutes.js (getUserById)",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/admin/users/:id/role": {
+      "patch": {
+        "summary": "PATCH /api/admin/users/:id/role",
+        "description": "Defined in routes/adminRoutes.js (updateUserRole)",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/admin/users/:id/status": {
+      "patch": {
+        "summary": "PATCH /api/admin/users/:id/status",
+        "description": "Defined in routes/adminRoutes.js (updateUserStatus)",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/auth/change-password": {
+      "patch": {
+        "summary": "PATCH /api/auth/change-password",
+        "description": "Defined in routes/authRoutes.js (changePassword)",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "POST /api/auth/login",
+        "description": "Defined in routes/authRoutes.js (login)",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "POST /api/auth/logout",
+        "description": "Defined in routes/authRoutes.js (logout)",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "GET /api/auth/me",
+        "description": "Defined in routes/authRoutes.js (me)",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/auth/profile": {
+      "patch": {
+        "summary": "PATCH /api/auth/profile",
+        "description": "Defined in routes/authRoutes.js (updateProfile)",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "POST /api/auth/register",
+        "description": "Defined in routes/authRoutes.js (register)",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/learning/admin/contents": {
+      "get": {
+        "summary": "GET /api/learning/admin/contents",
+        "description": "Defined in routes/learningContentRoutes.js (getAdminLearningContents)",
+        "tags": [
+          "learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/learning/admin/contents",
+        "description": "Defined in routes/learningContentRoutes.js (createLearningContent)",
+        "tags": [
+          "learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/learning/admin/contents/:id": {
+      "delete": {
+        "summary": "DELETE /api/learning/admin/contents/:id",
+        "description": "Defined in routes/learningContentRoutes.js (deleteLearningContent)",
+        "tags": [
+          "learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/learning/admin/contents/:id",
+        "description": "Defined in routes/learningContentRoutes.js (updateLearningContent)",
+        "tags": [
+          "learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/learning/contents": {
+      "get": {
+        "summary": "GET /api/learning/contents",
+        "description": "Defined in routes/learningContentRoutes.js (getLearningContents)",
+        "tags": [
+          "learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/learning/contents/:id/favorite": {
+      "patch": {
+        "summary": "PATCH /api/learning/contents/:id/favorite",
+        "description": "Defined in routes/learningContentRoutes.js (toggleLearningFavorite)",
+        "tags": [
+          "learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/learning/contents/:id/progress": {
+      "post": {
+        "summary": "POST /api/learning/contents/:id/progress",
+        "description": "Defined in routes/learningContentRoutes.js (updateLearningProgress)",
+        "tags": [
+          "learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/learning/summary": {
+      "get": {
+        "summary": "GET /api/learning/summary",
+        "description": "Defined in routes/learningContentRoutes.js (getLearningSummary)",
+        "tags": [
+          "learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/lessons": {
+      "get": {
+        "summary": "GET /api/lessons",
+        "description": "Defined in routes/lessonRoutes.js (getLessons)",
+        "tags": [
+          "lessons"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/lessons",
+        "description": "Defined in routes/lessonRoutes.js (createLesson)",
+        "tags": [
+          "lessons"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/lessons/:id": {
+      "get": {
+        "summary": "GET /api/lessons/:id",
+        "description": "Defined in routes/lessonRoutes.js (getLesson)",
+        "tags": [
+          "lessons"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/lessons/:id",
+        "description": "Defined in routes/lessonRoutes.js (updateLesson)",
+        "tags": [
+          "lessons"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/lessons/:id/attendance": {
+      "patch": {
+        "summary": "PATCH /api/lessons/:id/attendance",
+        "description": "Defined in routes/lessonRoutes.js (confirmAttendance)",
+        "tags": [
+          "lessons"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/lessons/:id/cancel": {
+      "patch": {
+        "summary": "PATCH /api/lessons/:id/cancel",
+        "description": "Defined in routes/lessonRoutes.js (cancelLesson)",
+        "tags": [
+          "lessons"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/lessons/:id/complete": {
+      "patch": {
+        "summary": "PATCH /api/lessons/:id/complete",
+        "description": "Defined in routes/lessonRoutes.js (completeLesson)",
+        "tags": [
+          "lessons"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/lessons/:id/start": {
+      "patch": {
+        "summary": "PATCH /api/lessons/:id/start",
+        "description": "Defined in routes/lessonRoutes.js (startLesson)",
+        "tags": [
+          "lessons"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes": {
+      "get": {
+        "summary": "GET /api/quizzes",
+        "description": "Defined in routes/quizRoutes.js (getQuizzes)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/quizzes",
+        "description": "Defined in routes/quizRoutes.js (createQuiz)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/:quizId": {
+      "delete": {
+        "summary": "DELETE /api/quizzes/:quizId",
+        "description": "Defined in routes/quizRoutes.js (deleteQuiz)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "get": {
+        "summary": "GET /api/quizzes/:quizId",
+        "description": "Defined in routes/quizRoutes.js (getQuiz)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/quizzes/:quizId",
+        "description": "Defined in routes/quizRoutes.js (updateQuiz)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/:quizId/admin-questions": {
+      "get": {
+        "summary": "GET /api/quizzes/:quizId/admin-questions",
+        "description": "Defined in routes/quizRoutes.js (getAdminQuestions)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/:quizId/attempts/start": {
+      "post": {
+        "summary": "POST /api/quizzes/:quizId/attempts/start",
+        "description": "Defined in routes/quizRoutes.js (startQuizAttempt)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/:quizId/questions": {
+      "get": {
+        "summary": "GET /api/quizzes/:quizId/questions",
+        "description": "Defined in routes/quizRoutes.js (getQuestions)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/quizzes/:quizId/questions",
+        "description": "Defined in routes/quizRoutes.js (createQuestion)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/admin/all": {
+      "get": {
+        "summary": "GET /api/quizzes/admin/all",
+        "description": "Defined in routes/quizRoutes.js (getAdminQuizzes)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/admin/attempts": {
+      "get": {
+        "summary": "GET /api/quizzes/admin/attempts",
+        "description": "Defined in routes/quizRoutes.js (getAdminAttempts)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/admin/retake-permissions": {
+      "get": {
+        "summary": "GET /api/quizzes/admin/retake-permissions",
+        "description": "Defined in routes/quizRoutes.js (getAdminRetakePermissions)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/quizzes/admin/retake-permissions",
+        "description": "Defined in routes/quizRoutes.js (grantQuizRetakePermission)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/admin/retake-permissions/:permissionId/revoke": {
+      "patch": {
+        "summary": "PATCH /api/quizzes/admin/retake-permissions/:permissionId/revoke",
+        "description": "Defined in routes/quizRoutes.js (revokeQuizRetakePermission)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/admin/stats": {
+      "get": {
+        "summary": "GET /api/quizzes/admin/stats",
+        "description": "Defined in routes/quizRoutes.js (getAdminQuizStats)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/attempts/:attemptId/answer": {
+      "post": {
+        "summary": "POST /api/quizzes/attempts/:attemptId/answer",
+        "description": "Defined in routes/quizRoutes.js (submitQuizAnswer)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/attempts/:attemptId/finish": {
+      "post": {
+        "summary": "POST /api/quizzes/attempts/:attemptId/finish",
+        "description": "Defined in routes/quizRoutes.js (finishQuizAttempt)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/attempts/:attemptId/review": {
+      "get": {
+        "summary": "GET /api/quizzes/attempts/:attemptId/review",
+        "description": "Defined in routes/quizRoutes.js (getQuizAttemptReview)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/attempts/me": {
+      "get": {
+        "summary": "GET /api/quizzes/attempts/me",
+        "description": "Defined in routes/quizRoutes.js (getMyQuizAttempts)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/questions/:questionId": {
+      "delete": {
+        "summary": "DELETE /api/quizzes/questions/:questionId",
+        "description": "Defined in routes/quizRoutes.js (deleteQuestion)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "get": {
+        "summary": "GET /api/quizzes/questions/:questionId",
+        "description": "Defined in routes/quizRoutes.js (getQuestionById)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/quizzes/questions/:questionId",
+        "description": "Defined in routes/quizRoutes.js (updateQuestion)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/retake-permissions/me": {
+      "get": {
+        "summary": "GET /api/quizzes/retake-permissions/me",
+        "description": "Defined in routes/quizRoutes.js (getMyRetakePermissions)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/road-signs": {
+      "post": {
+        "summary": "POST /api/quizzes/road-signs",
+        "description": "Defined in routes/quizRoutes.js (createRoadSign)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/quizzes/road-signs/list": {
+      "get": {
+        "summary": "GET /api/quizzes/road-signs/list",
+        "description": "Defined in routes/quizRoutes.js (getRoadSigns)",
+        "tags": [
+          "quizzes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/teachers/dashboard": {
+      "get": {
+        "summary": "GET /api/teachers/dashboard",
+        "description": "Defined in routes/teacherRoutes.js (getDashboard)",
+        "tags": [
+          "teachers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/teachers/locations": {
+      "get": {
+        "summary": "GET /api/teachers/locations",
+        "description": "Defined in routes/teacherRoutes.js (getLocations)",
+        "tags": [
+          "teachers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/teachers/locations",
+        "description": "Defined in routes/teacherRoutes.js (addLocation)",
+        "tags": [
+          "teachers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/teachers/profile": {
+      "get": {
+        "summary": "GET /api/teachers/profile",
+        "description": "Defined in routes/teacherRoutes.js (getProfile)",
+        "tags": [
+          "teachers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/teachers/profile",
+        "description": "Defined in routes/teacherRoutes.js (updateProfile)",
+        "tags": [
+          "teachers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/teachers/public": {
+      "get": {
+        "summary": "GET /api/teachers/public",
+        "description": "Defined in routes/teacherRoutes.js (getPublicTeachers)",
+        "tags": [
+          "teachers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/teachers/vehicles": {
+      "get": {
+        "summary": "GET /api/teachers/vehicles",
+        "description": "Defined in routes/teacherRoutes.js (getVehicles)",
+        "tags": [
+          "teachers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/teachers/vehicles",
+        "description": "Defined in routes/teacherRoutes.js (addVehicle)",
+        "tags": [
+          "teachers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  }
+}
