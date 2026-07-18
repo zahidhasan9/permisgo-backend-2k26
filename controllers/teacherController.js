@@ -1,86 +1,3 @@
-// import TeacherProfile from "../models/TeacherProfile";
-// import TeacherVehicle from "../models/TeacherVehicle";
-// import TeacherLocation from "../models/TeacherLocation";
-// import Lesson from "../models/Lesson";
-// import Booking from "../models/Booking";
-// import asyncHandler from "../utils/asyncHandler";
-// import sendResponse from "../utils/ApiResponse";
-// import ApiError from "../utils/ApiError";
-
-// export const getPublicTeachers = asyncHandler(async (req, res) => {
-//   const teachers = await TeacherProfile.find({ verificationStatus: "verified" })
-//     .populate("user", "name email phone avatar")
-//     .populate("vehicles locations");
-//   sendResponse(res, 200, "Teachers fetched.", teachers);
-// });
-
-// export const getDashboard = asyncHandler(async (req, res) => {
-//   const [profile, lessons, bookings, vehicles, locations] = await Promise.all([
-//     TeacherProfile.findOne({ user: req.user._id }),
-//     Lesson.countDocuments({ teacher: req.user._id }),
-//     Booking.countDocuments({ teacher: req.user._id }),
-//     TeacherVehicle.countDocuments({ teacher: req.user._id }),
-//     TeacherLocation.countDocuments({ teacher: req.user._id }),
-//   ]);
-
-//   sendResponse(res, 200, "Teacher dashboard fetched.", {
-//     profile,
-//     stats: { lessons, bookings, vehicles, locations },
-//   });
-// });
-
-// export const getProfile = asyncHandler(async (req, res) => {
-//   const profile = await TeacherProfile.findOne({ user: req.user._id })
-//     .populate("user", "name email phone avatar")
-//     .populate("vehicles locations documents");
-//   if (!profile) throw new ApiError(404, "Teacher profile not found.");
-//   sendResponse(res, 200, "Teacher profile fetched.", profile);
-// });
-
-// export const updateProfile = asyncHandler(async (req, res) => {
-//   const profile = await TeacherProfile.findOneAndUpdate(
-//     { user: req.user._id },
-//     req.body,
-//     { new: true, runValidators: true },
-//   );
-//   if (!profile) throw new ApiError(404, "Teacher profile not found.");
-//   sendResponse(res, 200, "Teacher profile updated.", profile);
-// });
-
-// export const addVehicle = asyncHandler(async (req, res) => {
-//   const vehicle = await TeacherVehicle.create({
-//     ...req.body,
-//     teacher: req.user._id,
-//   });
-//   await TeacherProfile.findOneAndUpdate(
-//     { user: req.user._id },
-//     { $addToSet: { vehicles: vehicle._id } },
-//   );
-//   sendResponse(res, 201, "Vehicle added.", vehicle);
-// });
-
-// export const getVehicles = asyncHandler(async (req, res) => {
-//   const vehicles = await TeacherVehicle.find({ teacher: req.user._id });
-//   sendResponse(res, 200, "Vehicles fetched.", vehicles);
-// });
-
-// export const addLocation = asyncHandler(async (req, res) => {
-//   const location = await TeacherLocation.create({
-//     ...req.body,
-//     teacher: req.user._id,
-//   });
-//   await TeacherProfile.findOneAndUpdate(
-//     { user: req.user._id },
-//     { $addToSet: { locations: location._id } },
-//   );
-//   sendResponse(res, 201, "Location added.", location);
-// });
-
-// export const getLocations = asyncHandler(async (req, res) => {
-//   const locations = await TeacherLocation.find({ teacher: req.user._id });
-//   sendResponse(res, 200, "Locations fetched.", locations);
-// });
-
 import TeacherLocation from "../models/TeacherLocation.js";
 import TeacherProfile from "../models/TeacherProfile.js";
 import TeacherVehicle from "../models/TeacherVehicle.js";
@@ -295,34 +212,152 @@ export const updateProfile = asyncHandler(async (req, res) => {
   sendResponse(res, 200, "Teacher profile updated successfully.", profile);
 });
 
+// export const addVehicle = asyncHandler(async (req, res) => {
+//   const vehicle = await TeacherVehicle.create({
+//     ...req.body,
+//     teacher: req.user._id,
+//   });
+
+//   await TeacherProfile.findOneAndUpdate(
+//     {
+//       user: req.user._id,
+//     },
+//     {
+//       $addToSet: {
+//         vehicles: vehicle._id,
+//       },
+//     },
+//   );
+
+//   sendResponse(res, 201, "Vehicle added successfully.", vehicle);
+// });
+
+// export const getVehicles = asyncHandler(async (req, res) => {
+//   const vehicles = await TeacherVehicle.find({
+//     teacher: req.user._id,
+//   }).sort({
+//     createdAt: -1,
+//   });
+
+//   sendResponse(res, 200, "Vehicles fetched successfully.", vehicles);
+// });
+
+//create  vehicle
+// export const addVehicle = asyncHandler(async (req, res) => {
+//   const vehicle = await TeacherVehicle.create({
+//     ...req.body,
+//     teacher: req.user._id,
+
+//     vehicleImage: req.file ? req.file.path : undefined,
+//   });
+
+//   await TeacherProfile.findOneAndUpdate(
+//     { user: req.user._id },
+//     {
+//       $addToSet: {
+//         vehicles: vehicle._id,
+//       },
+//     }
+//   );
+
+//   sendResponse(res, 201, "Vehicle added successfully.", vehicle);
+// });
+
 export const addVehicle = asyncHandler(async (req, res) => {
+  console.log("Body:", req.body);
+  console.log("File:", req.file);
+
   const vehicle = await TeacherVehicle.create({
     ...req.body,
     teacher: req.user._id,
+    vehicleImage: req.file ? req.file.path : undefined,
   });
 
+  sendResponse(res, 201, "Vehicle added successfully.", vehicle);
+});
+
+// Get Logged-in Teacher Vehicles
+export const getMyVehicles = asyncHandler(async (req, res) => {
+  const vehicles = await TeacherVehicle.find({
+    teacher: req.user._id,
+  }).sort({ createdAt: -1 });
+
+  sendResponse(res, 200, "Vehicles fetched successfully.", vehicles);
+});
+
+// Get All Vehicles (Admin)
+export const getAllVehicles = asyncHandler(async (req, res) => {
+  const vehicles = await TeacherVehicle.find()
+    .populate("teacher", "name email phone")
+    .sort({ createdAt: -1 });
+
+  sendResponse(res, 200, "All vehicles fetched successfully.", vehicles);
+});
+
+// Get Vehicle By ID
+export const getVehicleById = asyncHandler(async (req, res) => {
+  const vehicle = await TeacherVehicle.findById(req.params.id).populate(
+    "teacher",
+    "name email phone",
+  );
+
+  if (!vehicle) {
+    return sendResponse(res, 404, "Vehicle not found.");
+  }
+
+  sendResponse(res, 200, "Vehicle fetched successfully.", vehicle);
+});
+
+// Update Vehicle
+export const updateVehicle = asyncHandler(async (req, res) => {
+  const vehicle = await TeacherVehicle.findOne({
+    _id: req.params.id,
+    teacher: req.user._id,
+  });
+
+  if (!vehicle) {
+    return sendResponse(res, 404, "Vehicle not found.");
+  }
+
+  Object.assign(vehicle, req.body);
+
+  await vehicle.save();
+
+  sendResponse(res, 200, "Vehicle updated successfully.", vehicle);
+});
+
+// Delete Vehicle
+export const deleteVehicle = asyncHandler(async (req, res) => {
+  const vehicle = await TeacherVehicle.findOne({
+    _id: req.params.id,
+    teacher: req.user._id,
+  });
+
+  if (!vehicle) {
+    return sendResponse(res, 404, "Vehicle not found.");
+  }
+
   await TeacherProfile.findOneAndUpdate(
+    { user: req.user._id },
     {
-      user: req.user._id,
-    },
-    {
-      $addToSet: {
+      $pull: {
         vehicles: vehicle._id,
       },
     },
   );
 
-  sendResponse(res, 201, "Vehicle added successfully.", vehicle);
+  await vehicle.deleteOne();
+
+  sendResponse(res, 200, "Vehicle deleted successfully.");
 });
 
-export const getVehicles = asyncHandler(async (req, res) => {
+// Get Vehicles By Teacher ID
+export const getVehiclesByTeacher = asyncHandler(async (req, res) => {
   const vehicles = await TeacherVehicle.find({
-    teacher: req.user._id,
-  }).sort({
-    createdAt: -1,
-  });
+    teacher: req.params.teacherId,
+  }).sort({ createdAt: -1 });
 
-  sendResponse(res, 200, "Vehicles fetched successfully.", vehicles);
+  sendResponse(res, 200, "Teacher vehicles fetched successfully.", vehicles);
 });
 
 export const addLocation = asyncHandler(async (req, res) => {

@@ -1,3 +1,5 @@
+//
+
 import mongoose from "mongoose";
 
 const teacherVehicleSchema = new mongoose.Schema(
@@ -15,8 +17,9 @@ const teacherVehicleSchema = new mongoose.Schema(
     },
     brand: String,
     model: String,
-    registrationNumber: String,
+    vehiclenumber: { type: String, required: true, unique: true },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
+    vehicleImage: String,
   },
   { timestamps: true },
 );
