@@ -107,7 +107,7 @@ app.use("/api/lessons", lessonRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/teachers", teacherRoutes);
 app.use("/api/offers", offerRoutes);
-//app.use("/api/bookings", bookingRoutes);
+app.use("/api/bookings", bookingRoutes);
 //app.use("/api/payments", paymentRoutes);
 app.use("/api/documents", documentRoutes);
 //app.use("/api/blogs", blogRoutes);
