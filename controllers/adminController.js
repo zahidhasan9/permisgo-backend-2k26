@@ -1,9 +1,21 @@
+// import User from "../models/User.js";
+// import Booking from "../models/Booking.js";
+// import Lesson from "../models/Lesson.js";
+// import Payment from "../models/Payment.js";
+// import SupportTicket from "../models/SupportTicket.js";
+// import TeacherProfile from "../models/TeacherProfile.js";
+// import asyncHandler from "../utils/asyncHandler.js";
+// import sendResponse from "../utils/ApiResponse.js";
+
 import User from "../models/User.js";
 import Booking from "../models/Booking.js";
 import Lesson from "../models/Lesson.js";
 import Payment from "../models/Payment.js";
 import SupportTicket from "../models/SupportTicket.js";
 import TeacherProfile from "../models/TeacherProfile.js";
+import StudentProfile from "../models/StudentProfile.js";
+import Document from "../models/Document.js";
+
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/ApiResponse.js";
 
@@ -96,6 +108,7 @@ export const getUsers = asyncHandler(async (req, res) => {
 
   if (search.trim()) {
     const keyword = search.trim();
+
     filter.$or = [
       { name: { $regex: keyword, $options: "i" } },
       { email: { $regex: keyword, $options: "i" } },
@@ -107,6 +120,7 @@ export const getUsers = asyncHandler(async (req, res) => {
     if (!allowedRoles.includes(role)) {
       return fail(res, 400, "Invalid role filter.");
     }
+
     filter.role = role;
   }
 
@@ -114,23 +128,67 @@ export const getUsers = asyncHandler(async (req, res) => {
     if (!allowedStatuses.includes(status)) {
       return fail(res, 400, "Invalid status filter.");
     }
+
     filter.status = status;
   }
 
-  const [users, total] = await Promise.all([
+  const [users, filteredTotal, statusSummary] = await Promise.all([
     User.find(filter)
+      // avatar is included because only password is excluded
       .select("-password")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNumber),
+
     User.countDocuments(filter),
+
+    User.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          active: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "active"] }, 1, 0],
+            },
+          },
+          inactive: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "inactive"] }, 1, 0],
+            },
+          },
+          blocked: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "blocked"] }, 1, 0],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          total: 1,
+          active: 1,
+          inactive: 1,
+          blocked: 1,
+        },
+      },
+    ]),
   ]);
+
+  const stats = statusSummary[0] || {
+    total: 0,
+    active: 0,
+    inactive: 0,
+    blocked: 0,
+  };
 
   return sendResponse(res, 200, "Users fetched successfully.", users, {
     page: pageNumber,
     limit: limitNumber,
-    total,
-    totalPages: Math.ceil(total / limitNumber) || 1,
+    total: filteredTotal,
+    totalPages: Math.ceil(filteredTotal / limitNumber) || 1,
+    stats,
   });
 });
 
@@ -138,13 +196,36 @@ export const getUsers = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/users/:id
 // @access  Admin
 export const getUserById = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id).select("-password");
+  const user = await User.findById(req.params.id)
+    .select("-password -resetPasswordToken -resetPasswordExpire")
+    .lean();
 
   if (!user) {
     return fail(res, 404, "User not found.");
   }
 
-  return sendResponse(res, 200, "User fetched successfully.", user);
+  const profileQuery =
+    user.role === "teacher"
+      ? TeacherProfile.findOne({ user: user._id }).lean()
+      : user.role === "student"
+        ? StudentProfile.findOne({ user: user._id }).lean()
+        : Promise.resolve(null);
+
+  const [profile, documents] = await Promise.all([
+    profileQuery,
+    Document.find({ user: user._id })
+      .select(
+        "title requirementKey type documentSide originalFileName fileUrl fileType fileSize status rejectionReason version uploadedAt reviewedAt createdAt updatedAt",
+      )
+      .sort({ createdAt: -1 })
+      .lean(),
+  ]);
+
+  return sendResponse(res, 200, "User fetched successfully.", {
+    ...user,
+    profile,
+    documents,
+  });
 });
 
 // @desc    Update user status
