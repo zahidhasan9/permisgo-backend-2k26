@@ -246,6 +246,7 @@ const bookingSchema = new mongoose.Schema(
         "rejected",
         "cancelled",
         "completed",
+        "no_show",
         "expired",
       ],
       default: "pending",

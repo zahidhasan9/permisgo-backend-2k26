@@ -8,9 +8,14 @@ const teacherProfileSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    bio: String,
-    experienceYears: { type: Number, default: 0 },
-    qualification: String,
+    bio: { type: String, trim: true, maxlength: 500, default: "" },
+    experienceYears: { type: Number, min: 0, max: 80, default: 0 },
+    qualification: {
+      type: String,
+      trim: true,
+      maxlength: 200,
+      default: "",
+    },
     verificationStatus: {
       type: String,
       enum: ["pending", "verified", "rejected"],
@@ -22,7 +27,7 @@ const teacherProfileSchema = new mongoose.Schema(
         enum: ["manual", "automatic", "code", "accompanied", "accelerated"],
       },
     ],
-    hourlyRate: { type: Number, default: 0 },
+    hourlyRate: { type: Number, min: 0, max: 10000, default: 0 },
     rating: {
       average: { type: Number, default: 0 },
       totalReviews: { type: Number, default: 0 },

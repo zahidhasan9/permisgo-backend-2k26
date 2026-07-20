@@ -69,6 +69,8 @@ import express from "express";
 
 import {
   getDashboard,
+  getMyStudentDetails,
+  getMyStudents,
   getProfile,
   getPublicTeachers,
   updateProfile,
@@ -115,6 +117,8 @@ router.get(
 router.use(protect, authorize("teacher"));
 
 router.get("/dashboard", getDashboard);
+router.get("/students", getMyStudents);
+router.get("/students/:studentId", getMyStudentDetails);
 
 router.get("/profile", getProfile);
 router.patch("/profile", updateProfile);

@@ -853,6 +853,7 @@ const BOOKING_STATUSES = [
   "rejected",
   "cancelled",
   "completed",
+  "no_show",
   "expired",
 ];
 
@@ -1314,13 +1315,52 @@ export const getBookings = asyncHandler(async (req, res) => {
     filter.status = req.query.status;
   }
 
+  if (req.query.dateFrom || req.query.dateTo) {
+    filter.bookingDate = {};
+    if (req.query.dateFrom) {
+      filter.bookingDate.$gte = getUtcDayRange(req.query.dateFrom).start;
+    }
+    if (req.query.dateTo) {
+      filter.bookingDate.$lte = getUtcDayRange(req.query.dateTo).end;
+    }
+  }
+
   await expirePendingBookings(filter);
 
-  const bookings = await populateBooking(
-    Booking.find(filter).sort({ bookingDate: -1, startTime: -1 }),
-  );
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
+  const skip = (page - 1) * limit;
+  const roleFilter = {};
+  if (req.user.role === "student") roleFilter.student = req.user._id;
+  if (req.user.role === "teacher") roleFilter.teacher = req.user._id;
 
-  sendResponse(res, 200, "Bookings fetched successfully.", bookings);
+  const [bookings, total, statusRows] = await Promise.all([
+    populateBooking(
+      Booking.find(filter)
+        .sort({ bookingDate: -1, startTime: -1, _id: -1 })
+        .skip(skip)
+        .limit(limit),
+    ),
+    Booking.countDocuments(filter),
+    Booking.aggregate([
+      { $match: roleFilter },
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]),
+  ]);
+
+  const statusCounts = statusRows.reduce(
+    (result, row) => ({ ...result, [row._id]: row.count }),
+    {},
+  );
+  statusCounts.all = statusRows.reduce((sum, row) => sum + row.count, 0);
+
+  sendResponse(res, 200, "Bookings fetched successfully.", bookings, {
+    page,
+    limit,
+    total,
+    totalPages: Math.max(Math.ceil(total / limit), 1),
+    statusCounts,
+  });
 });
 
 export const getBooking = asyncHandler(async (req, res) => {
@@ -1589,7 +1629,7 @@ export const cancelBooking = asyncHandler(async (req, res) => {
       }
 
       if (
-        ["cancelled", "rejected", "completed", "expired"].includes(
+        ["cancelled", "rejected", "completed", "no_show", "expired"].includes(
           booking.status,
         )
       ) {

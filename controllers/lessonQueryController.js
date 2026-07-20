@@ -17,6 +17,11 @@ const LESSON_STATUSES = [
 
 const REQUEST_TYPES = ["all", "reschedule", "cancellation"];
 const REQUEST_STATUSES = ["all", "none", "pending", "approved", "rejected"];
+const LESSON_VIEWS = {
+  action: ["in_progress", "awaiting_confirmation"],
+  upcoming: ["scheduled"],
+  history: ["completed", "cancelled", "no_show"],
+};
 
 const escapeRegex = (value = "") =>
   String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -165,8 +170,21 @@ export const getLessonsPaginated = asyncHandler(async (req, res) => {
   const filter = getRoleFilter(req.user);
 
   const status = req.query.status || "all";
+  const view = req.query.view || "";
 
-  if (status !== "all") {
+  if (view) {
+    if (!Object.hasOwn(LESSON_VIEWS, view)) {
+      throw new ApiError(400, "Invalid lesson view.");
+    }
+    if (status !== "all") {
+      if (!LESSON_VIEWS[view].includes(status)) {
+        throw new ApiError(400, "Status does not belong to this lesson view.");
+      }
+      filter.status = status;
+    } else {
+      filter.status = { $in: LESSON_VIEWS[view] };
+    }
+  } else if (status !== "all") {
     if (!LESSON_STATUSES.includes(status)) {
       throw new ApiError(400, "Invalid lesson status filter.");
     }

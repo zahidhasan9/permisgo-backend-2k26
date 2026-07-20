@@ -1,9 +1,12 @@
+import mongoose from "mongoose";
 import TeacherLocation from "../models/TeacherLocation.js";
 import TeacherProfile from "../models/TeacherProfile.js";
 import TeacherVehicle from "../models/TeacherVehicle.js";
 import Booking from "../models/Booking.js";
 import Lesson from "../models/Lesson.js";
-import "../models/Document.js";
+import Document from "../models/Document.js";
+import TeacherAvailability from "../models/TeacherAvailability.js";
+import User from "../models/User.js";
 
 import ApiError from "../utils/ApiError.js";
 import sendResponse from "../utils/ApiResponse.js";
@@ -52,35 +55,132 @@ export const getPublicTeachers = asyncHandler(async (req, res) => {
 });
 
 export const getDashboard = asyncHandler(async (req, res) => {
-  const [profile, lessons, bookings, vehicles, locations] = await Promise.all([
-    TeacherProfile.findOne({
-      user: req.user._id,
-    }),
+  const now = new Date();
+  const todayStart = new Date(now);
+  const todayEnd = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  todayEnd.setHours(23, 59, 59, 999);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
+  const [
+    profile,
+    todayLessons,
+    pendingBookings,
+    todayLessonCount,
+    pendingBookingCount,
+    upcomingCount,
+    completedCount,
+    actionCount,
+    activeStudents,
+    monthCompletedLessons,
+    approvedVehicles,
+    activeLocations,
+    availability,
+    approvedDocuments,
+  ] = await Promise.all([
+    TeacherProfile.findOne({ user: req.user._id }).populate(
+      "user",
+      "name email phone avatar",
+    ),
+    Lesson.find({
+      teacher: req.user._id,
+      lessonDate: { $gte: todayStart, $lte: todayEnd },
+      status: { $in: ["scheduled", "in_progress", "awaiting_confirmation"] },
+    })
+      .sort({ startTime: 1 })
+      .limit(5)
+      .populate("student", "name email phone avatar")
+      .populate("booking"),
+    Booking.find({ teacher: req.user._id, status: "pending" })
+      .sort({ bookingDate: 1, startTime: 1 })
+      .limit(5)
+      .populate("student", "name email phone avatar"),
     Lesson.countDocuments({
       teacher: req.user._id,
+      lessonDate: { $gte: todayStart, $lte: todayEnd },
+      status: { $in: ["scheduled", "in_progress", "awaiting_confirmation"] },
     }),
-
-    Booking.countDocuments({
+    Booking.countDocuments({ teacher: req.user._id, status: "pending" }),
+    Lesson.countDocuments({
       teacher: req.user._id,
+      status: "scheduled",
+      lessonDate: { $gte: todayStart },
     }),
-
+    Lesson.countDocuments({ teacher: req.user._id, status: "completed" }),
+    Lesson.countDocuments({
+      teacher: req.user._id,
+      status: { $in: ["in_progress", "awaiting_confirmation"] },
+    }),
+    Lesson.distinct("student", {
+      teacher: req.user._id,
+      status: { $in: ["scheduled", "in_progress", "awaiting_confirmation"] },
+    }),
+    Lesson.find({
+      teacher: req.user._id,
+      status: "completed",
+      completedAt: { $gte: monthStart, $lte: now },
+    }).populate("booking", "pricingSnapshot"),
     TeacherVehicle.countDocuments({
       teacher: req.user._id,
+      approvalStatus: "approved",
+      status: "active",
     }),
-
     TeacherLocation.countDocuments({
       teacher: req.user._id,
+      status: "active",
+    }),
+    TeacherAvailability.findOne({ teacher: req.user._id }).lean(),
+    Document.countDocuments({
+      user: req.user._id,
+      status: "approved",
     }),
   ]);
+
+  const monthlyEarnings = monthCompletedLessons.reduce(
+    (sum, lesson) =>
+      sum + Number(lesson.booking?.pricingSnapshot?.subtotal || 0),
+    0,
+  );
+  const readiness = {
+    profile: Boolean(
+      profile?.user?.name &&
+        profile?.user?.phone &&
+        profile?.qualification &&
+        profile?.bio,
+    ),
+    verified: profile?.verificationStatus === "verified",
+    vehicle: approvedVehicles > 0,
+    location: activeLocations > 0,
+    availability: Boolean(
+      availability?.weeklySchedule?.some(
+        (day) => day.enabled && day.slots?.length,
+      ),
+    ),
+    documents: approvedDocuments > 0,
+  };
+  const completedReadiness = Object.values(readiness).filter(Boolean).length;
 
   sendResponse(res, 200, "Teacher dashboard fetched successfully.", {
     profile,
     stats: {
-      lessons,
-      bookings,
-      vehicles,
-      locations,
+      todayLessons: todayLessonCount,
+      pendingBookings: pendingBookingCount,
+      upcomingLessons: upcomingCount,
+      completedLessons: completedCount,
+      actionRequired: actionCount,
+      activeStudents: activeStudents.length,
+      monthlyEarnings: Number(monthlyEarnings.toFixed(2)),
+      rating: profile?.rating?.average || 0,
+    },
+    todayLessons,
+    pendingBookings,
+    readiness: {
+      items: readiness,
+      completed: completedReadiness,
+      total: Object.keys(readiness).length,
+      percentage: Math.round(
+        (completedReadiness / Object.keys(readiness).length) * 100,
+      ),
     },
   });
 });
@@ -150,13 +250,36 @@ export const updateProfile = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Lesson types must be an array.");
   }
 
+  if (updateData.lessonTypes !== undefined) {
+    const allowedLessonTypes = [
+      "manual",
+      "automatic",
+      "code",
+      "accompanied",
+      "accelerated",
+    ];
+    updateData.lessonTypes = [
+      ...new Set(updateData.lessonTypes.map((item) => String(item).trim())),
+    ];
+    if (
+      updateData.lessonTypes.length > allowedLessonTypes.length ||
+      updateData.lessonTypes.some((item) => !allowedLessonTypes.includes(item))
+    ) {
+      throw new ApiError(400, "One or more lesson types are invalid.");
+    }
+  }
+
   if (updateData.experienceYears !== undefined) {
     const experienceYears = Number(updateData.experienceYears);
 
-    if (Number.isNaN(experienceYears) || experienceYears < 0) {
+    if (
+      !Number.isFinite(experienceYears) ||
+      experienceYears < 0 ||
+      experienceYears > 80
+    ) {
       throw new ApiError(
         400,
-        "Experience years must be a valid positive number.",
+        "Experience years must be between 0 and 80.",
       );
     }
 
@@ -166,11 +289,31 @@ export const updateProfile = asyncHandler(async (req, res) => {
   if (updateData.hourlyRate !== undefined) {
     const hourlyRate = Number(updateData.hourlyRate);
 
-    if (Number.isNaN(hourlyRate) || hourlyRate < 0) {
-      throw new ApiError(400, "Hourly rate must be a valid positive number.");
+    if (!Number.isFinite(hourlyRate) || hourlyRate < 0 || hourlyRate > 10000) {
+      throw new ApiError(400, "Hourly rate must be between 0 and 10000.");
     }
 
     updateData.hourlyRate = hourlyRate;
+  }
+
+  if (updateData.availabilityStatus !== undefined) {
+    if (!["available", "unavailable"].includes(updateData.availabilityStatus)) {
+      throw new ApiError(400, "Invalid booking availability status.");
+    }
+  }
+
+  if (updateData.qualification !== undefined) {
+    updateData.qualification = String(updateData.qualification).trim();
+    if (updateData.qualification.length > 200) {
+      throw new ApiError(400, "Qualification cannot exceed 200 characters.");
+    }
+  }
+
+  if (updateData.bio !== undefined) {
+    updateData.bio = String(updateData.bio).trim();
+    if (updateData.bio.length > 500) {
+      throw new ApiError(400, "Teacher bio cannot exceed 500 characters.");
+    }
   }
 
   const profile = await TeacherProfile.findOneAndUpdate(
@@ -210,6 +353,229 @@ export const updateProfile = asyncHandler(async (req, res) => {
     .populate("vehicles locations documents");
 
   sendResponse(res, 200, "Teacher profile updated successfully.", profile);
+});
+
+export const getMyStudents = asyncHandler(async (req, res) => {
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+  const search = String(req.query.search || "").trim().slice(0, 80);
+
+  const [lessonStudentIds, bookingStudentIds] = await Promise.all([
+    Lesson.distinct("student", { teacher: req.user._id }),
+    Booking.distinct("student", { teacher: req.user._id }),
+  ]);
+  const studentIds = [
+    ...new Set(
+      [...lessonStudentIds, ...bookingStudentIds].map((value) => String(value)),
+    ),
+  ].map((value) => new mongoose.Types.ObjectId(value));
+
+  const userFilter = { _id: { $in: studentIds }, role: "student" };
+  if (search) {
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(escaped, "i");
+    userFilter.$or = [{ name: regex }, { email: regex }, { phone: regex }];
+  }
+  ["name", "email", "phone"].forEach((field) => {
+    const value = String(req.query[field] || "").trim().slice(0, 80);
+    if (value) {
+      const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      userFilter[field] = new RegExp(escaped, "i");
+    }
+  });
+
+  const [users, total] = await Promise.all([
+    User.find(userFilter)
+      .select("name email phone avatar status")
+      .sort({ name: 1, _id: 1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(),
+    User.countDocuments(userFilter),
+  ]);
+  const pageIds = users.map((user) => user._id);
+
+  const [lessonRows, pendingRows, latestBookings] = await Promise.all([
+    Lesson.aggregate([
+      { $match: { teacher: req.user._id, student: { $in: pageIds } } },
+      {
+        $group: {
+          _id: "$student",
+          totalLessons: {
+            $sum: {
+              $cond: [{ $in: ["$status", ["cancelled", "no_show"]] }, 0, 1],
+            },
+          },
+          completedLessons: {
+            $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] },
+          },
+          activeLessons: {
+            $sum: {
+              $cond: [
+                {
+                  $in: [
+                    "$status",
+                    ["scheduled", "in_progress", "awaiting_confirmation"],
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          noShows: { $sum: { $cond: [{ $eq: ["$status", "no_show"] }, 1, 0] } },
+          lastLessonAt: { $max: "$lessonDate" },
+        },
+      },
+    ]),
+    Booking.aggregate([
+      {
+        $match: {
+          teacher: req.user._id,
+          student: { $in: pageIds },
+          status: "pending",
+        },
+      },
+      { $group: { _id: "$student", count: { $sum: 1 } } },
+    ]),
+    Booking.find({ teacher: req.user._id, student: { $in: pageIds } })
+      .sort({ bookingDate: -1, createdAt: -1 })
+      .populate("offer", "title")
+      .lean(),
+  ]);
+
+  const lessonMap = new Map(lessonRows.map((row) => [String(row._id), row]));
+  const pendingMap = new Map(pendingRows.map((row) => [String(row._id), row.count]));
+  const bookingMap = new Map();
+  latestBookings.forEach((booking) => {
+    const key = String(booking.student);
+    if (!bookingMap.has(key)) bookingMap.set(key, booking);
+  });
+
+  const students = users.map((user) => {
+    const key = String(user._id);
+    const row = lessonMap.get(key) || {};
+    const totalLessons = Number(row.totalLessons || 0);
+    const completedLessons = Number(row.completedLessons || 0);
+    const activeLessons = Number(row.activeLessons || 0);
+    const pendingBookings = Number(pendingMap.get(key) || 0);
+    const latestBooking = bookingMap.get(key);
+    const status =
+      activeLessons > 0
+        ? "active"
+        : pendingBookings > 0
+          ? "pending"
+          : totalLessons > 0 && completedLessons === totalLessons
+            ? "completed"
+            : "inactive";
+
+    return {
+      ...user,
+      totalLessons,
+      completedLessons,
+      activeLessons,
+      pendingBookings,
+      noShows: Number(row.noShows || 0),
+      lastLessonAt: row.lastLessonAt || null,
+      progress: totalLessons
+        ? Math.round((completedLessons / totalLessons) * 100)
+        : 0,
+      status,
+      course:
+        latestBooking?.offer?.title ||
+        (latestBooking?.vehicleType
+          ? `${latestBooking.vehicleType} driving`
+          : "Driving lessons"),
+    };
+  });
+
+  sendResponse(res, 200, "Teacher students fetched successfully.", students, {
+    page,
+    limit,
+    total,
+    totalPages: Math.max(Math.ceil(total / limit), 1),
+  });
+});
+
+export const getMyStudentDetails = asyncHandler(async (req, res) => {
+  const { studentId } = req.params;
+  if (!mongoose.isValidObjectId(studentId)) {
+    throw new ApiError(400, "Invalid student ID.");
+  }
+
+  const accessFilter = { teacher: req.user._id, student: studentId };
+  const [hasLesson, hasBooking] = await Promise.all([
+    Lesson.exists(accessFilter),
+    Booking.exists(accessFilter),
+  ]);
+  if (!hasLesson && !hasBooking) {
+    throw new ApiError(403, "You do not have access to this student.");
+  }
+
+  const student = await User.findOne({ _id: studentId, role: "student" })
+    .select("name email phone avatar status")
+    .lean();
+  if (!student) throw new ApiError(404, "Student not found.");
+
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+  const [statusRows, lessons, total] = await Promise.all([
+    Lesson.aggregate([
+      {
+        $match: {
+          teacher: req.user._id,
+          student: new mongoose.Types.ObjectId(studentId),
+        },
+      },
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]),
+    Lesson.find(accessFilter)
+      .sort({ lessonDate: -1, startTime: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("booking", "vehicleType location offer")
+      .lean(),
+    Lesson.countDocuments(accessFilter),
+  ]);
+
+  const counts = Object.fromEntries(
+    statusRows.map((row) => [row._id, row.count]),
+  );
+  const completed = Number(counts.completed || 0);
+  const assessableTotal = total - Number(counts.cancelled || 0) - Number(counts.no_show || 0);
+  const latestReport = await Lesson.findOne({
+    ...accessFilter,
+    "lessonProgress.teacherSubmittedAt": { $exists: true },
+  })
+    .sort({ "lessonProgress.teacherSubmittedAt": -1 })
+    .select("lessonProgress")
+    .lean();
+
+  sendResponse(
+    res,
+    200,
+    "Teacher student details fetched successfully.",
+    {
+      student,
+      stats: {
+        totalLessons: total,
+        completedLessons: completed,
+        upcomingLessons: Number(counts.scheduled || 0),
+        noShows: Number(counts.no_show || 0),
+        progress: assessableTotal
+          ? Math.round((completed / assessableTotal) * 100)
+          : 0,
+      },
+      latestProgress: latestReport?.lessonProgress || null,
+      lessons,
+    },
+    {
+      page,
+      limit,
+      total,
+      totalPages: Math.max(Math.ceil(total / limit), 1),
+    },
+  );
 });
 
 // export const addVehicle = asyncHandler(async (req, res) => {

@@ -134,3 +134,28 @@ Recommended build order:
 ## Notes
 
 This is a professional starter foundation. Payment gateway, exam API, SMS, live chat, and production file storage can be connected later.
+
+## Lesson lifecycle policy
+
+The lesson endpoints enforce these production defaults. Override them in `.env`
+when the business policy requires different values:
+
+```txt
+# Minutes before a new or rescheduled lesson must start.
+LESSON_MIN_BOOKING_LEAD_MINUTES=60
+
+# Earliest and latest window in which a teacher can start a lesson.
+LESSON_START_EARLY_MINUTES=15
+LESSON_START_LATE_MINUTES=60
+
+# Reschedule/cancellation request cutoff and no-show grace period.
+LESSON_CHANGE_CUTOFF_MINUTES=1440
+LESSON_NO_SHOW_GRACE_MINUTES=15
+
+# Offset of the lesson business timezone from UTC, in minutes.
+# Example: UTC+2 = 120. Set this explicitly in production.
+LESSON_TIMEZONE_OFFSET_MINUTES=0
+```
+
+MongoDB transactions are used when a teacher accepts a booking. Production
+MongoDB must therefore run as a replica set (MongoDB Atlas already does).

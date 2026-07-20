@@ -847,8 +847,63 @@ const ACTIVE_LESSON_STATUSES = [
   "awaiting_confirmation",
 ];
 
-const VEHICLE_TYPES = ["manual", "automatic"];
+const VEHICLE_TYPES = ["manual", "automatic", "electric"];
 const ATTENDANCE_STATUSES = ["present", "absent", "disputed"];
+
+const getPolicyMinutes = (name, fallback) => {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) && value >= 0 ? value : fallback;
+};
+
+const getScheduledDateTime = (lessonDate, time) => {
+  const date = new Date(lessonDate);
+  const minutes = timeToMinutes(time);
+  const timezoneOffset = Number(
+    process.env.LESSON_TIMEZONE_OFFSET_MINUTES || 0,
+  );
+  const safeOffset = Number.isFinite(timezoneOffset) ? timezoneOffset : 0;
+
+  return new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      Math.floor(minutes / 60),
+      minutes % 60,
+    ) -
+      safeOffset * 60 * 1000,
+  );
+};
+
+const ensureScheduleHasLeadTime = (lessonDate, startTime) => {
+  const minimumLeadMinutes = getPolicyMinutes(
+    "LESSON_MIN_BOOKING_LEAD_MINUTES",
+    60,
+  );
+  const startsAt = getScheduledDateTime(lessonDate, startTime);
+
+  if (startsAt.getTime() < Date.now() + minimumLeadMinutes * 60 * 1000) {
+    throw new ApiError(
+      400,
+      `Lesson must be scheduled at least ${minimumLeadMinutes} minutes in advance.`,
+    );
+  }
+};
+
+const ensureChangeWindowIsOpen = (lesson, action) => {
+  const cutoffMinutes = getPolicyMinutes(
+    "LESSON_CHANGE_CUTOFF_MINUTES",
+    24 * 60,
+  );
+  const startsAt = getScheduledDateTime(lesson.lessonDate, lesson.startTime);
+
+  if (startsAt.getTime() - Date.now() < cutoffMinutes * 60 * 1000) {
+    throw new ApiError(
+      400,
+      `${action} requests must be submitted at least ${cutoffMinutes} minutes before the lesson.`,
+    );
+  }
+};
 
 const getId = (value) => String(value?._id || value || "");
 
@@ -1191,6 +1246,7 @@ export const createLesson = asyncHandler(async (req, res) => {
 
   const { date } = getDayRange(lessonDate);
   const duration = calculateDuration(startTime, endTime);
+  ensureScheduleHasLeadTime(date, startTime);
 
   await ensureNoScheduleConflict({
     student: selectedStudent._id,
@@ -1301,6 +1357,7 @@ export const updateLesson = asyncHandler(async (req, res) => {
 
   const { date } = getDayRange(lessonDate);
   const duration = calculateDuration(startTime, endTime);
+  ensureScheduleHasLeadTime(date, startTime);
 
   await ensureNoScheduleConflict({
     student: lesson.student,
@@ -1377,6 +1434,28 @@ export const startLesson = asyncHandler(async (req, res) => {
 
   if (lesson.status !== "scheduled") {
     throw new ApiError(400, "Only a scheduled lesson can be started.");
+  }
+
+  if (req.user.role !== "admin") {
+    const startsAt = getScheduledDateTime(lesson.lessonDate, lesson.startTime);
+    const endsAt = getScheduledDateTime(lesson.lessonDate, lesson.endTime);
+    const earlyMinutes = getPolicyMinutes("LESSON_START_EARLY_MINUTES", 15);
+    const lateMinutes = getPolicyMinutes("LESSON_START_LATE_MINUTES", 60);
+    const now = Date.now();
+
+    if (now < startsAt.getTime() - earlyMinutes * 60 * 1000) {
+      throw new ApiError(
+        400,
+        `Lesson can only be started ${earlyMinutes} minutes before its scheduled time.`,
+      );
+    }
+
+    if (now > endsAt.getTime() + lateMinutes * 60 * 1000) {
+      throw new ApiError(
+        400,
+        "The start window has passed. Ask an admin to review this lesson.",
+      );
+    }
   }
 
   lesson.status = "in_progress";
@@ -1498,7 +1577,26 @@ export const completeLesson = asyncHandler(async (req, res) => {
     throw new ApiError(400, "This lesson cannot be completed.");
   }
 
+  if (!isAdmin && lesson.attendance?.teacherStatus !== "present") {
+    throw new ApiError(
+      400,
+      "Confirm your attendance before submitting the lesson report.",
+    );
+  }
+
   const progress = req.body.lessonProgress || req.body || {};
+
+  if (
+    !isAdmin &&
+    (!Array.isArray(progress.skillsCovered) ||
+      !cleanStringArray(progress.skillsCovered).length ||
+      !String(progress.teacherNotes || "").trim())
+  ) {
+    throw new ApiError(
+      400,
+      "Teacher notes and at least one covered skill are required.",
+    );
+  }
 
   if (Array.isArray(progress.skillsCovered)) {
     lesson.lessonProgress.skillsCovered = cleanStringArray(
@@ -1543,10 +1641,6 @@ export const completeLesson = asyncHandler(async (req, res) => {
   }
 
   lesson.lessonProgress.teacherSubmittedAt = new Date();
-  lesson.attendance.teacherStatus = "present";
-  lesson.attendance.teacherConfirmed = true;
-  lesson.attendance.teacherConfirmedAt =
-    lesson.attendance.teacherConfirmedAt || new Date();
 
   const finalizeNow = isAdmin && req.body.finalize === true;
   lesson.status = finalizeNow ? "completed" : "awaiting_confirmation";
@@ -1600,16 +1694,16 @@ export const confirmLessonCompletion = asyncHandler(async (req, res) => {
     throw new ApiError(400, "This lesson is not waiting for confirmation.");
   }
 
+  if (!isAdmin && lesson.attendance?.studentStatus !== "present") {
+    throw new ApiError(
+      400,
+      "Confirm your attendance before confirming lesson completion.",
+    );
+  }
+
   lesson.status = "completed";
   lesson.completedAt = new Date();
   lesson.lessonProgress.studentConfirmedAt = new Date();
-
-  if (isStudent) {
-    lesson.attendance.studentStatus = "present";
-    lesson.attendance.studentConfirmed = true;
-    lesson.attendance.studentConfirmedAt =
-      lesson.attendance.studentConfirmedAt || new Date();
-  }
 
   addHistory(lesson, "lesson_completion_confirmed", req.user);
   await lesson.save();
@@ -1689,6 +1783,8 @@ export const requestReschedule = asyncHandler(async (req, res) => {
     throw new ApiError(400, "A reschedule request is already pending.");
   }
 
+  ensureChangeWindowIsOpen(lesson, "Reschedule");
+
   const lessonDate = req.body.lessonDate || req.body.requestedDate;
   const startTime = req.body.startTime || req.body.requestedStartTime;
   const endTime = req.body.endTime || req.body.requestedEndTime;
@@ -1702,6 +1798,7 @@ export const requestReschedule = asyncHandler(async (req, res) => {
 
   const { date } = getDayRange(lessonDate);
   calculateDuration(startTime, endTime);
+  ensureScheduleHasLeadTime(date, startTime);
 
   await ensureNoScheduleConflict({
     student: lesson.student,
@@ -1826,6 +1923,8 @@ export const requestCancellation = asyncHandler(async (req, res) => {
   if (lesson.cancellationRequest?.status === "pending") {
     throw new ApiError(400, "A cancellation request is already pending.");
   }
+
+  ensureChangeWindowIsOpen(lesson, "Cancellation");
 
   const reason = String(req.body.reason || "").trim();
   if (!reason) throw new ApiError(400, "Cancellation reason is required.");
@@ -2002,6 +2101,17 @@ export const markNoShow = asyncHandler(async (req, res) => {
     throw new ApiError(400, "No-show cannot be recorded for this lesson.");
   }
 
+  if (!isAdmin) {
+    const startsAt = getScheduledDateTime(lesson.lessonDate, lesson.startTime);
+    const graceMinutes = getPolicyMinutes("LESSON_NO_SHOW_GRACE_MINUTES", 15);
+    if (Date.now() < startsAt.getTime() + graceMinutes * 60 * 1000) {
+      throw new ApiError(
+        400,
+        `No-show can only be recorded ${graceMinutes} minutes after the scheduled start time.`,
+      );
+    }
+  }
+
   const participant = req.body.participant || "student";
   if (!["student", "teacher"].includes(participant)) {
     throw new ApiError(400, "Participant must be student or teacher.");
@@ -2021,7 +2131,7 @@ export const markNoShow = asyncHandler(async (req, res) => {
   addHistory(lesson, "no_show_recorded", req.user, `${participant}: ${reason}`);
   await lesson.save();
 
-  await syncBookingFromLesson(lesson, { status: "cancelled" });
+  await syncBookingFromLesson(lesson, { status: "no_show" });
 
   const updatedLesson = await populateLesson(Lesson.findById(lesson._id));
   return sendResponse(

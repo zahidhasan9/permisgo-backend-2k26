@@ -61,6 +61,37 @@ const normalizeWeeklySchedule = (weeklySchedule = []) => {
   return Array.from({ length: 7 }, (_, dayOfWeek) => dayMap.get(dayOfWeek));
 };
 
+const normalizeDateExceptions = (dateExceptions = []) => {
+  if (!Array.isArray(dateExceptions)) {
+    throw new ApiError(400, "Date exceptions must be an array.");
+  }
+  if (dateExceptions.length > 366) {
+    throw new ApiError(400, "A maximum of 366 date exceptions is allowed.");
+  }
+
+  const dates = new Set();
+  return dateExceptions.map((exception) => {
+    const date = new Date(exception.date);
+    if (Number.isNaN(date.getTime())) {
+      throw new ApiError(400, "A date exception contains an invalid date.");
+    }
+    date.setUTCHours(0, 0, 0, 0);
+    const key = date.toISOString();
+    if (dates.has(key)) {
+      throw new ApiError(400, "Date exceptions cannot contain duplicate dates.");
+    }
+    dates.add(key);
+
+    const unavailable = Boolean(exception.unavailable);
+    return {
+      date,
+      unavailable,
+      slots: unavailable ? [] : validateTimeRanges(exception.slots || []),
+      note: String(exception.note || "").trim().slice(0, 200),
+    };
+  });
+};
+
 export const getMyAvailability = asyncHandler(async (req, res) => {
   let availability = await TeacherAvailability.findOne({
     teacher: req.user._id,
@@ -87,6 +118,9 @@ export const updateMyAvailability = asyncHandler(async (req, res) => {
   const lessonDurationOptions = Array.isArray(req.body.lessonDurationOptions)
     ? [...new Set(req.body.lessonDurationOptions.map(Number))]
     : [30, 60, 90, 120];
+  const dateExceptions = normalizeDateExceptions(
+    req.body.dateExceptions || [],
+  );
 
   if (bufferMinutes < 0 || bufferMinutes > 120) {
     throw new ApiError(400, "Buffer time must be between 0 and 120 minutes.");
@@ -113,6 +147,7 @@ export const updateMyAvailability = asyncHandler(async (req, res) => {
       $set: {
         timezone: String(req.body.timezone || "Europe/Paris").trim(),
         weeklySchedule,
+        dateExceptions,
         bufferMinutes,
         slotIntervalMinutes,
         lessonDurationOptions,
