@@ -11,8 +11,29 @@ import User from "../models/User.js";
 import ApiError from "../utils/ApiError.js";
 import sendResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import {
+  ACTIVE_BOOKING_STATUSES,
+  getUtcDayRange,
+  hasOccupiedConflict,
+  isTimeInsideWorkingSlots,
+  normalizeTime,
+} from "../utils/bookingAvailability.js";
 
 export const getPublicTeachers = asyncHandler(async (req, res) => {
+  const vehicleType = ["manual", "automatic", "electric"].includes(
+    req.query.vehicleType,
+  )
+    ? req.query.vehicleType
+    : "";
+  const hasSlotFilter = req.query.date && req.query.startTime && req.query.endTime;
+  const startTime = hasSlotFilter
+    ? normalizeTime(req.query.startTime, "Start time")
+    : "";
+  const endTime = hasSlotFilter
+    ? normalizeTime(req.query.endTime, "End time")
+    : "";
+  const dateRange = hasSlotFilter ? getUtcDayRange(req.query.date) : null;
+
   const teachers = await TeacherProfile.find({
     verificationStatus: "verified",
     availabilityStatus: "available",
@@ -29,8 +50,11 @@ export const getPublicTeachers = asyncHandler(async (req, res) => {
       path: "vehicles",
       match: {
         status: "active",
+        approvalStatus: "approved",
+        ...(vehicleType ? { vehicleType } : {}),
       },
-      select: "vehicleName vehicleType brand model registrationNumber status",
+      select:
+        "vehicleName vehicleType brand model modelYear vehicleImage isDefault approvalStatus status",
     })
     .populate({
       path: "locations",
@@ -42,9 +66,52 @@ export const getPublicTeachers = asyncHandler(async (req, res) => {
     .sort({
       "rating.average": -1,
       experienceYears: -1,
-    });
+    })
+    .lean();
 
-  const availableTeachers = teachers.filter((teacher) => teacher.user);
+  let availableTeachers = teachers.filter(
+    (teacher) => teacher.user && teacher.vehicles?.length && teacher.locations?.length,
+  );
+
+  if (dateRange && availableTeachers.length) {
+    const teacherIds = availableTeachers.map((teacher) => teacher.user._id);
+    const [availabilities, bookings] = await Promise.all([
+      TeacherAvailability.find({ teacher: { $in: teacherIds } }).lean(),
+      Booking.find({
+        teacher: { $in: teacherIds },
+        bookingDate: { $gte: dateRange.start, $lte: dateRange.end },
+        status: { $in: ACTIVE_BOOKING_STATUSES },
+      })
+        .select("teacher startTime endTime")
+        .lean(),
+    ]);
+    const availabilityByTeacher = new Map(
+      availabilities.map((item) => [String(item.teacher), item]),
+    );
+    const bookingsByTeacher = new Map();
+    bookings.forEach((booking) => {
+      const key = String(booking.teacher);
+      bookingsByTeacher.set(key, [...(bookingsByTeacher.get(key) || []), booking]);
+    });
+    availableTeachers = availableTeachers.filter((teacher) => {
+      const teacherId = String(teacher.user._id);
+      const availability = availabilityByTeacher.get(teacherId);
+      return (
+        isTimeInsideWorkingSlots({
+          availability,
+          bookingDate: dateRange.date,
+          startTime,
+          endTime,
+        }) &&
+        !hasOccupiedConflict({
+          startTime,
+          endTime,
+          occupiedSlots: bookingsByTeacher.get(teacherId) || [],
+          bufferMinutes: availability?.bufferMinutes || 0,
+        })
+      );
+    });
+  }
 
   sendResponse(
     res,
