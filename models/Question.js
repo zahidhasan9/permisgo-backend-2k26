@@ -135,6 +135,7 @@ const questionSchema = new mongoose.Schema(
 
     topic: {
       type: String,
+      enum: ["", "L", "HAS", "C", "P", "R", "M", "U", "S", "D", "E"],
       default: "",
       index: true,
     },

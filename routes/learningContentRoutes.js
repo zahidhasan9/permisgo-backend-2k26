@@ -4,16 +4,28 @@ import {
   getAdminLearningContents,
   updateLearningContent,
   deleteLearningContent,
+  permanentlyDeleteLearningContent,
   getLearningContents,
+  getLearningContentById,
+  downloadLearningContentFile,
   updateLearningProgress,
   toggleLearningFavorite,
   getLearningSummary,
+  uploadLearningEditorImage,
 } from "../controllers/learningContentController.js";
 
 import { protect, authorize } from "../middlewares/authMiddleware.js";
 import upload from "../middlewares/uploadMiddleware.js";
 
 const router = express.Router();
+
+router.post(
+  "/admin/editor-image",
+  protect,
+  authorize("admin"),
+  upload.single("upload"),
+  uploadLearningEditorImage,
+);
 
 // Admin routes
 router.post(
@@ -52,6 +64,27 @@ router.get(
   protect,
   authorize("student", "admin"),
   getLearningContents,
+);
+
+router.delete(
+  "/admin/contents/:id/permanent",
+  protect,
+  authorize("admin"),
+  permanentlyDeleteLearningContent,
+);
+
+router.get(
+  "/contents/:id/download",
+  protect,
+  authorize("student", "admin"),
+  downloadLearningContentFile,
+);
+
+router.get(
+  "/contents/:id",
+  protect,
+  authorize("student", "admin"),
+  getLearningContentById,
 );
 
 router.get(

@@ -125,6 +125,8 @@ const learningContentSchema = new mongoose.Schema(
       index: true,
     },
 
+    section: { type: String, default: "General" },
+
     topicCode: {
       type: String,
       enum: ["", "L", "C", "R", "U", "D", "HAS", "P", "M", "S", "E"],
@@ -153,10 +155,27 @@ const learningContentSchema = new mongoose.Schema(
       default: "",
     },
 
+    contentImages: {
+      type: [String],
+      default: [],
+    },
+
+    videos: {
+      type: [{ title: String, url: String, thumbnail: String, durationMinutes: { type: Number, default: 0 } }],
+      default: [],
+    },
+
+    materials: {
+      type: [{ title: String, fileUrl: String, readMinutes: { type: Number, default: 0 } }],
+      default: [],
+    },
+
     fileUrl: {
       type: String,
       default: "",
     },
+
+    readMinutes: { type: Number, default: 0 },
 
     videoUrl: {
       type: String,

@@ -1,13 +1,12 @@
 import express from "express";
-import examController from "../controllers/examController";
-import { protect, authorize } from "../middlewares/authMiddleware";
-import ROLES from "../constants/roles";
+import { createExamRequest, getMyExams, updateExam } from "../controllers/examController.js";
+import { protect, authorize } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 router.use(protect);
-router.post("/", authorize(ROLES.STUDENT), examController.createExamRequest);
-router.get("/me", authorize(ROLES.STUDENT), examController.getMyExams);
-router.patch("/:id", authorize(ROLES.ADMIN), examController.updateExam);
+router.post("/", authorize("student"), createExamRequest);
+router.get("/me", authorize("student"), getMyExams);
+router.patch("/:id", authorize("admin"), updateExam);
 
 export default router;

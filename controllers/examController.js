@@ -1,7 +1,7 @@
-import Exam from "../models/Exam";
-import asyncHandler from "../utils/asyncHandler";
-import sendResponse from "../utils/ApiResponse";
-import ApiError from "../utils/ApiError";
+import Exam from "../models/Exam.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import sendResponse from "../utils/ApiResponse.js";
+import ApiError from "../utils/ApiError.js";
 
 export const createExamRequest = asyncHandler(async (req, res) => {
   const exam = await Exam.create({ ...req.body, student: req.user._id });

@@ -42,6 +42,19 @@ const getSelectedAnswersMap = (attempt) => {
   return selectedAnswers;
 };
 
+const TOPIC_CODES = ["L", "HAS", "C", "P", "R", "M", "U", "S", "D", "E"];
+const normalizeTopic = (value) => {
+  const topic = String(value || "").trim().toUpperCase();
+  const normalized = topic === "A" ? "HAS" : topic;
+  if (!normalized) return "";
+  if (!TOPIC_CODES.includes(normalized)) {
+    const error = new Error("Topic must be L, HAS, C, P, R, M, U, S, D or E.");
+    error.statusCode = 400;
+    throw error;
+  }
+  return normalized;
+};
+
 const getResumeIndex = (questions, attempt) => {
   const answeredSet = new Set(getAnsweredQuestionIds(attempt));
 
@@ -224,11 +237,28 @@ const calculateAttemptResult = (attempt, quiz) => {
 // Public / Student Quiz
 // =======================
 export const getQuizzes = asyncHandler(async (req, res) => {
-  const quizzes = await Quiz.find({ status: "active" }).sort({
-    order: 1,
-    createdAt: -1,
-  });
-  sendResponse(res, 200, "Quizzes fetched.", quizzes);
+  const quizzes = await Quiz.find({ status: "active" })
+    .sort({ order: 1, createdAt: -1 })
+    .lean();
+
+  const firstQuestions = await Question.aggregate([
+    { $match: { quiz: { $in: quizzes.map((quiz) => quiz._id) }, status: "active" } },
+    { $sort: { order: 1, createdAt: 1 } },
+    { $group: { _id: "$quiz", questionText: { $first: "$questionText" } } },
+  ]);
+  const questionTextByQuiz = new Map(
+    firstQuestions.map((item) => [String(item._id), item.questionText]),
+  );
+
+  sendResponse(
+    res,
+    200,
+    "Quizzes fetched.",
+    quizzes.map((quiz) => ({
+      ...quiz,
+      questionText: questionTextByQuiz.get(String(quiz._id)) || "",
+    })),
+  );
 });
 
 export const getQuiz = asyncHandler(async (req, res) => {
@@ -477,6 +507,56 @@ export const getMyQuizAttempts = asyncHandler(async (req, res) => {
   sendResponse(res, 200, "My quiz attempts fetched.", attempts);
 });
 
+export const getMyTopicResults = asyncHandler(async (req, res) => {
+  const results = await QuizAttempt.aggregate([
+    { $match: { student: req.user._id, status: "completed" } },
+    { $unwind: "$answers" },
+    { $sort: { "answers.answeredAt": -1, createdAt: -1 } },
+    {
+      $group: {
+        _id: "$answers.question",
+        isCorrect: { $first: "$answers.isCorrect" },
+      },
+    },
+    {
+      $lookup: {
+        from: Question.collection.name,
+        localField: "_id",
+        foreignField: "_id",
+        as: "question",
+      },
+    },
+    { $unwind: "$question" },
+    { $match: { "question.topic": { $in: TOPIC_CODES } } },
+    {
+      $group: {
+        _id: "$question.topic",
+        attempted: { $sum: 1 },
+        correct: { $sum: { $cond: ["$isCorrect", 1, 0] } },
+      },
+    },
+  ]);
+
+  const resultMap = new Map(results.map((item) => [item._id, item]));
+  sendResponse(
+    res,
+    200,
+    "Topic results fetched.",
+    TOPIC_CODES.map((code) => {
+      const item = resultMap.get(code);
+      const attempted = Number(item?.attempted || 0);
+      const correct = Number(item?.correct || 0);
+      return {
+        code,
+        attempted,
+        correct,
+        wrong: Math.max(attempted - correct, 0),
+        percentage: attempted ? Math.round((correct / attempted) * 100) : 0,
+      };
+    }),
+  );
+});
+
 export const getQuizAttemptReview = asyncHandler(async (req, res) => {
   assertObjectId(req.params.attemptId, "Invalid attempt id.");
 
@@ -654,6 +734,10 @@ export const getAdminQuizStats = asyncHandler(async (req, res) => {
 });
 
 export const createQuiz = asyncHandler(async (req, res) => {
+  if (req.body.type === "road_sign") {
+    res.status(400);
+    throw new Error("Road Sign quizzes are retired. Use Road Signs management instead.");
+  }
   const coverImageFile = getFileByField(req, "coverImage");
 
   const coverImage = coverImageFile
@@ -685,6 +769,11 @@ export const updateQuiz = asyncHandler(async (req, res) => {
   if (!quiz || quiz.status === "deleted") {
     res.statusCode = 404;
     throw new Error("Quiz not found.");
+  }
+
+  if (req.body.type === "road_sign" && quiz.type !== "road_sign") {
+    res.status(400);
+    throw new Error("A quiz cannot be converted to the retired Road Sign type.");
   }
 
   const coverImageFile = getFileByField(req, "coverImage");
@@ -807,7 +896,7 @@ export const createQuestion = asyncHandler(async (req, res) => {
     markedAnswerImage: markedAnswerImageFile
       ? toPublicFilePath(markedAnswerImageFile)
       : req.body.markedAnswerImage || "",
-    topic: req.body.topic || "",
+    topic: normalizeTopic(req.body.topic),
     difficulty: req.body.difficulty || "medium",
     order: toNumber(req.body.order, 0),
     status: req.body.status || "active",
@@ -843,7 +932,8 @@ export const updateQuestion = asyncHandler(async (req, res) => {
     );
   if (req.body.explanationText !== undefined)
     question.explanationText = req.body.explanationText;
-  if (req.body.topic !== undefined) question.topic = req.body.topic;
+  if (req.body.topic !== undefined)
+    question.topic = normalizeTopic(req.body.topic);
   if (req.body.difficulty !== undefined)
     question.difficulty = req.body.difficulty;
   if (req.body.order !== undefined)
@@ -1062,7 +1152,12 @@ export const revokeQuizRetakePermission = asyncHandler(async (req, res) => {
 // Existing Road Signs
 // =======================
 export const getRoadSigns = asyncHandler(async (req, res) => {
-  const signs = await RoadSign.find({ status: "active" });
+  const signs = await RoadSign.find({ status: "active" }).sort({ sortOrder: 1, createdAt: -1 });
+  sendResponse(res, 200, "Road signs fetched.", signs);
+});
+
+export const getAdminRoadSigns = asyncHandler(async (req, res) => {
+  const signs = await RoadSign.find().sort({ sortOrder: 1, createdAt: -1 });
   sendResponse(res, 200, "Road signs fetched.", signs);
 });
 
@@ -1074,8 +1169,36 @@ export const createRoadSign = asyncHandler(async (req, res) => {
     category: req.body.category || "",
     description: req.body.description || "",
     status: req.body.status || "active",
+    sortOrder: Number(req.body.sortOrder) || 0,
   });
   sendResponse(res, 201, "Road sign created.", sign);
+});
+
+export const updateRoadSign = asyncHandler(async (req, res) => {
+  const sign = await RoadSign.findById(req.params.id);
+  if (!sign) {
+    res.status(404);
+    throw new Error("Road sign not found.");
+  }
+
+  const imageFile = getFileByField(req, "image");
+  ["title", "category", "description", "status"].forEach((field) => {
+    if (req.body[field] !== undefined) sign[field] = req.body[field];
+  });
+  if (req.body.sortOrder !== undefined) sign.sortOrder = Number(req.body.sortOrder) || 0;
+  if (imageFile) sign.image = toPublicFilePath(imageFile);
+  await sign.save();
+  sendResponse(res, 200, "Road sign updated.", sign);
+});
+
+export const deleteRoadSign = asyncHandler(async (req, res) => {
+  const sign = await RoadSign.findById(req.params.id);
+  if (!sign) {
+    res.status(404);
+    throw new Error("Road sign not found.");
+  }
+  await sign.deleteOne();
+  sendResponse(res, 200, "Road sign deleted.", { id: sign._id });
 });
 
 export default {
@@ -1098,7 +1221,10 @@ export default {
   deleteQuestion,
   getAdminAttempts,
   getRoadSigns,
+  getAdminRoadSigns,
   createRoadSign,
+  updateRoadSign,
+  deleteRoadSign,
   getAdminQuizStats,
   grantQuizRetakePermission,
   getAdminRetakePermissions,
