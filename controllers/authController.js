@@ -49,7 +49,7 @@ const setStringField = (user, field, value, maxLength = 200) => {
 
 export const register = async (req, res) => {
   try {
-    const { name, email, phone, password, role = "student" } = req.body;
+    const { name, email, phone, password, role = "student", gender } = req.body;
 
     const cleanName = String(name || "").trim();
     const normalizedEmail = String(email || "")
@@ -59,6 +59,9 @@ export const register = async (req, res) => {
     const cleanPhone = String(phone || "").trim();
 
     const normalizedRole = String(role || "student")
+      .trim()
+      .toLowerCase();
+    const normalizedGender = String(gender || "")
       .trim()
       .toLowerCase();
 
@@ -76,6 +79,13 @@ export const register = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Role must be either student or teacher.",
+      });
+    }
+
+    if (!["male", "female", "other"].includes(normalizedGender)) {
+      return res.status(400).json({
+        success: false,
+        message: "Gender must be male, female, or other.",
       });
     }
 
@@ -113,6 +123,7 @@ export const register = async (req, res) => {
       email: normalizedEmail,
       phone: cleanPhone,
       password: hashedPassword,
+      gender: normalizedGender,
 
       // গুরুত্বপূর্ণ পরিবর্তন
       role: normalizedRole,
