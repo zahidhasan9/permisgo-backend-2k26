@@ -342,36 +342,6 @@ export const startQuizAttempt = asyncHandler(async (req, res) => {
     }
   }
 
-  const latestCompletedAttempt = await QuizAttempt.findOne({
-    student: req.user._id,
-    quiz: quiz._id,
-    status: "completed",
-  }).sort({ finishedAt: -1, createdAt: -1 });
-
-  let activeRetakePermission = null;
-
-  if (latestCompletedAttempt) {
-    activeRetakePermission = await QuizRetakePermission.findOne({
-      student: req.user._id,
-      quiz: quiz._id,
-      status: "active",
-    }).sort({ createdAt: -1 });
-
-    if (!activeRetakePermission) {
-      return sendResponse(
-        res,
-        409,
-        "Quiz time is over or this quiz is already completed. Please contact admin to allow retake.",
-        {
-          retakeLocked: true,
-          timeExpired: true,
-          latestAttempt: latestCompletedAttempt,
-          quiz,
-        },
-      );
-    }
-  }
-
   const attempt = await QuizAttempt.create({
     student: req.user._id,
     quiz: quiz._id,
@@ -380,20 +350,13 @@ export const startQuizAttempt = asyncHandler(async (req, res) => {
     status: "in_progress",
   });
 
-  if (activeRetakePermission) {
-    activeRetakePermission.status = "used";
-    activeRetakePermission.usedAttempt = attempt._id;
-    activeRetakePermission.usedAt = new Date();
-    await activeRetakePermission.save();
-  }
-
   sendResponse(res, 201, "Quiz attempt started.", {
     ...buildStudentAttemptPayload({
       attempt,
       quiz,
       questions,
       resumed: false,
-      retakePermissionUsed: Boolean(activeRetakePermission),
+      retakePermissionUsed: false,
     }),
   });
 });

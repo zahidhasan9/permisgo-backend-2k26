@@ -160,6 +160,17 @@ const learningContentSchema = new mongoose.Schema(
       default: [],
     },
 
+    contentBlocks: {
+      type: [{
+        title: { type: String, default: "" },
+        image: { type: String, default: "" },
+        description: { type: String, default: "" },
+        bulletPoints: { type: [String], default: [] },
+        footerText: { type: String, default: "" },
+      }],
+      default: [],
+    },
+
     videos: {
       type: [{ title: String, url: String, thumbnail: String, durationMinutes: { type: Number, default: 0 } }],
       default: [],

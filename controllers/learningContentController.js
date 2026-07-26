@@ -478,6 +478,7 @@ export const createLearningContent = async (req, res) => {
     const imageFile = getSingleFile(req, "image");
     const file = getSingleFile(req, "file");
     const contentImageFiles = getFiles(req, "contentImages");
+    const blockImageFiles = getFiles(req, "blockImages");
     const materialFiles = getFiles(req, "materials");
 
     const {
@@ -512,6 +513,7 @@ export const createLearningContent = async (req, res) => {
       return res.status(400).json({ success: false, message: "A valid YouTube URL is required" });
     }
 
+    const blockMeta = parseJsonArray(req.body.contentBlocks);
     const learningContent = await LearningContent.create({
       title,
       type,
@@ -530,6 +532,13 @@ export const createLearningContent = async (req, res) => {
       isFeatured: isFeatured === "true" || isFeatured === true,
       image: getFilePath(imageFile),
       contentImages: contentImageFiles.map(getFilePath),
+      contentBlocks: blockMeta.map((block, index) => ({
+        title: block.title || "",
+        image: getFilePath(blockImageFiles[Number(block.fileIndex)]) || block.image || "",
+        description: block.description || "",
+        bulletPoints: Array.isArray(block.bulletPoints) ? block.bulletPoints : [],
+        footerText: block.footerText || "",
+      })),
       videos: parseJsonArray(req.body.videos),
       materials: materialFiles.map((material, index) => {
         const meta = parseJsonArray(req.body.materialMeta)[index] || {};
@@ -607,6 +616,7 @@ export const updateLearningContent = async (req, res) => {
 
     const imageFile = getSingleFile(req, "image");
     const contentImageFiles = getFiles(req, "contentImages");
+    const blockImageFiles = getFiles(req, "blockImages");
     const materialFiles = getFiles(req, "materials");
 
     const file = getSingleFile(req, "file");
@@ -672,6 +682,17 @@ export const updateLearningContent = async (req, res) => {
         ...(contentItem.contentImages || []),
         ...contentImageFiles.map(getUploadedFileUrl),
       ];
+    }
+
+    if (req.body.contentBlocks !== undefined) {
+      const blocks = parseJsonArray(req.body.contentBlocks);
+      updateData.contentBlocks = blocks.map((block, index) => ({
+        title: block.title || "",
+        image: getUploadedFileUrl(blockImageFiles[Number(block.fileIndex)]) || block.image || "",
+        description: block.description || "",
+        bulletPoints: Array.isArray(block.bulletPoints) ? block.bulletPoints : [],
+        footerText: block.footerText || "",
+      }));
     }
 
     if (req.body.videos !== undefined) updateData.videos = parseJsonArray(req.body.videos);
