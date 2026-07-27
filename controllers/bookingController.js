@@ -1255,51 +1255,114 @@ export const createBooking = asyncHandler(async (req, res) => {
 
   const hourlyRate = Number(profile.hourlyRate) || 0;
 
-  const booking = await Booking.create({
-    student: req.user._id,
-    teacher,
-    offer: offer || undefined,
-    teacherLocation: teacherLocation._id,
-    teacherVehicle: vehicle._id,
-    location: officialLocation,
-    studentSearchLocation: studentSnapshot,
-    vehicleSnapshot: makeVehicleSnapshot(vehicle),
-    distanceKm: Number.isFinite(distanceKm)
-      ? Number(distanceKm.toFixed(2))
-      : undefined,
-    vehicleType: vehicle.vehicleType,
-    bookingDate: date,
-    startTime,
-    endTime,
-    duration,
-    pricingSnapshot: {
-      hourlyRate,
-      subtotal: Number(((hourlyRate * duration) / 60).toFixed(2)),
-      currency: process.env.DEFAULT_CURRENCY || "EUR",
-    },
-    status: "pending",
-    expiresAt: getExpiryDate(),
-  });
+  const session = await mongoose.startSession();
+  let bookingId;
+  let lessonId;
+
+  try {
+    await session.withTransaction(async () => {
+      // Re-check inside the transaction so a slot cannot be booked after the
+      // public availability check but before persistence.
+      await ensureNoConflict({
+        student: req.user._id,
+        teacher,
+        bookingDate: date,
+        startTime,
+        endTime,
+        session,
+      });
+
+      const [booking] = await Booking.create(
+        [
+          {
+            student: req.user._id,
+            teacher,
+            offer: offer || undefined,
+            teacherLocation: teacherLocation._id,
+            teacherVehicle: vehicle._id,
+            location: officialLocation,
+            studentSearchLocation: studentSnapshot,
+            vehicleSnapshot: makeVehicleSnapshot(vehicle),
+            distanceKm: Number.isFinite(distanceKm)
+              ? Number(distanceKm.toFixed(2))
+              : undefined,
+            vehicleType: vehicle.vehicleType,
+            bookingDate: date,
+            startTime,
+            endTime,
+            duration,
+            pricingSnapshot: {
+              hourlyRate,
+              subtotal: Number(((hourlyRate * duration) / 60).toFixed(2)),
+              currency: process.env.DEFAULT_CURRENCY || "EUR",
+            },
+            status: "confirmed",
+            expiresAt: null,
+            confirmation: {
+              confirmedBy: req.user._id,
+              confirmedAt: new Date(),
+            },
+          },
+        ],
+        { session },
+      );
+
+      const [lesson] = await Lesson.create(
+        [
+          {
+            booking: booking._id,
+            student: req.user._id,
+            teacher,
+            lessonDate: date,
+            startTime,
+            endTime,
+            duration,
+            status: "scheduled",
+            history: [
+              {
+                action: "created_from_booking",
+                by: req.user._id,
+                note: "Lesson created from an instantly confirmed student booking.",
+              },
+            ],
+          },
+        ],
+        { session },
+      );
+
+      booking.lesson = lesson._id;
+      await booking.save({ session });
+      bookingId = booking._id;
+      lessonId = lesson._id;
+    });
+  } finally {
+    await session.endSession();
+  }
 
   await createNotificationsSafely([
     {
       user: teacher,
-      title: "New lesson booking request",
-      message: "A student requested a driving lesson.",
+      title: "New confirmed lesson",
+      message: "A student booked an available driving lesson slot.",
       type: "booking",
-      actionUrl: `/teacher/lessons?tab=requests&bookingId=${booking._id}`,
+      actionUrl: `/teacher/lessons?tab=upcoming&lessonId=${lessonId}`,
     },
     {
       user: req.user._id,
-      title: "Booking request created",
-      message: "Your request is waiting for teacher confirmation.",
+      title: "Lesson booked",
+      message: "Your driving lesson is confirmed.",
       type: "booking",
-      actionUrl: `/student/lessons?tab=requests&bookingId=${booking._id}`,
+      actionUrl: `/student/lessons/${lessonId}`,
     },
   ]);
 
-  const populated = await populateBooking(Booking.findById(booking._id));
-  sendResponse(res, 201, "Booking request created successfully.", populated);
+  const populated = await populateBooking(Booking.findById(bookingId));
+  sendResponse(
+    res,
+    201,
+    "Lesson booked and confirmed successfully.",
+    populated,
+  );
 });
 
 export const getBookings = asyncHandler(async (req, res) => {
@@ -1610,6 +1673,10 @@ export const rejectBooking = asyncHandler(async (req, res) => {
 
 export const cancelBooking = asyncHandler(async (req, res) => {
   await expirePendingBookings({ _id: req.params.id });
+
+  if (req.user.role === "student") {
+    throw new ApiError(403, "Students cannot cancel a confirmed booking.");
+  }
 
   const reason = String(req.body.reason || "").trim();
   if (!reason) throw new ApiError(400, "Cancellation reason is required.");

@@ -79,7 +79,7 @@ router.patch("/:id/reject", authorize("teacher"), rejectBooking);
 
 router.patch(
   "/:id/cancel",
-  authorize("student", "teacher", "admin"),
+  authorize("teacher", "admin"),
   cancelBooking,
 );
 
