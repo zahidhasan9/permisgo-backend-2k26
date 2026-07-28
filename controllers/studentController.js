@@ -354,6 +354,7 @@ const buildProfileUpdate = (body = {}) => {
     "address",
     "city",
     "postalCode",
+    "nephNumber",
   ];
 
   allowedPersonalFields.forEach((field) => {

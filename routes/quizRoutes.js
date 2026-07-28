@@ -133,6 +133,7 @@ import {
   submitQuizAnswer,
   finishQuizAttempt,
   getMyQuizAttempts,
+  getMyQuizMistakes,
   getMyTopicResults,
   getQuizAttemptReview,
   getAdminQuizzes,
@@ -256,6 +257,13 @@ router.get(
   protect,
   authorize("student", "admin"),
   getMyQuizAttempts,
+);
+
+router.get(
+  "/mistakes/me",
+  protect,
+  authorize("student", "admin"),
+  getMyQuizMistakes,
 );
 
 router.get(

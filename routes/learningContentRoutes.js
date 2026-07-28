@@ -21,8 +21,8 @@ import {
   listTopics, createTopic, updateTopic, deleteTopic,
 } from "../controllers/ebookStructureController.js";
 import {
-  listAdminLessons, getAdminLesson, createLesson, updateLesson, deleteLesson,
-  listStudentLessons, getStudentLesson,
+  listAdminLessons, getAdminLesson, createLesson, updateLesson, deleteLesson, permanentlyDeleteLesson,
+  listStudentLessons, getStudentLesson, updateStudentLessonProgress,
 } from "../controllers/ebookLessonController.js";
 
 const router = express.Router();
@@ -39,9 +39,11 @@ router.get("/admin/ebook/lessons", protect, authorize("admin"), listAdminLessons
 router.get("/admin/ebook/lessons/:lessonId", protect, authorize("admin"), getAdminLesson);
 router.post("/admin/ebook/lessons", protect, authorize("admin"), upload.any(), createLesson);
 router.patch("/admin/ebook/lessons/:lessonId", protect, authorize("admin"), upload.any(), updateLesson);
+router.delete("/admin/ebook/lessons/:lessonId/permanent", protect, authorize("admin"), permanentlyDeleteLesson);
 router.delete("/admin/ebook/lessons/:lessonId", protect, authorize("admin"), deleteLesson);
 router.get("/ebook/courses/:courseId/topics/:topicId/lessons", protect, authorize("student", "admin"), listStudentLessons);
 router.get("/ebook/lessons/:lessonId", protect, authorize("student", "admin"), getStudentLesson);
+router.patch("/ebook/lessons/:lessonId/progress", protect, authorize("student", "admin"), updateStudentLessonProgress);
 
 router.post(
   "/admin/editor-image",

@@ -470,6 +470,67 @@ export const getMyQuizAttempts = asyncHandler(async (req, res) => {
   sendResponse(res, 200, "My quiz attempts fetched.", attempts);
 });
 
+export const getMyQuizMistakes = asyncHandler(async (req, res) => {
+  const items = await QuizAttempt.aggregate([
+    {
+      $match: {
+        student: req.user._id,
+        status: "completed",
+      },
+    },
+    { $unwind: "$answers" },
+    { $sort: { "answers.answeredAt": -1, createdAt: -1, _id: -1 } },
+    {
+      $group: {
+        _id: "$answers.question",
+        attemptId: { $first: "$_id" },
+        quizId: { $first: "$quiz" },
+        selectedOptionIndex: { $first: "$answers.selectedOptionIndex" },
+        correctOptionIndex: { $first: "$answers.correctOptionIndex" },
+        isCorrect: { $first: "$answers.isCorrect" },
+        answeredAt: { $first: "$answers.answeredAt" },
+      },
+    },
+    { $match: { isCorrect: false } },
+    {
+      $lookup: {
+        from: Question.collection.name,
+        localField: "_id",
+        foreignField: "_id",
+        as: "question",
+      },
+    },
+    { $unwind: "$question" },
+    {
+      $lookup: {
+        from: Quiz.collection.name,
+        localField: "quizId",
+        foreignField: "_id",
+        as: "quiz",
+      },
+    },
+    { $unwind: { path: "$quiz", preserveNullAndEmptyArrays: true } },
+    { $sort: { answeredAt: -1, _id: 1 } },
+    {
+      $project: {
+        _id: 0,
+        id: { $concat: [{ $toString: "$attemptId" }, "-", { $toString: "$_id" }] },
+        attemptId: 1,
+        quizTitle: { $ifNull: ["$quiz.title", "Quiz"] },
+        question: 1,
+        selectedIndex: "$selectedOptionIndex",
+        correctIndex: "$correctOptionIndex",
+        answeredAt: 1,
+      },
+    },
+  ]);
+
+  sendResponse(res, 200, "My current quiz mistakes fetched.", {
+    count: items.length,
+    items,
+  });
+});
+
 export const getMyTopicResults = asyncHandler(async (req, res) => {
   const results = await QuizAttempt.aggregate([
     { $match: { student: req.user._id, status: "completed" } },
@@ -1172,6 +1233,7 @@ export default {
   submitQuizAnswer,
   finishQuizAttempt,
   getMyQuizAttempts,
+  getMyQuizMistakes,
   getQuizAttemptReview,
   getAdminQuizzes,
   createQuiz,

@@ -13,6 +13,12 @@ const studentProfileSchema = new mongoose.Schema(
     address: String,
     city: String,
     postalCode: String,
+    nephNumber: {
+      type: String,
+      trim: true,
+      maxlength: 30,
+      default: "",
+    },
     drivingInfo: {
       licenseType: String,
       currentLevel: String,

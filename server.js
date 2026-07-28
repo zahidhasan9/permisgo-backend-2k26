@@ -29,7 +29,7 @@ import documentRoutes from "./routes/documentRoutes.js";
 // import supportRoutes from"./routes/supportRoutes.js";
 // import notificationRoutes from"./routes/notificationRoutes.js";
 // import reviewRoutes from"./routes/reviewRoutes.js";
-// import referralRoutes from"./routes/referralRoutes.js";
+import referralRoutes from "./routes/referralRoutes.js";
 
 import examRoutes from "./routes/examRoutes.js";
 
@@ -116,7 +116,7 @@ app.use("/api/documents", documentRoutes);
 //app.use("/api/support", supportRoutes);
 //app.use("/api/notifications", notificationRoutes);
 //app.use("/api/reviews", reviewRoutes);
-//app.use("/api/referrals", referralRoutes);
+app.use("/api/referrals", referralRoutes);
 
 app.use("/api/exams", examRoutes);
 //app.use("/api/admin", adminRoutes);

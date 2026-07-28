@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import EbookCourse from "../models/EbookCourse.js";
 import EbookTopic from "../models/EbookTopic.js";
 import EbookLesson from "../models/EbookLesson.js";
+import EbookLessonProgress from "../models/EbookLessonProgress.js";
 import { deleteStoredFile, getUploadedFileUrl } from "../utils/uploadHelpers.js";
 
 const files = (req, name) => Array.isArray(req.files) ? req.files.filter((file) => file.fieldname === name) : [];
@@ -97,17 +98,86 @@ export const deleteLesson = async (req, res) => {
   res.json({ success: true, message: "Lesson deactivated." });
 };
 
+export const permanentlyDeleteLesson = async (req, res) => {
+  try {
+    const lesson = validId(req.params.lessonId) ? await EbookLesson.findById(req.params.lessonId) : null;
+    if (!lesson) return res.status(404).json({ success: false, message: "Lesson not found." });
+
+    const storedFiles = [
+      lesson.coverImage,
+      ...(lesson.contentBlocks || []).map((block) => block.image),
+      ...(lesson.materials || []).map((material) => material.fileUrl),
+      ...(lesson.videos || []).map((video) => video.thumbnail),
+    ].filter(Boolean);
+
+    await Promise.all([
+      lesson.deleteOne(),
+      EbookLessonProgress.deleteMany({ lesson: lesson._id }),
+    ]);
+    await Promise.all([...new Set(storedFiles)].map((file) => deleteStoredFile(file).catch(() => null)));
+
+    res.json({ success: true, message: "Lesson permanently deleted.", data: { id: req.params.lessonId } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const listStudentLessons = async (req, res) => {
   try {
     const structure = await assertStructure(req.params.courseId, req.params.topicId);
     if (!structure || structure.course.status !== "active" || structure.topic.status !== "active") return res.status(404).json({ success: false, message: "Course topic not found." });
-    const lessons = await EbookLesson.find({ course: structure.course._id, topic: structure.topic._id, status: "active" }).sort({ order: 1, createdAt: 1 });
-    res.json({ success: true, data: lessons });
+    const lessons = await EbookLesson.find({ course: structure.course._id, topic: structure.topic._id, status: "active" }).sort({ order: 1, createdAt: 1 }).lean();
+    const progressList = await EbookLessonProgress.find({
+      student: req.userId,
+      lesson: { $in: lessons.map((lesson) => lesson._id) },
+    }).lean();
+    const progressByLesson = new Map(progressList.map((progress) => [String(progress.lesson), progress]));
+    res.json({
+      success: true,
+      data: lessons.map((lesson) => ({
+        ...lesson,
+        progress: progressByLesson.get(String(lesson._id)) || null,
+      })),
+    });
   } catch (error) { res.status(500).json({ success: false, message: error.message }); }
 };
 
 export const getStudentLesson = async (req, res) => {
-  const lesson = validId(req.params.lessonId) ? await EbookLesson.findOne({ _id: req.params.lessonId, status: "active" }).populate("course topic", "title status") : null;
+  const lesson = validId(req.params.lessonId) ? await EbookLesson.findOne({ _id: req.params.lessonId, status: "active" }).populate("course topic", "title status").lean() : null;
   if (!lesson || lesson.course?.status !== "active" || lesson.topic?.status !== "active") return res.status(404).json({ success: false, message: "Lesson not found." });
-  res.json({ success: true, data: lesson });
+  const progress = await EbookLessonProgress.findOne({ student: req.userId, lesson: lesson._id }).lean();
+  res.json({ success: true, data: { ...lesson, progress: progress || null } });
+};
+
+export const updateStudentLessonProgress = async (req, res) => {
+  try {
+    const lesson = validId(req.params.lessonId)
+      ? await EbookLesson.findOne({ _id: req.params.lessonId, status: "active" })
+      : null;
+    if (!lesson) return res.status(404).json({ success: false, message: "Lesson not found." });
+
+    const requestedPercent = Math.max(0, Math.min(Number(req.body.readPercent) || 0, 100));
+    const completed = req.body.status === "completed" || requestedPercent >= 100;
+    const current = await EbookLessonProgress.findOne({ student: req.userId, lesson: lesson._id });
+    const readPercent = completed
+      ? 100
+      : Math.max(Number(current?.readPercent || 0), requestedPercent);
+
+    const progress = await EbookLessonProgress.findOneAndUpdate(
+      { student: req.userId, lesson: lesson._id },
+      {
+        $set: {
+          status: completed ? "completed" : readPercent > 0 ? "in-progress" : "not-started",
+          readPercent,
+          lastViewedAt: new Date(),
+          completedAt: completed ? current?.completedAt || new Date() : null,
+        },
+      },
+      { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true },
+    );
+
+    res.json({ success: true, message: completed ? "Lesson completed." : "Lesson progress updated.", data: progress });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };

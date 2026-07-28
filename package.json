@@ -7,7 +7,16 @@
   "scripts": {
     "start": "node /server.js",
     "dev": "nodemon /server.js",
-    "seed:admin": "node /seeders/adminSeeder.js"
+    "seed:admin": "node /seeders/adminSeeder.js",
+    "seed:simple-series": "node seeders/importTwentySimpleSeries.js",
+    "seed:thematic-crash": "node seeders/importThematicAndCrashTests.js",
+    "seed:code-ebooks": "node seeders/importStandardCodeEbooks.js",
+    "migrate:ebook-images": "node seeders/migrateEbookImagesToCloudinary.js",
+    "migrate:quiz-images": "node seeders/mapGeneratedQuizImages.js",
+    "migrate:all-quiz-images": "node seeders/fillAllQuizImages.js",
+    "migrate:quiz-answer-images": "node seeders/fillQuizAnswerImages.js",
+    "seed:road-signs": "node seeders/importRoadSigns.js",
+    "seed:live-replays": "node seeders/importLiveReplays.js"
   },
   "keywords": [
     "permisgo",
