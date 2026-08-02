@@ -114,12 +114,10 @@ export const createLearningContent = async (req, res) => {
       type === "knowledge-sheet" &&
       (!file || file.mimetype !== "application/pdf")
     ) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "A PDF file is required for a knowledge sheet",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "A PDF file is required for a knowledge sheet",
+      });
     }
     if (type === "live-replay" && !isYouTubeUrl(videoUrl)) {
       return res
@@ -490,13 +488,11 @@ export const permanentlyDeleteLearningContent = async (req, res) => {
     await Promise.all(
       files.map((file) => deleteStoredFile(file).catch(() => null)),
     );
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Learning content permanently deleted",
-        data: { id: req.params.id },
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Learning content permanently deleted",
+      data: { id: req.params.id },
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
