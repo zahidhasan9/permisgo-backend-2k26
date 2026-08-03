@@ -1,0 +1,3 @@
+server [STARTED] ~ http://localhost:5055
+[0mGET / [32m200[0m 3.556 ms - 88[0m
+MongoDB connected: ac-uqef29k-shard-00-00.wkqjnwv.mongodb.net

@@ -101,8 +101,12 @@ const uploadBuffer = (file, folder) =>
  * req.file অথবা req.files-এর structure অপরিবর্তিত রাখে,
  * যাতে existing controller আগের মতো কাজ করে।
  */
-export const uploadRequestFilesToCloudinary = async (req, folder) => {
-  if (!isCloudinaryStorage) return;
+export const uploadRequestFilesToCloudinary = async (
+  req,
+  folder,
+  forceCloudinary = false,
+) => {
+  if (!isCloudinaryStorage && !forceCloudinary) return;
 
   const files = collectRequestFiles(req);
   const uploadedAssets = [];

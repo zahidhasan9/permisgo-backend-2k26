@@ -1,0 +1,4 @@
+server [STARTED] ~ http://localhost:5056
+[0mGET /api-docs.json [32m200[0m 5.481 ms - 201246[0m
+MongoDB connected: ac-uqef29k-shard-00-00.wkqjnwv.mongodb.net
+[0mGET /api-docs/ [32m200[0m 2.701 ms - 3063[0m

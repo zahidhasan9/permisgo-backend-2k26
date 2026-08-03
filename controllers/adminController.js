@@ -1,3 +1,12 @@
+// import User from "../models/User.js";
+// import Booking from "../models/Booking.js";
+// import Lesson from "../models/Lesson.js";
+// import Payment from "../models/Payment.js";
+// import SupportTicket from "../models/SupportTicket.js";
+// import TeacherProfile from "../models/TeacherProfile.js";
+// import asyncHandler from "../utils/asyncHandler.js";
+// import sendResponse from "../utils/ApiResponse.js";
+
 import User from "../models/User.js";
 import Booking from "../models/Booking.js";
 import Lesson from "../models/Lesson.js";

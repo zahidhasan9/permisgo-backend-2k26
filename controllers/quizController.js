@@ -36,7 +36,9 @@ const getSelectedAnswersMap = (attempt) => {
   const selectedAnswers = {};
 
   (attempt?.answers || []).forEach((answer) => {
-    selectedAnswers[String(answer.question)] = answer.selectedOptionIndex;
+    selectedAnswers[String(answer.question)] = answer.selectedOptionIndexes?.length > 1
+      ? answer.selectedOptionIndexes
+      : answer.selectedOptionIndex;
   });
 
   return selectedAnswers;
@@ -133,18 +135,24 @@ const toNumber = (value, fallback = 0) => {
   return Number.isFinite(number) ? number : fallback;
 };
 
+const wantsRemoval = (value) => value === true || value === "true";
+
 const sanitizeQuestionForStudent = (question) => ({
   _id: question._id,
   id: question._id,
   quiz: question.quiz,
   questionText: question.questionText,
   questionImage: question.questionImage,
+  questionVideoUrl: question.questionVideoUrl || "",
+  promptCount: question.promptCount || 1,
+  secondaryQuestionText: question.secondaryQuestionText || "",
   voiceText: question.voiceText,
   options: question.options.map((option, index) => ({
     text: option.text,
     image: option.image,
     order: option.order ?? index,
   })),
+  answerMode: (question.correctOptionIndexes?.length || 0) > 1 ? "multiple" : "single",
   topic: question.topic,
   difficulty: question.difficulty,
   order: question.order,
@@ -169,11 +177,14 @@ const normalizeOptionsFromRequest = (req, existingOptions = []) => {
     const optionImageFile =
       getFileByField(req, `optionImage${index}`) ||
       getFileByField(req, `optionImage${index + 1}`);
+    const removeOptionImage = wantsRemoval(req.body[`removeOptionImage${index}`]);
     return {
       text: String(option?.text || "").trim(),
       image: optionImageFile
         ? toPublicFilePath(optionImageFile)
-        : option?.image || existingOptions[index]?.image || "",
+        : removeOptionImage
+          ? ""
+          : option?.image || existingOptions[index]?.image || "",
       order: Number.isFinite(Number(option?.order))
         ? Number(option.order)
         : index,
@@ -364,13 +375,15 @@ export const startQuizAttempt = asyncHandler(async (req, res) => {
 export const submitQuizAnswer = asyncHandler(async (req, res) => {
   assertObjectId(req.params.attemptId, "Invalid attempt id.");
 
-  const { questionId, selectedOptionIndex, timeSpentSeconds = 0 } = req.body;
+  const { questionId, selectedOptionIndex, selectedOptionIndexes, timeSpentSeconds = 0 } = req.body;
   assertObjectId(questionId, "Invalid question id.");
 
-  const selectedIndex = toNumber(selectedOptionIndex, -1);
-  if (selectedIndex < 0 || selectedIndex > 3) {
+  const requestedIndexes = Array.isArray(selectedOptionIndexes) ? selectedOptionIndexes : parseJSON(selectedOptionIndexes, null);
+  const selectedIndexes = [...new Set((Array.isArray(requestedIndexes) ? requestedIndexes : [selectedOptionIndex]).map((value) => toNumber(value, -1)))].sort();
+  const selectedIndex = selectedIndexes[0] ?? -1;
+  if (!selectedIndexes.length || selectedIndexes.some((index) => index < 0 || index > 3)) {
     res.statusCode = 400;
-    throw new Error("Selected option index must be between 0 and 3.");
+    throw new Error("Every selected option index must be between 0 and 3.");
   }
 
   const attempt = await QuizAttempt.findOne({
@@ -399,13 +412,16 @@ export const submitQuizAnswer = asyncHandler(async (req, res) => {
   const existingAnswer = attempt.answers.find(
     (answer) => String(answer.question) === String(question._id),
   );
-  const isCorrect = selectedIndex === question.correctOptionIndex;
+  const correctIndexes = [...new Set((question.correctOptionIndexes?.length ? question.correctOptionIndexes : [question.correctOptionIndex]).map(Number))].sort();
+  const isCorrect = selectedIndexes.length === correctIndexes.length && selectedIndexes.every((value, index) => value === correctIndexes[index]);
 
   if (!existingAnswer) {
     attempt.answers.push({
       question: question._id,
       selectedOptionIndex: selectedIndex,
       correctOptionIndex: question.correctOptionIndex,
+      selectedOptionIndexes: selectedIndexes,
+      correctOptionIndexes: correctIndexes,
       isCorrect,
       timeSpentSeconds: toNumber(timeSpentSeconds, 0),
     });
@@ -421,10 +437,24 @@ export const submitQuizAnswer = asyncHandler(async (req, res) => {
     await attempt.save();
   }
 
+  const effectiveSelectedIndexes = existingAnswer?.selectedOptionIndexes?.length
+    ? existingAnswer.selectedOptionIndexes.map(Number)
+    : selectedIndexes;
+  const groupResults = Number(question.promptCount) === 2
+    ? [[0, 1], [2, 3]].map((indexes, promptIndex) => {
+      const selected = effectiveSelectedIndexes.find((index) => indexes.includes(index));
+      const correct = correctIndexes.find((index) => indexes.includes(index));
+      return { promptIndex, selectedIndex: selected ?? null, correctIndex: correct ?? null, isCorrect: selected === correct };
+    })
+    : [];
+
   sendResponse(res, 200, "Answer checked.", {
     questionId: question._id,
     selectedOptionIndex: existingAnswer?.selectedOptionIndex ?? selectedIndex,
     correctOptionIndex: question.correctOptionIndex,
+    selectedOptionIndexes: effectiveSelectedIndexes,
+    correctOptionIndexes: correctIndexes,
+    groupResults,
     isCorrect: existingAnswer?.isCorrect ?? isCorrect,
     explanationText: question.explanationText,
     explanationImage: question.explanationImage,
@@ -487,6 +517,8 @@ export const getMyQuizMistakes = asyncHandler(async (req, res) => {
         quizId: { $first: "$quiz" },
         selectedOptionIndex: { $first: "$answers.selectedOptionIndex" },
         correctOptionIndex: { $first: "$answers.correctOptionIndex" },
+        selectedOptionIndexes: { $first: "$answers.selectedOptionIndexes" },
+        correctOptionIndexes: { $first: "$answers.correctOptionIndexes" },
         isCorrect: { $first: "$answers.isCorrect" },
         answeredAt: { $first: "$answers.answeredAt" },
       },
@@ -520,6 +552,8 @@ export const getMyQuizMistakes = asyncHandler(async (req, res) => {
         question: 1,
         selectedIndex: "$selectedOptionIndex",
         correctIndex: "$correctOptionIndex",
+        selectedIndexes: "$selectedOptionIndexes",
+        correctIndexes: "$correctOptionIndexes",
         answeredAt: 1,
       },
     },
@@ -615,6 +649,12 @@ export const getQuizAttemptReview = asyncHandler(async (req, res) => {
       question: answer.question,
       selectedOptionIndex: answer.selectedOptionIndex,
       correctOptionIndex: answer.correctOptionIndex,
+      selectedOptionIndexes: answer.selectedOptionIndexes?.length
+        ? Array.from(answer.selectedOptionIndexes, Number)
+        : [Number(answer.selectedOptionIndex)],
+      correctOptionIndexes: answer.correctOptionIndexes?.length
+        ? Array.from(answer.correctOptionIndexes, Number)
+        : [Number(answer.correctOptionIndex)],
       isCorrect: answer.isCorrect,
       timeSpentSeconds: answer.timeSpentSeconds,
       answeredAt: answer.answeredAt,
@@ -803,6 +843,7 @@ export const updateQuiz = asyncHandler(async (req, res) => {
   const coverImageFile = getFileByField(req, "coverImage");
 
   const oldCoverImage = quiz.coverImage || "";
+  const removeCoverImage = wantsRemoval(req.body.removeCoverImage);
 
   const allowedFields = ["title", "slug", "type", "description", "status"];
 
@@ -840,10 +881,12 @@ export const updateQuiz = asyncHandler(async (req, res) => {
     }
 
     quiz.coverImage = newCoverImage;
+  } else if (removeCoverImage) {
+    quiz.coverImage = "";
   }
 
   await quiz.save();
-  if (coverImageFile && oldCoverImage && oldCoverImage !== quiz.coverImage) {
+  if ((coverImageFile || removeCoverImage) && oldCoverImage && oldCoverImage !== quiz.coverImage) {
     await deleteStoredFile(oldCoverImage);
   }
 
@@ -903,6 +946,14 @@ export const createQuestion = asyncHandler(async (req, res) => {
   const explanationImageFile = getFileByField(req, "explanationImage");
   const markedAnswerImageFile = getFileByField(req, "markedAnswerImage");
   const options = normalizeOptionsFromRequest(req);
+  const promptCount = Number(req.body.promptCount) === 2 ? 2 : 1;
+  const correctOptionIndexes = parseJSON(req.body.correctOptionIndexes, null) || [toNumber(req.body.correctOptionIndex, 0)];
+  const questionVideoUrl = String(req.body.questionVideoUrl || "").trim();
+  if (questionImageFile && questionVideoUrl) { res.statusCode = 400; throw new Error("Choose either a question image or a video, not both."); }
+  if (promptCount === 2) {
+    if (!String(req.body.secondaryQuestionText || "").trim()) { res.statusCode = 400; throw new Error("Second question text is required."); }
+    if (correctOptionIndexes.length !== 2 || !correctOptionIndexes.some((index) => [0, 1].includes(Number(index))) || !correctOptionIndexes.some((index) => [2, 3].includes(Number(index)))) { res.statusCode = 400; throw new Error("Choose one correct answer from A/B and one from C/D."); }
+  }
 
   const question = await Question.create({
     quiz: quiz._id,
@@ -910,9 +961,13 @@ export const createQuestion = asyncHandler(async (req, res) => {
     questionImage: questionImageFile
       ? toPublicFilePath(questionImageFile)
       : req.body.questionImage || "",
+    questionVideoUrl,
+    promptCount,
+    secondaryQuestionText: promptCount === 2 ? req.body.secondaryQuestionText : "",
     voiceText: req.body.voiceText || "",
     options,
     correctOptionIndex: toNumber(req.body.correctOptionIndex, 0),
+    correctOptionIndexes,
     explanationText: req.body.explanationText || "",
     explanationImage: explanationImageFile
       ? toPublicFilePath(explanationImageFile)
@@ -945,15 +1000,30 @@ export const updateQuestion = asyncHandler(async (req, res) => {
   const questionImageFile = getFileByField(req, "questionImage");
   const explanationImageFile = getFileByField(req, "explanationImage");
   const markedAnswerImageFile = getFileByField(req, "markedAnswerImage");
+  const oldImages = {
+    questionImage: question.questionImage || "",
+    explanationImage: question.explanationImage || "",
+    markedAnswerImage: question.markedAnswerImage || "",
+    options: question.options.map((option) => option.image || ""),
+  };
 
   if (req.body.questionText !== undefined)
     question.questionText = req.body.questionText;
+  if (req.body.promptCount !== undefined) question.promptCount = Number(req.body.promptCount) === 2 ? 2 : 1;
+  if (req.body.secondaryQuestionText !== undefined) question.secondaryQuestionText = String(req.body.secondaryQuestionText || "").trim();
+  if (req.body.questionVideoUrl !== undefined) question.questionVideoUrl = String(req.body.questionVideoUrl || "").trim();
   if (req.body.voiceText !== undefined) question.voiceText = req.body.voiceText;
   if (req.body.correctOptionIndex !== undefined)
     question.correctOptionIndex = toNumber(
       req.body.correctOptionIndex,
       question.correctOptionIndex,
     );
+  if (req.body.correctOptionIndexes !== undefined) {
+    const indexes = [...new Set((parseJSON(req.body.correctOptionIndexes, []) || []).map((value) => toNumber(value, -1)))].filter((value) => value >= 0 && value <= 3).sort();
+    if (!indexes.length) throw new Error("At least one correct option is required.");
+    question.correctOptionIndexes = indexes;
+    question.correctOptionIndex = indexes[0];
+  }
   if (req.body.explanationText !== undefined)
     question.explanationText = req.body.explanationText;
   if (req.body.topic !== undefined)
@@ -965,11 +1035,14 @@ export const updateQuestion = asyncHandler(async (req, res) => {
   if (req.body.status !== undefined) question.status = req.body.status;
 
   if (questionImageFile)
-    question.questionImage = toPublicFilePath(questionImageFile);
+    { question.questionImage = toPublicFilePath(questionImageFile); question.questionVideoUrl = ""; }
+  else if (wantsRemoval(req.body.removeQuestionImage)) question.questionImage = "";
   if (explanationImageFile)
     question.explanationImage = toPublicFilePath(explanationImageFile);
+  else if (wantsRemoval(req.body.removeExplanationImage)) question.explanationImage = "";
   if (markedAnswerImageFile)
     question.markedAnswerImage = toPublicFilePath(markedAnswerImageFile);
+  else if (wantsRemoval(req.body.removeMarkedAnswerImage)) question.markedAnswerImage = "";
 
   if (
     req.body.options !== undefined ||
@@ -979,7 +1052,19 @@ export const updateQuestion = asyncHandler(async (req, res) => {
     question.options = normalizeOptionsFromRequest(req, question.options);
   }
 
+  if (question.promptCount === 2) {
+    const indexes = question.correctOptionIndexes?.length ? question.correctOptionIndexes.map(Number) : [question.correctOptionIndex];
+    if (!question.secondaryQuestionText) { res.statusCode = 400; throw new Error("Second question text is required."); }
+    if (indexes.length !== 2 || !indexes.some((index) => [0, 1].includes(index)) || !indexes.some((index) => [2, 3].includes(index))) { res.statusCode = 400; throw new Error("Choose one correct answer from A/B and one from C/D."); }
+  } else {
+    question.secondaryQuestionText = "";
+  }
+  if (question.questionImage && question.questionVideoUrl) { res.statusCode = 400; throw new Error("Choose either a question image or a video, not both."); }
+
   await question.save();
+  const currentImages = [question.questionImage, question.explanationImage, question.markedAnswerImage, ...question.options.map((option) => option.image)];
+  const previousImages = [oldImages.questionImage, oldImages.explanationImage, oldImages.markedAnswerImage, ...oldImages.options];
+  await Promise.all(previousImages.filter((image) => image && !currentImages.includes(image)).map((image) => deleteStoredFile(image)));
   await recalculateQuizTotal(question.quiz);
   sendResponse(res, 200, "Question updated.", question);
 });
@@ -1206,12 +1291,16 @@ export const updateRoadSign = asyncHandler(async (req, res) => {
   }
 
   const imageFile = getFileByField(req, "image");
+  const oldImage = sign.image || "";
+  const removeImage = req.body.removeImage === "true";
   ["title", "category", "description", "status"].forEach((field) => {
     if (req.body[field] !== undefined) sign[field] = req.body[field];
   });
   if (req.body.sortOrder !== undefined) sign.sortOrder = Number(req.body.sortOrder) || 0;
   if (imageFile) sign.image = toPublicFilePath(imageFile);
+  else if (removeImage) sign.image = "";
   await sign.save();
+  if ((imageFile || removeImage) && oldImage && oldImage !== sign.image) await deleteStoredFile(oldImage);
   sendResponse(res, 200, "Road sign updated.", sign);
 });
 

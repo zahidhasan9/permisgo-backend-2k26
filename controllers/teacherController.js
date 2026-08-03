@@ -121,6 +121,42 @@ export const getPublicTeachers = asyncHandler(async (req, res) => {
   );
 });
 
+export const getBookedTeacherProfile = asyncHandler(async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.teacherId)) throw new ApiError(400, "Invalid teacher id.");
+  const teacherId = req.params.teacherId;
+  if (req.user.role === "student") {
+    const hasBooking = await Booking.exists({ student: req.user._id, teacher: teacherId });
+    if (!hasBooking) throw new ApiError(403, "You can only view an instructor you have booked.");
+  }
+
+  const [profile, vehicles, locations, availability, lessons, documents] = await Promise.all([
+    TeacherProfile.findOne({ user: teacherId }).populate("user", "name fullName email phone avatar city address dateOfBirth").lean(),
+    TeacherVehicle.find({ teacher: teacherId, status: "active" }).lean(),
+    TeacherLocation.find({ teacher: teacherId, status: "active" }).lean(),
+    TeacherAvailability.findOne({ teacher: teacherId }).lean(),
+    Lesson.find({ teacher: teacherId }).select("student status duration").lean(),
+    Document.find({ user: teacherId }).select("requirementKey title type status").lean(),
+  ]);
+  if (!profile?.user) throw new ApiError(404, "Instructor profile not found.");
+
+  const completed = lessons.filter((lesson) => lesson.status === "completed");
+  const decided = lessons.filter((lesson) => ["completed", "cancelled", "no_show"].includes(lesson.status));
+  sendResponse(res, 200, "Booked instructor profile fetched.", {
+    ...profile,
+    vehicles,
+    locations,
+    availability,
+    documents,
+    stats: {
+      studentsTrained: new Set(completed.map((lesson) => String(lesson.student))).size,
+      completionRate: decided.length ? Math.round((completed.length / decided.length) * 100) : 0,
+      lessonsCompleted: completed.length,
+      hoursWorked: Math.round((completed.reduce((sum, lesson) => sum + Number(lesson.duration || 0), 0) / 60) * 10) / 10,
+      reviews: Number(profile.rating?.totalReviews || 0),
+    },
+  });
+});
+
 export const getDashboard = asyncHandler(async (req, res) => {
   const now = new Date();
   const todayStart = new Date(now);

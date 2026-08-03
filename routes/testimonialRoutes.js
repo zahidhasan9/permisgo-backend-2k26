@@ -1,28 +1,11 @@
 import express from "express";
-import testimonialController from "../controllers/testimonialController";
-import { protect, authorize } from "../middlewares/authMiddleware";
-import ROLES from "../constants/roles";
-
+import testimonialController from "../controllers/testimonialController.js";
+import { protect, authorize } from "../middlewares/authMiddleware.js";
+import testimonialImageUpload from "../middlewares/testimonialUploadMiddleware.js";
 const router = express.Router();
-
 router.get("/", testimonialController.getTestimonials);
-router.post(
-  "/",
-  protect,
-  authorize(ROLES.ADMIN),
-  testimonialController.createTestimonial,
-);
-router.patch(
-  "/:id",
-  protect,
-  authorize(ROLES.ADMIN),
-  testimonialController.updateTestimonial,
-);
-router.delete(
-  "/:id",
-  protect,
-  authorize(ROLES.ADMIN),
-  testimonialController.deleteTestimonial,
-);
-
+router.get("/admin/all", protect, authorize("admin"), testimonialController.getAdminTestimonials);
+router.post("/", protect, authorize("admin"), testimonialImageUpload, testimonialController.createTestimonial);
+router.patch("/:id", protect, authorize("admin"), testimonialImageUpload, testimonialController.updateTestimonial);
+router.delete("/:id", protect, authorize("admin"), testimonialController.deleteTestimonial);
 export default router;

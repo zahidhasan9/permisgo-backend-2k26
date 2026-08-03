@@ -2,18 +2,8 @@ import mongoose from "mongoose";
 
 const ebookLessonProgressSchema = new mongoose.Schema(
   {
-    student: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true,
-    },
-    lesson: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "EbookLesson",
-      required: true,
-      index: true,
-    },
+    student: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    lesson: { type: mongoose.Schema.Types.ObjectId, ref: "EbookLesson", required: true, index: true },
     status: {
       type: String,
       enum: ["not-started", "in-progress", "completed"],

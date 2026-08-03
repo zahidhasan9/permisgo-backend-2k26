@@ -37,15 +37,18 @@ const getApprovalFilter = (approvalStatus) => {
 };
 
 export const getAdminTeacherVehicles = asyncHandler(async (req, res) => {
-  const approvalStatus = String(
-    req.query.approvalStatus || "all",
-  ).toLowerCase();
+  const approvalStatus = String(req.query.approvalStatus || "all").toLowerCase();
 
-  if (approvalStatus !== "all" && !APPROVAL_STATUSES.includes(approvalStatus)) {
+  if (
+    approvalStatus !== "all" &&
+    !APPROVAL_STATUSES.includes(approvalStatus)
+  ) {
     throw new ApiError(400, "Invalid approval status filter.");
   }
 
-  const vehicles = await TeacherVehicle.find(getApprovalFilter(approvalStatus))
+  const vehicles = await TeacherVehicle.find(
+    getApprovalFilter(approvalStatus),
+  )
     .populate("teacher", "name email phone avatar")
     .populate("approvedBy", "name email")
     .sort({ createdAt: -1 });

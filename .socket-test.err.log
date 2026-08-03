@@ -1,0 +1,1 @@
+REDIS_URL is not configured; Socket.IO is running in single-instance mode.

@@ -196,7 +196,18 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, expectedRole } = req.body;
+
+    const normalizedExpectedRole = String(expectedRole || "")
+      .trim()
+      .toLowerCase();
+
+    if (!["student", "teacher", "admin"].includes(normalizedExpectedRole)) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid login portal role is required.",
+      });
+    }
 
     if (!email || !password) {
       return res.status(400).json({
@@ -232,6 +243,18 @@ export const login = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password.",
+      });
+    }
+
+    if (user.role !== normalizedExpectedRole) {
+      const portalNames = {
+        student: "student",
+        teacher: "teacher",
+        admin: "admin",
+      };
+      return res.status(403).json({
+        success: false,
+        message: `This account cannot sign in through the ${portalNames[normalizedExpectedRole]} login portal.`,
       });
     }
 
@@ -404,6 +427,8 @@ export const updateProfile = async (req, res) => {
 
     let oldAvatarToDelete = "";
 
+    const removeAvatar = req.body.removeAvatar === "true";
+
     if (req.file) {
       const newAvatarUrl = getUploadedFileUrl(req.file);
 
@@ -413,6 +438,9 @@ export const updateProfile = async (req, res) => {
 
       oldAvatarToDelete = user.avatar || "";
       user.avatar = newAvatarUrl;
+    } else if (removeAvatar) {
+      oldAvatarToDelete = user.avatar || "";
+      user.avatar = "";
     }
 
     /*

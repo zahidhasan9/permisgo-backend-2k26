@@ -4,7 +4,13 @@ const faqSchema = new mongoose.Schema(
   {
     question: { type: String, required: true },
     answer: { type: String, required: true },
-    category: String,
+    section: {
+      type: String,
+      enum: ["home", "general", "instructors", "locations", "driving-code"],
+      default: "general",
+      index: true,
+    },
+    category: { type: String, default: "Driving lessons" },
     order: { type: Number, default: 0 },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
   },

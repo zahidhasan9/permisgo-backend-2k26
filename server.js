@@ -1,4 +1,5 @@
 import express from "express";
+import http from "http";
 import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -10,6 +11,7 @@ import rateLimit from "express-rate-limit";
 import "dotenv/config";
 
 import { connectDB } from "./config/db.js";
+import { mountSwagger } from "./config/swagger.js";
 import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
 
 import AuthRoutes from "./routes/authRoutes.js";
@@ -23,15 +25,17 @@ import studentRoutes from "./routes/studentRoutes.js";
 import offerRoutes from "./routes/offerRoutes.js";
 // import paymentRoutes from"./routes/paymentRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
-// import blogRoutes from"./routes/blogRoutes.js";
-// import faqRoutes from"./routes/faqRoutes.js";
-// import testimonialRoutes from"./routes/testimonialRoutes.js";
+import blogRoutes from "./routes/blogRoutes.js";
+import faqRoutes from "./routes/faqRoutes.js";
+import testimonialRoutes from "./routes/testimonialRoutes.js";
 // import supportRoutes from"./routes/supportRoutes.js";
 // import notificationRoutes from"./routes/notificationRoutes.js";
 // import reviewRoutes from"./routes/reviewRoutes.js";
 import referralRoutes from "./routes/referralRoutes.js";
 
 import examRoutes from "./routes/examRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import { initializeChatSocket } from "./socket/chatSocket.js";
 
 connectDB();
 
@@ -91,6 +95,8 @@ const uploadDirectory = path.resolve(process.env.UPLOAD_DIR || "uploads");
 
 app.use("/uploads", express.static(uploadDirectory));
 
+mountSwagger(app);
+
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
@@ -110,21 +116,24 @@ app.use("/api/offers", offerRoutes);
 app.use("/api/bookings", bookingRoutes);
 //app.use("/api/payments", paymentRoutes);
 app.use("/api/documents", documentRoutes);
-//app.use("/api/blogs", blogRoutes);
-//app.use("/api/faqs", faqRoutes);
-//app.use("/api/testimonials", testimonialRoutes);
+app.use("/api/blogs", blogRoutes);
+app.use("/api/faqs", faqRoutes);
+app.use("/api/testimonials", testimonialRoutes);
 //app.use("/api/support", supportRoutes);
 //app.use("/api/notifications", notificationRoutes);
 //app.use("/api/reviews", reviewRoutes);
 app.use("/api/referrals", referralRoutes);
 
 app.use("/api/exams", examRoutes);
+app.use("/api/chat", chatRoutes);
 //app.use("/api/admin", adminRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const httpServer = http.createServer(app);
+await initializeChatSocket(httpServer, allowedOrigins);
+httpServer.listen(PORT, () => {
   console.log(`server [STARTED] ~ http://localhost:${PORT}`);
 });
