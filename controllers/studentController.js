@@ -312,6 +312,7 @@ import Lesson from "../models/Lesson.js";
 import Payment from "../models/Payment.js";
 import Document from "../models/Document.js";
 import StudentSkillAssessment from "../models/StudentSkillAssessment.js";
+import QuizAttempt from "../models/QuizAttempt.js";
 
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/ApiResponse.js";
@@ -395,6 +396,8 @@ const buildProfileUpdate = (body = {}) => {
  */
 export const getDashboard = asyncHandler(async (req, res) => {
   const userId = req.user._id;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   /**
    * Profile না থাকলে create হবে।
@@ -402,7 +405,7 @@ export const getDashboard = asyncHandler(async (req, res) => {
    */
   const profile = await ensureStudentProfile(userId);
 
-  const [bookings, lessons, payments, documents] = await Promise.all([
+  const [bookings, lessons, payments, documents, upcomingLessons, completedLessons, quizAttemptSummary] = await Promise.all([
     Booking.countDocuments({
       student: userId,
     }),
@@ -418,7 +421,64 @@ export const getDashboard = asyncHandler(async (req, res) => {
     Document.countDocuments({
       user: userId,
     }),
+    Lesson.find({
+      student: userId,
+      lessonDate: { $gte: today },
+      status: { $in: ["scheduled", "in_progress", "awaiting_confirmation"] },
+    })
+      .sort({ lessonDate: 1, startTime: 1 })
+      .limit(10)
+      .populate("teacher", "name fullName email phone avatar")
+      .populate({ path: "booking", populate: { path: "offer", select: "title category" } })
+      .lean(),
+    Lesson.find({ student: userId, status: "completed" })
+      .sort({ lessonDate: -1, startTime: -1 })
+      .limit(3)
+      .populate("teacher", "name fullName email phone avatar")
+      .populate({ path: "booking", populate: { path: "offer", select: "title category" } })
+      .lean(),
+    QuizAttempt.aggregate([
+      { $match: { student: userId } },
+      {
+        $group: {
+          _id: null,
+          completed: { $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] } },
+          inProgress: { $sum: { $cond: [{ $eq: ["$status", "in_progress"] }, 1, 0] } },
+          notCompleted: { $sum: { $cond: [{ $eq: ["$status", "abandoned"] }, 1, 0] } },
+          average: {
+            $avg: { $cond: [{ $eq: ["$status", "completed"] }, "$percentage", null] },
+          },
+          totalAttempts: { $sum: 1 },
+        },
+      },
+    ]),
   ]);
+
+  const mapLesson = (lesson) => ({
+    _id: lesson._id,
+    id: lesson._id,
+    title: lesson.booking?.offer?.title || "Driving Lesson",
+    lessonDate: lesson.lessonDate,
+    startTime: lesson.startTime,
+    endTime: lesson.endTime,
+    duration: lesson.duration,
+    status: lesson.status,
+    instructorName: lesson.teacher?.name || lesson.teacher?.fullName || "Instructor",
+    teacher: lesson.teacher,
+    vehicleType: lesson.booking?.vehicleType || lesson.booking?.vehicle?.vehicleType || "automatic",
+    vehicle: lesson.booking?.vehicle || null,
+    location: lesson.booking?.location || null,
+    progressPercent: lesson.status === "completed" ? 100 : lesson.status === "in_progress" ? 55 : 20,
+  });
+
+  const completedMinutes = completedLessons.reduce(
+    (total, lesson) => total + Number(lesson.duration || 0),
+    0,
+  );
+  const upcomingMinutes = upcomingLessons.reduce(
+    (total, lesson) => total + Number(lesson.duration || 0),
+    0,
+  );
 
   return sendResponse(res, 200, "Student dashboard fetched.", {
     profile,
@@ -428,6 +488,21 @@ export const getDashboard = asyncHandler(async (req, res) => {
       lessons,
       payments,
       documents,
+      timeTakenHours: Number((completedMinutes / 60).toFixed(1)),
+      timeToComeMinutes: upcomingMinutes,
+    },
+    lessonProgress: completedLessons.map(mapLesson),
+    upcomingSchedule: upcomingLessons.map(mapLesson),
+    practiceDriving: {
+      scheduled: upcomingLessons.length > 0,
+      lesson: upcomingLessons.length ? mapLesson(upcomingLessons[0]) : null,
+    },
+    progressStatistics: {
+      completed: Number(quizAttemptSummary[0]?.completed || 0),
+      inProgress: Number(quizAttemptSummary[0]?.inProgress || 0),
+      notCompleted: Number(quizAttemptSummary[0]?.notCompleted || 0),
+      average: Math.round(Number(quizAttemptSummary[0]?.average || 0)),
+      totalAttempts: Number(quizAttemptSummary[0]?.totalAttempts || 0),
     },
   });
 });
