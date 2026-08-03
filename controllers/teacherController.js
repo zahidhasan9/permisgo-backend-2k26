@@ -7,6 +7,7 @@ import Lesson from "../models/Lesson.js";
 import Document from "../models/Document.js";
 import TeacherAvailability from "../models/TeacherAvailability.js";
 import User from "../models/User.js";
+import StudentSkillAssessment from "../models/StudentSkillAssessment.js";
 
 import ApiError from "../utils/ApiError.js";
 import sendResponse from "../utils/ApiResponse.js";
@@ -155,6 +156,52 @@ export const getBookedTeacherProfile = asyncHandler(async (req, res) => {
       reviews: Number(profile.rating?.totalReviews || 0),
     },
   });
+});
+
+export const getStudentBookletSkills = asyncHandler(async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.studentId)) throw new ApiError(400, "Invalid student id.");
+  const hasBooking = await Booking.exists({ teacher: req.user._id, student: req.params.studentId });
+  if (!hasBooking) throw new ApiError(403, "This student has not booked a lesson with you.");
+  const [student, assessments] = await Promise.all([
+    User.findById(req.params.studentId).select("name fullName email avatar").lean(),
+    StudentSkillAssessment.find({ student: req.params.studentId }).sort({ skill: 1 }).lean(),
+  ]);
+  if (!student) throw new ApiError(404, "Student not found.");
+  sendResponse(res, 200, "Student booklet skills fetched.", { student, assessments });
+});
+
+export const updateStudentBookletSkill = asyncHandler(async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.studentId)) throw new ApiError(400, "Invalid student id.");
+  const skill = String(req.body.skill || "").trim();
+  const status = String(req.body.status || "");
+  const category = ["C1", "C2", "C3", "C4"].includes(req.body.category) ? req.body.category : "C1";
+  if (!skill || !["not_acquired", "to_work", "acquired"].includes(status)) throw new ApiError(400, "A valid skill and status are required.");
+  const hasBooking = await Booking.exists({ teacher: req.user._id, student: req.params.studentId });
+  if (!hasBooking) throw new ApiError(403, "This student has not booked a lesson with you.");
+  const assessment = await StudentSkillAssessment.findOneAndUpdate(
+    { student: req.params.studentId, skill },
+    { $set: { status, category, teacher: req.user._id } },
+    { upsert: true, new: true, runValidators: true },
+  );
+  sendResponse(res, 200, "Booklet skill updated.", assessment);
+});
+
+export const updateStudentBookletSkills = asyncHandler(async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.studentId)) throw new ApiError(400, "Invalid student id.");
+  const hasBooking = await Booking.exists({ teacher: req.user._id, student: req.params.studentId });
+  if (!hasBooking) throw new ApiError(403, "This student has not booked a lesson with you.");
+  const assessments = Array.isArray(req.body.assessments) ? req.body.assessments : [];
+  if (!assessments.length || assessments.length > 50) throw new ApiError(400, "Provide between 1 and 50 skill assessments.");
+  const cleaned = assessments.map((item) => {
+    const skill = String(item.skill || "").trim();
+    const status = String(item.status || "");
+    const category = ["C1", "C2", "C3", "C4"].includes(item.category) ? item.category : "C1";
+    if (!skill || !["not_acquired", "to_work", "acquired"].includes(status)) throw new ApiError(400, "Every assessment requires a valid skill and status.");
+    return { skill, status, category };
+  });
+  await StudentSkillAssessment.bulkWrite(cleaned.map((item) => ({ updateOne: { filter: { student: req.params.studentId, skill: item.skill }, update: { $set: { ...item, teacher: req.user._id } }, upsert: true } })));
+  const saved = await StudentSkillAssessment.find({ student: req.params.studentId, skill: { $in: cleaned.map((item) => item.skill) } }).lean();
+  sendResponse(res, 200, "Booklet skills updated.", saved);
 });
 
 export const getDashboard = asyncHandler(async (req, res) => {

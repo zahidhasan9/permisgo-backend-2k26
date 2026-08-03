@@ -26,6 +26,7 @@ import {
   addFavoriteTeacher,
   getDashboard,
   getProfile,
+  getMyBookletSkills,
   removeFavoriteTeacher,
   updateProfile,
 } from "../controllers/studentController.js";
@@ -37,6 +38,7 @@ router.use(protect, authorize("student"));
 
 router.get("/dashboard", getDashboard);
 router.get("/profile", getProfile);
+router.get("/booklet/skills", getMyBookletSkills);
 router.patch("/profile", updateProfile);
 router.patch("/favorite-teachers/:teacherId", addFavoriteTeacher);
 router.delete("/favorite-teachers/:teacherId", removeFavoriteTeacher);

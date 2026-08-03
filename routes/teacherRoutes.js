@@ -72,9 +72,12 @@ import {
   getMyStudentDetails,
   getMyStudents,
   getBookedTeacherProfile,
+  getStudentBookletSkills,
   getProfile,
   getPublicTeachers,
   updateProfile,
+  updateStudentBookletSkill,
+  updateStudentBookletSkills,
 } from "../controllers/teacherController.js";
 
 import {
@@ -127,6 +130,9 @@ router.use(protect, authorize("teacher"));
 router.get("/dashboard", getDashboard);
 router.get("/students", getMyStudents);
 router.get("/students/:studentId", getMyStudentDetails);
+router.get("/students/:studentId/booklet", getStudentBookletSkills);
+router.put("/students/:studentId/booklet", updateStudentBookletSkill);
+router.put("/students/:studentId/booklet/bulk", updateStudentBookletSkills);
 
 router.get("/profile", getProfile);
 router.patch("/profile", updateProfile);

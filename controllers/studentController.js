@@ -311,10 +311,16 @@ import Booking from "../models/Booking.js";
 import Lesson from "../models/Lesson.js";
 import Payment from "../models/Payment.js";
 import Document from "../models/Document.js";
+import StudentSkillAssessment from "../models/StudentSkillAssessment.js";
 
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
+
+export const getMyBookletSkills = asyncHandler(async (req, res) => {
+  const assessments = await StudentSkillAssessment.find({ student: req.user._id }).sort({ skill: 1 }).lean();
+  sendResponse(res, 200, "Booklet skills fetched.", assessments);
+});
 
 /**
  * Student profile না থাকলে automatically create করবে।
