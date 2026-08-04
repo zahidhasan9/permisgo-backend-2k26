@@ -34,6 +34,7 @@ import testimonialRoutes from "./routes/testimonialRoutes.js";
 import referralRoutes from "./routes/referralRoutes.js";
 
 import examRoutes from "./routes/examRoutes.js";
+import examQuestionRoutes from "./routes/examQuestionRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import { initializeChatSocket } from "./socket/chatSocket.js";
 
@@ -125,6 +126,7 @@ app.use("/api/testimonials", testimonialRoutes);
 app.use("/api/referrals", referralRoutes);
 
 app.use("/api/exams", examRoutes);
+app.use("/api/exam-questions", examQuestionRoutes);
 app.use("/api/chat", chatRoutes);
 //app.use("/api/admin", adminRoutes);
 

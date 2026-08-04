@@ -313,6 +313,8 @@ import Payment from "../models/Payment.js";
 import Document from "../models/Document.js";
 import StudentSkillAssessment from "../models/StudentSkillAssessment.js";
 import QuizAttempt from "../models/QuizAttempt.js";
+import TeacherProfile from "../models/TeacherProfile.js";
+import Exam from "../models/Exam.js";
 
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/ApiResponse.js";
@@ -321,6 +323,27 @@ import ApiError from "../utils/ApiError.js";
 export const getMyBookletSkills = asyncHandler(async (req, res) => {
   const assessments = await StudentSkillAssessment.find({ student: req.user._id }).sort({ skill: 1 }).lean();
   sendResponse(res, 200, "Booklet skills fetched.", assessments);
+});
+
+export const getMyFavoriteTeachers = asyncHandler(async (req, res) => {
+  const studentProfile = await StudentProfile.findOne({ user: req.user._id })
+    .select("favoriteTeachers")
+    .lean();
+  const favoriteIds = studentProfile?.favoriteTeachers || [];
+  if (!favoriteIds.length) {
+    return sendResponse(res, 200, "Favorite teachers fetched.", []);
+  }
+
+  const profiles = await TeacherProfile.find({ user: { $in: favoriteIds } })
+    .populate("user", "name fullName email phone avatar status")
+    .populate("vehicles", "vehicleName vehicleType brand model status approvalStatus")
+    .populate("locations", "title address city status")
+    .lean();
+  const profileByUser = new Map(
+    profiles.filter((profile) => profile.user).map((profile) => [String(profile.user._id), profile]),
+  );
+  const ordered = favoriteIds.map((id) => profileByUser.get(String(id))).filter(Boolean);
+  return sendResponse(res, 200, "Favorite teachers fetched.", ordered);
 });
 
 /**
@@ -405,7 +428,7 @@ export const getDashboard = asyncHandler(async (req, res) => {
    */
   const profile = await ensureStudentProfile(userId);
 
-  const [bookings, lessons, payments, documents, upcomingLessons, completedLessons, quizAttemptSummary] = await Promise.all([
+  const [bookings, lessons, payments, documents, upcomingLessons, completedLessons, completedLessonSummary, quizAttemptSummary, drivingExam] = await Promise.all([
     Booking.countDocuments({
       student: userId,
     }),
@@ -437,6 +460,10 @@ export const getDashboard = asyncHandler(async (req, res) => {
       .populate("teacher", "name fullName email phone avatar")
       .populate({ path: "booking", populate: { path: "offer", select: "title category" } })
       .lean(),
+    Lesson.aggregate([
+      { $match: { student: userId, status: "completed" } },
+      { $group: { _id: null, minutes: { $sum: { $ifNull: ["$duration", 0] } }, count: { $sum: 1 } } },
+    ]),
     QuizAttempt.aggregate([
       { $match: { student: userId } },
       {
@@ -452,6 +479,7 @@ export const getDashboard = asyncHandler(async (req, res) => {
         },
       },
     ]),
+    Exam.findOne({ student: userId, examType: "driving" }).sort({ createdAt: -1 }).lean(),
   ]);
 
   const mapLesson = (lesson) => ({
@@ -471,14 +499,27 @@ export const getDashboard = asyncHandler(async (req, res) => {
     progressPercent: lesson.status === "completed" ? 100 : lesson.status === "in_progress" ? 55 : 20,
   });
 
-  const completedMinutes = completedLessons.reduce(
-    (total, lesson) => total + Number(lesson.duration || 0),
-    0,
-  );
+  const completedMinutes = Number(completedLessonSummary[0]?.minutes || 0);
   const upcomingMinutes = upcomingLessons.reduce(
     (total, lesson) => total + Number(lesson.duration || 0),
     0,
   );
+  const completedHours = Number((completedMinutes / 60).toFixed(1));
+  const quizAverage = Math.round(Number(quizAttemptSummary[0]?.average || 0));
+  const completedQuizzes = Number(quizAttemptSummary[0]?.completed || 0);
+  const codeProgress = completedQuizzes ? Math.min(quizAverage, 100) : 0;
+  const drivingTargetHours = 20;
+  const drivingProgress = Math.min(Math.round((completedHours / drivingTargetHours) * 100), 100);
+  const examProgress = drivingExam?.status === "passed" ? 100 : drivingExam?.status === "scheduled" ? 50 : 0;
+  const journeySteps = [
+    { code: "registration", label: "Registration", progress: 100, completed: true },
+    { code: "code_training", label: "Code Training", progress: codeProgress, completed: completedQuizzes > 0 && quizAverage >= 60 },
+    { code: "driving_lessons", label: "Driving Lessons", progress: drivingProgress, completed: completedHours >= drivingTargetHours },
+    { code: "driving_exam", label: "Driving Exam", progress: examProgress, completed: drivingExam?.status === "passed", status: drivingExam?.status || "not_scheduled" },
+    { code: "license", label: "License Completed", progress: drivingExam?.status === "passed" ? 100 : 0, completed: drivingExam?.status === "passed" },
+  ];
+  const firstIncompleteStep = journeySteps.findIndex((step) => !step.completed);
+  const currentStepIndex = firstIncompleteStep === -1 ? journeySteps.length - 1 : firstIncompleteStep;
 
   return sendResponse(res, 200, "Student dashboard fetched.", {
     profile,
@@ -488,7 +529,7 @@ export const getDashboard = asyncHandler(async (req, res) => {
       lessons,
       payments,
       documents,
-      timeTakenHours: Number((completedMinutes / 60).toFixed(1)),
+      timeTakenHours: completedHours,
       timeToComeMinutes: upcomingMinutes,
     },
     lessonProgress: completedLessons.map(mapLesson),
@@ -501,8 +542,17 @@ export const getDashboard = asyncHandler(async (req, res) => {
       completed: Number(quizAttemptSummary[0]?.completed || 0),
       inProgress: Number(quizAttemptSummary[0]?.inProgress || 0),
       notCompleted: Number(quizAttemptSummary[0]?.notCompleted || 0),
-      average: Math.round(Number(quizAttemptSummary[0]?.average || 0)),
+      average: quizAverage,
       totalAttempts: Number(quizAttemptSummary[0]?.totalAttempts || 0),
+    },
+    licenseJourney: {
+      steps: journeySteps,
+      currentStep: currentStepIndex + 1,
+      currentStepLabel: journeySteps[currentStepIndex]?.label || "License Completed",
+      completedHours,
+      targetHours: drivingTargetHours,
+      overallProgress: Math.round(journeySteps.reduce((sum, step) => sum + step.progress, 0) / journeySteps.length),
+      documentsUploaded: documents,
     },
   });
 });
