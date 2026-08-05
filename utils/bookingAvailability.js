@@ -52,6 +52,34 @@ export const timeToMinutes = (value) => {
   return hour * 60 + minute;
 };
 
+export const isBookingStartInPast = (
+  bookingDate,
+  startTime,
+  now = new Date(),
+) => {
+  const bookingKey = dateKey(bookingDate);
+  const timeZone = process.env.BOOKING_TIME_ZONE || "Europe/Paris";
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(now)
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value]),
+  );
+  const todayKey = `${parts.year}-${parts.month}-${parts.day}`;
+  if (bookingKey < todayKey) return true;
+  if (bookingKey > todayKey) return false;
+  const currentMinutes = Number(parts.hour) * 60 + Number(parts.minute);
+  return timeToMinutes(startTime) <= currentMinutes;
+};
+
 export const minutesToTime = (value) => {
   const minutes = Math.max(0, Math.min(1439, Number(value) || 0));
   const hour = Math.floor(minutes / 60);
@@ -155,6 +183,7 @@ export const buildAvailableSlots = ({
       const endTime = minutesToTime(cursor + safeDuration);
 
       if (
+        !isBookingStartInPast(bookingDate, startTime) &&
         !hasOccupiedConflict({
           startTime,
           endTime,

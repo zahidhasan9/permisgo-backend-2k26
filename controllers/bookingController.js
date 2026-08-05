@@ -842,6 +842,7 @@ import {
   getUtcDayRange,
   haversineDistanceKm,
   isTimeInsideWorkingSlots,
+  isBookingStartInPast,
   normalizeTime,
   timeToMinutes,
 } from "../utils/bookingAvailability.js";
@@ -1179,6 +1180,10 @@ export const createBooking = asyncHandler(async (req, res) => {
   const startTime = normalizeTime(rawStartTime, "Start time");
   const endTime = normalizeTime(rawEndTime, "End time");
   const duration = timeToMinutes(endTime) - timeToMinutes(startTime);
+
+  if (isBookingStartInPast(date, startTime)) {
+    throw new ApiError(400, "The selected lesson time has already passed.");
+  }
 
   if (duration < 30 || duration > 240) {
     throw new ApiError(

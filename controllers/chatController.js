@@ -40,6 +40,31 @@ export const getContacts = asyncHandler(async (req, res) => {
   sendResponse(res, 200, "Chat contacts fetched.", contacts);
 });
 
+export const getIceConfig = asyncHandler(async (req, res) => {
+  const stunUrl = process.env.STUN_URL || process.env.NEXT_PUBLIC_STUN_URL;
+  const turnUrl = process.env.TURN_URL || process.env.NEXT_PUBLIC_TURN_URL;
+  const turnUsername = process.env.TURN_USERNAME || process.env.NEXT_PUBLIC_TURN_USERNAME;
+  const turnCredential = process.env.TURN_CREDENTIAL || process.env.NEXT_PUBLIC_TURN_CREDENTIAL;
+  const iceServers = [
+    {
+      urls: (stunUrl || "stun:stun.l.google.com:19302")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean),
+    },
+  ];
+  if (turnUrl) {
+    iceServers.push({
+      urls: turnUrl.split(",")
+        .map((value) => value.trim())
+        .filter(Boolean),
+      username: turnUsername || "",
+      credential: turnCredential || "",
+    });
+  }
+  sendResponse(res, 200, "ICE configuration fetched.", { iceServers });
+});
+
 export const getMessages = asyncHandler(async (req, res) => {
   await getChatRecipient(req.user, req.params.userId);
   const conversation = await findOrCreateConversation(req.user._id, req.params.userId);
