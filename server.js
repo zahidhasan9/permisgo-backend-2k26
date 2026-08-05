@@ -30,7 +30,7 @@ import faqRoutes from "./routes/faqRoutes.js";
 import testimonialRoutes from "./routes/testimonialRoutes.js";
 // import supportRoutes from"./routes/supportRoutes.js";
 // import notificationRoutes from"./routes/notificationRoutes.js";
-// import reviewRoutes from"./routes/reviewRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 import referralRoutes from "./routes/referralRoutes.js";
 
 import examRoutes from "./routes/examRoutes.js";
@@ -122,7 +122,7 @@ app.use("/api/faqs", faqRoutes);
 app.use("/api/testimonials", testimonialRoutes);
 //app.use("/api/support", supportRoutes);
 //app.use("/api/notifications", notificationRoutes);
-//app.use("/api/reviews", reviewRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api/referrals", referralRoutes);
 
 app.use("/api/exams", examRoutes);

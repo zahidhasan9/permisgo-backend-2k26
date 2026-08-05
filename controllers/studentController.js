@@ -307,6 +307,7 @@
 // });
 
 import StudentProfile from "../models/StudentProfile.js";
+import User from "../models/User.js";
 import Booking from "../models/Booking.js";
 import Lesson from "../models/Lesson.js";
 import Payment from "../models/Payment.js";
@@ -315,6 +316,7 @@ import StudentSkillAssessment from "../models/StudentSkillAssessment.js";
 import QuizAttempt from "../models/QuizAttempt.js";
 import TeacherProfile from "../models/TeacherProfile.js";
 import Exam from "../models/Exam.js";
+import Setting from "../models/Setting.js";
 
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/ApiResponse.js";
@@ -427,8 +429,17 @@ export const getDashboard = asyncHandler(async (req, res) => {
    * আগে এখানে new: true থাকার কারণে warning আসছিল।
    */
   const profile = await ensureStudentProfile(userId);
+  const [registrationUser, registrationDocuments] = await Promise.all([
+    User.findById(userId)
+      .select("name email phone gender dateOfBirth address city")
+      .lean(),
+    Document.find({ user: userId })
+      .select("requirementKey status createdAt")
+      .sort({ createdAt: -1 })
+      .lean(),
+  ]);
 
-  const [bookings, lessons, payments, documents, upcomingLessons, completedLessons, completedLessonSummary, quizAttemptSummary, drivingExam] = await Promise.all([
+  const [bookings, lessons, payments, documents, upcomingLessons, completedLessons, bookedInstructorRecords, completedLessonSummary, quizAttemptSummary, drivingExam] = await Promise.all([
     Booking.countDocuments({
       student: userId,
     }),
@@ -459,6 +470,14 @@ export const getDashboard = asyncHandler(async (req, res) => {
       .limit(3)
       .populate("teacher", "name fullName email phone avatar")
       .populate({ path: "booking", populate: { path: "offer", select: "title category" } })
+      .lean(),
+    Booking.find({
+      student: userId,
+      status: { $in: ["pending", "confirmed", "completed"] },
+    })
+      .sort({ bookingDate: -1, createdAt: -1 })
+      .populate("teacher", "name fullName email phone avatar")
+      .select("teacher bookingDate status")
       .lean(),
     Lesson.aggregate([
       { $match: { student: userId, status: "completed" } },
@@ -508,18 +527,92 @@ export const getDashboard = asyncHandler(async (req, res) => {
   const quizAverage = Math.round(Number(quizAttemptSummary[0]?.average || 0));
   const completedQuizzes = Number(quizAttemptSummary[0]?.completed || 0);
   const codeProgress = completedQuizzes ? Math.min(quizAverage, 100) : 0;
-  const drivingTargetHours = 20;
+  const [journeySettings, bookletAssessments] = await Promise.all([
+    Setting.find({ key: { $in: ["requiredDrivingHours", "requiredSkillsPercentage"] } }).lean(),
+    StudentSkillAssessment.find({ student: userId }).select("status").lean(),
+  ]);
+  const settingValues = new Map(journeySettings.map((item) => [item.key, item.value]));
+  const drivingTargetHours = Number(settingValues.get("requiredDrivingHours") || 20);
+  const targetSkillsPercentage = Number(settingValues.get("requiredSkillsPercentage") || 60);
+  const skillScore = bookletAssessments.reduce((total, item) => {
+    if (item.status === "acquired") return total + 100;
+    if (item.status === "to_work") return total + 50;
+    return total;
+  }, 0);
+  const totalBookletSkills = Math.max(34, bookletAssessments.length);
+  const bookletAverage = bookletAssessments.length
+    ? Math.round(skillScore / totalBookletSkills)
+    : 0;
   const drivingProgress = Math.min(Math.round((completedHours / drivingTargetHours) * 100), 100);
   const examProgress = drivingExam?.status === "passed" ? 100 : drivingExam?.status === "scheduled" ? 50 : 0;
+  const requiredRegistrationFields = [
+    registrationUser?.name,
+    registrationUser?.email,
+    registrationUser?.phone,
+    registrationUser?.gender,
+    registrationUser?.dateOfBirth,
+    registrationUser?.address,
+    registrationUser?.city,
+    profile?.postalCode,
+    profile?.nephNumber,
+    profile?.drivingInfo?.licenseType,
+    profile?.drivingInfo?.currentLevel,
+    profile?.drivingInfo?.preferredVehicleType,
+    profile?.drivingInfo?.previousExperience,
+  ];
+  const profileComplete = requiredRegistrationFields.every((value) =>
+    String(value || "").trim(),
+  );
+  const requiredDocumentKeys = [
+    "identity_front",
+    "identity_back",
+    "license_front",
+    "license_back",
+    "proof_address",
+  ];
+  const latestDocumentByKey = new Map();
+  registrationDocuments.forEach((document) => {
+    if (!latestDocumentByKey.has(document.requirementKey)) {
+      latestDocumentByKey.set(document.requirementKey, document);
+    }
+  });
+  const approvedDocumentKeys = new Set(
+    [...latestDocumentByKey.values()]
+      .filter((document) => document.status === "approved")
+      .map((document) => document.requirementKey),
+  );
+  const approvedRequiredDocuments = requiredDocumentKeys.filter((key) =>
+    approvedDocumentKeys.has(key),
+  ).length;
+  const documentsApproved = approvedRequiredDocuments === requiredDocumentKeys.length;
+  const registrationComplete = profileComplete && documentsApproved;
+  const firstLessonComplete = Number(completedLessonSummary[0]?.count || 0) > 0;
   const journeySteps = [
-    { code: "registration", label: "Registration", progress: 100, completed: true },
-    { code: "code_training", label: "Code Training", progress: codeProgress, completed: completedQuizzes > 0 && quizAverage >= 60 },
-    { code: "driving_lessons", label: "Driving Lessons", progress: drivingProgress, completed: completedHours >= drivingTargetHours },
-    { code: "driving_exam", label: "Driving Exam", progress: examProgress, completed: drivingExam?.status === "passed", status: drivingExam?.status || "not_scheduled" },
-    { code: "license", label: "License Completed", progress: drivingExam?.status === "passed" ? 100 : 0, completed: drivingExam?.status === "passed" },
+    { code: "registration", label: "Driving registration", progress: registrationComplete ? 100 : 0, completed: registrationComplete },
+    { code: "first_lesson", label: "First lesson", progress: firstLessonComplete ? 100 : 0, completed: firstLessonComplete },
+    { code: "driving_training", label: "Driving training", progress: 0, completed: false },
+    { code: "exam_preparation", label: "Exam preparation", progress: 0, completed: false },
+    { code: "practical_exam", label: "Practical exam", progress: 0, completed: false },
   ];
   const firstIncompleteStep = journeySteps.findIndex((step) => !step.completed);
   const currentStepIndex = firstIncompleteStep === -1 ? journeySteps.length - 1 : firstIncompleteStep;
+  const seenInstructorIds = new Set();
+  const bookedInstructors = bookedInstructorRecords.reduce((items, booking) => {
+    const teacher = booking.teacher;
+    const teacherId = teacher?._id?.toString();
+    if (!teacherId || seenInstructorIds.has(teacherId)) return items;
+
+    seenInstructorIds.add(teacherId);
+    items.push({
+      _id: teacher._id,
+      name: teacher.name || teacher.fullName || "Instructor",
+      avatar: teacher.avatar || "",
+      phone: teacher.phone || "",
+      email: teacher.email || "",
+      lastBookedAt: booking.bookingDate,
+    });
+    return items;
+  }, []);
 
   return sendResponse(res, 200, "Student dashboard fetched.", {
     profile,
@@ -534,6 +627,7 @@ export const getDashboard = asyncHandler(async (req, res) => {
     },
     lessonProgress: completedLessons.map(mapLesson),
     upcomingSchedule: upcomingLessons.map(mapLesson),
+    bookedInstructors,
     practiceDriving: {
       scheduled: upcomingLessons.length > 0,
       lesson: upcomingLessons.length ? mapLesson(upcomingLessons[0]) : null,
@@ -551,8 +645,17 @@ export const getDashboard = asyncHandler(async (req, res) => {
       currentStepLabel: journeySteps[currentStepIndex]?.label || "License Completed",
       completedHours,
       targetHours: drivingTargetHours,
+      skillsPercentage: bookletAverage,
+      targetSkillsPercentage,
       overallProgress: Math.round(journeySteps.reduce((sum, step) => sum + step.progress, 0) / journeySteps.length),
       documentsUploaded: documents,
+      registration: {
+        profileComplete,
+        documentsApproved,
+        approvedDocuments: approvedRequiredDocuments,
+        requiredDocuments: requiredDocumentKeys.length,
+        completed: registrationComplete,
+      },
     },
   });
 });

@@ -22,7 +22,7 @@ import {
 } from "../controllers/ebookStructureController.js";
 import {
   listAdminLessons, getAdminLesson, createLesson, updateLesson, deleteLesson, permanentlyDeleteLesson,
-  listStudentLessons, getStudentLesson, updateStudentLessonProgress,
+  listStudentLessons, listAllStudentLessons, getStudentLesson, updateStudentLessonProgress,
 } from "../controllers/ebookLessonController.js";
 
 const router = express.Router();
@@ -42,6 +42,7 @@ router.patch("/admin/ebook/lessons/:lessonId", protect, authorize("admin"), uplo
 router.delete("/admin/ebook/lessons/:lessonId/permanent", protect, authorize("admin"), permanentlyDeleteLesson);
 router.delete("/admin/ebook/lessons/:lessonId", protect, authorize("admin"), deleteLesson);
 router.get("/ebook/courses/:courseId/topics/:topicId/lessons", protect, authorize("student", "admin"), listStudentLessons);
+router.get("/ebook/lessons", protect, authorize("student", "admin"), listAllStudentLessons);
 router.get("/ebook/lessons/:lessonId", protect, authorize("student", "admin"), getStudentLesson);
 router.patch("/ebook/lessons/:lessonId/progress", protect, authorize("student", "admin"), updateStudentLessonProgress);
 

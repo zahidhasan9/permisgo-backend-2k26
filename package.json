@@ -17,6 +17,7 @@
     "migrate:quiz-answer-images": "node seeders/fillQuizAnswerImages.js",
     "seed:road-signs": "node seeders/importRoadSigns.js",
     "seed:live-replays": "node seeders/importLiveReplays.js",
+    "seed:e-learning-videos": "node seeders/importELearningVideos.js",
     "seed:blogs": "node seeders/blogSeeder.js",
     "seed:faqs": "node seeders/faqSeeder.js",
     "seed:offers": "node seeders/offerSeeder.js",

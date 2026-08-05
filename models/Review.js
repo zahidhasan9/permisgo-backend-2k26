@@ -20,5 +20,7 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+reviewSchema.index({ lesson: 1 }, { unique: true, sparse: true });
+
 const Review = mongoose.model("Review", reviewSchema);
 export default Review;

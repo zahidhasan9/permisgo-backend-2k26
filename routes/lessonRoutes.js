@@ -74,6 +74,7 @@ import {
   confirmLessonCompletion,
   createLesson,
   getLesson,
+  getLatestLessonForFeedback,
   markNoShow,
   requestCancellation,
   requestReschedule,
@@ -103,6 +104,8 @@ router.get(
 );
 
 router.get("/", authorize("student", "teacher", "admin"), getLessonsPaginated);
+
+router.get("/latest-feedback", authorize("student"), getLatestLessonForFeedback);
 
 router.post("/", authorize("admin"), createLesson);
 

@@ -8,6 +8,7 @@ import Document from "../models/Document.js";
 import TeacherAvailability from "../models/TeacherAvailability.js";
 import User from "../models/User.js";
 import StudentSkillAssessment from "../models/StudentSkillAssessment.js";
+import Setting from "../models/Setting.js";
 
 import ApiError from "../utils/ApiError.js";
 import sendResponse from "../utils/ApiResponse.js";
@@ -170,6 +171,55 @@ export const getStudentBookletSkills = asyncHandler(async (req, res) => {
   sendResponse(res, 200, "Student booklet skills fetched.", { student, assessments });
 });
 
+export const getMyExamStudents = asyncHandler(async (req, res) => {
+  const lessons = await Lesson.find({
+    teacher: req.user._id,
+    status: { $nin: ["cancelled", "no_show"] },
+  })
+    .select("student booking lessonDate startTime endTime status")
+    .populate("student", "name fullName avatar")
+    .populate("booking", "location")
+    .sort({ lessonDate: -1, startTime: -1 })
+    .lean();
+
+  const studentIds = [...new Set(lessons.filter((item) => item.student).map((item) => String(item.student._id)))];
+  const [assessments, targetSetting] = await Promise.all([
+    StudentSkillAssessment.find({ student: { $in: studentIds } }).select("student status").lean(),
+    Setting.findOne({ key: "requiredSkillsPercentage" }).lean(),
+  ]);
+  const targetScore = Number(targetSetting?.value || 60);
+  const scoreMap = new Map();
+  assessments.forEach((item) => {
+    const key = String(item.student);
+    const current = scoreMap.get(key) || { points: 0, count: 0 };
+    current.points += item.status === "acquired" ? 100 : item.status === "to_work" ? 50 : 0;
+    current.count += 1;
+    scoreMap.set(key, current);
+  });
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const rows = lessons.filter((lesson) => lesson.student).map((lesson) => {
+    const score = scoreMap.get(String(lesson.student._id)) || { points: 0, count: 0 };
+    const bookletAverage = score.count ? Math.round(score.points / Math.max(34, score.count)) : 0;
+    const lessonDay = new Date(lesson.lessonDate);
+    lessonDay.setHours(0, 0, 0, 0);
+    const examStatus = lessonDay >= today ? "upcoming" : bookletAverage >= targetScore ? "passed" : "failed";
+    const location = lesson.booking?.location || {};
+    return {
+      _id: lesson._id,
+      student: lesson.student,
+      examCenter: [location.address, location.city].filter(Boolean).join(", ") || "Location not available",
+      date: lesson.lessonDate,
+      startTime: lesson.startTime,
+      endTime: lesson.endTime,
+      status: examStatus,
+      bookletAverage,
+      targetScore,
+    };
+  });
+  sendResponse(res, 200, "Teacher examination list fetched.", rows);
+});
+
 export const updateStudentBookletSkill = asyncHandler(async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.studentId)) throw new ApiError(400, "Invalid student id.");
   const skill = String(req.body.skill || "").trim();
@@ -240,7 +290,7 @@ export const getDashboard = asyncHandler(async (req, res) => {
       .sort({ startTime: 1 })
       .limit(5)
       .populate("student", "name email phone avatar")
-      .populate("booking"),
+      .populate({ path: "booking", populate: { path: "offer", select: "title" } }),
     Booking.find({ teacher: req.user._id, status: "pending" })
       .sort({ bookingDate: 1, startTime: 1 })
       .limit(5)
@@ -291,6 +341,62 @@ export const getDashboard = asyncHandler(async (req, res) => {
       sum + Number(lesson.booking?.pricingSnapshot?.subtotal || 0),
     0,
   );
+  const recentBookingRows = await Booking.find({
+    teacher: req.user._id,
+    status: { $in: ["pending", "confirmed", "completed"] },
+  })
+    .sort({ bookingDate: -1, createdAt: -1 })
+    .limit(50)
+    .populate("student", "name email phone avatar")
+    .populate("offer", "title")
+    .lean();
+  const recentStudents = [];
+  const seenStudentIds = new Set();
+  recentBookingRows.forEach((booking) => {
+    const studentId = String(booking.student?._id || "");
+    if (!studentId || seenStudentIds.has(studentId) || recentStudents.length >= 2) return;
+    seenStudentIds.add(studentId);
+    recentStudents.push(booking);
+  });
+  const progressStudentIds = recentStudents.map(
+    (booking) => booking.student._id,
+  );
+  const progressAssessments = await StudentSkillAssessment.find({
+    student: { $in: progressStudentIds },
+  })
+    .select("student status")
+    .lean();
+  const bookletScores = new Map();
+  progressAssessments.forEach((assessment) => {
+    const key = String(assessment.student);
+    const current = bookletScores.get(key) || { points: 0, count: 0 };
+    current.points +=
+      assessment.status === "acquired"
+        ? 100
+        : assessment.status === "to_work"
+          ? 50
+          : 0;
+    current.count += 1;
+    bookletScores.set(key, current);
+  });
+  const lessonsInProgress = recentStudents.map((booking) => {
+    const score = bookletScores.get(String(booking.student?._id)) || {
+      points: 0,
+      count: 0,
+    };
+    return {
+      _id: booking._id,
+      student: booking.student,
+      startTime: booking.startTime,
+      endTime: booking.endTime,
+      title:
+        booking.offer?.title ||
+        `${booking.student?.name || "Student"} driving lesson`,
+      bookletProgress: score.count
+        ? Math.round(score.points / Math.max(34, score.count))
+        : 0,
+    };
+  });
   const readiness = {
     profile: Boolean(
       profile?.user?.name &&
@@ -323,6 +429,7 @@ export const getDashboard = asyncHandler(async (req, res) => {
       rating: profile?.rating?.average || 0,
     },
     todayLessons,
+    lessonsInProgress,
     pendingBookings,
     readiness: {
       items: readiness,
@@ -631,6 +738,14 @@ export const getMyStudents = asyncHandler(async (req, res) => {
         ? Math.round((completedLessons / totalLessons) * 100)
         : 0,
       status,
+      bookingDate: latestBooking?.bookingDate || null,
+      duration: Number(latestBooking?.duration || 0),
+      startTime: latestBooking?.startTime || "",
+      endTime: latestBooking?.endTime || "",
+      vehicleType:
+        latestBooking?.vehicleType ||
+        latestBooking?.vehicleSnapshot?.vehicleType ||
+        "",
       course:
         latestBooking?.offer?.title ||
         (latestBooking?.vehicleType

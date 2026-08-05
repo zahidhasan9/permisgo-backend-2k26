@@ -1,16 +1,8 @@
 import express from "express";
-import reviewController from "../controllers/reviewController";
-import { protect, authorize } from "../middlewares/authMiddleware";
-import ROLES from "../constants/roles";
+import { getTeacherReviews } from "../controllers/reviewController.js";
 
 const router = express.Router();
 
-router.get("/teacher/:teacherId", reviewController.getTeacherReviews);
-router.post(
-  "/",
-  protect,
-  authorize(ROLES.STUDENT),
-  reviewController.createReview,
-);
+router.get("/teacher/:teacherId", getTeacherReviews);
 
 export default router;

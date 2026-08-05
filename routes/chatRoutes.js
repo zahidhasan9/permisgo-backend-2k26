@@ -1,9 +1,11 @@
 import express from "express";
-import { getContacts, getMessages } from "../controllers/chatController.js";
+import upload from "../middlewares/uploadMiddleware.js";
+import { getContacts, getMessages, uploadAttachment } from "../controllers/chatController.js";
 import { authorize, protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 router.use(protect, authorize("student", "teacher"));
 router.get("/contacts", getContacts);
 router.get("/messages/:userId", getMessages);
+router.post("/attachments", upload.single("file"), uploadAttachment);
 export default router;

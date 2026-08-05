@@ -71,6 +71,7 @@ import {
   getDashboard,
   getMyStudentDetails,
   getMyStudents,
+  getMyExamStudents,
   getBookedTeacherProfile,
   getStudentBookletSkills,
   getProfile,
@@ -129,6 +130,7 @@ router.use(protect, authorize("teacher"));
 
 router.get("/dashboard", getDashboard);
 router.get("/students", getMyStudents);
+router.get("/exams", getMyExamStudents);
 router.get("/students/:studentId", getMyStudentDetails);
 router.get("/students/:studentId/booklet", getStudentBookletSkills);
 router.put("/students/:studentId/booklet", updateStudentBookletSkill);
