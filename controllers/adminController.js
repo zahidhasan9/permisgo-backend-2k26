@@ -268,12 +268,13 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
 // @access  Admin
 export const getDrivingSettings = asyncHandler(async (req, res) => {
   const settings = await Setting.find({
-    key: { $in: ["requiredDrivingHours", "requiredSkillsPercentage"] },
+    key: { $in: ["requiredDrivingHours", "requiredSkillsPercentage", "contactRecipientEmail"] },
   }).lean();
   const values = new Map(settings.map((item) => [item.key, item.value]));
   return sendResponse(res, 200, "Driving settings fetched successfully.", {
     requiredHours: Number(values.get("requiredDrivingHours") || 20),
     requiredSkillsPercentage: Number(values.get("requiredSkillsPercentage") || 60),
+    contactRecipientEmail: String(values.get("contactRecipientEmail") || ""),
   });
 });
 
@@ -283,6 +284,7 @@ export const getDrivingSettings = asyncHandler(async (req, res) => {
 export const updateDrivingSettings = asyncHandler(async (req, res) => {
   const requiredHours = Number(req.body.requiredHours);
   const requiredSkillsPercentage = Number(req.body.requiredSkillsPercentage);
+  const contactRecipientEmail = String(req.body.contactRecipientEmail || "").trim().toLowerCase();
 
   if (!Number.isFinite(requiredHours) || requiredHours < 1 || requiredHours > 200) {
     return fail(res, 400, "Required driving hours must be between 1 and 200.");
@@ -295,6 +297,9 @@ export const updateDrivingSettings = asyncHandler(async (req, res) => {
   ) {
     return fail(res, 400, "Required skills percentage must be between 1 and 100.");
   }
+  if (contactRecipientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactRecipientEmail)) {
+    return fail(res, 400, "Please enter a valid contact recipient email.");
+  }
 
   const normalizedHours = Math.round(requiredHours * 10) / 10;
   const normalizedSkills = Math.round(requiredSkillsPercentage);
@@ -302,6 +307,11 @@ export const updateDrivingSettings = asyncHandler(async (req, res) => {
     Setting.findOneAndUpdate(
       { key: "requiredDrivingHours" },
       { $set: { value: normalizedHours, group: "driving" }, $setOnInsert: { key: "requiredDrivingHours" } },
+      { new: true, upsert: true, runValidators: true },
+    ),
+    Setting.findOneAndUpdate(
+      { key: "contactRecipientEmail" },
+      { $set: { value: contactRecipientEmail, group: "contact" }, $setOnInsert: { key: "contactRecipientEmail" } },
       { new: true, upsert: true, runValidators: true },
     ),
     Setting.findOneAndUpdate(
@@ -314,6 +324,7 @@ export const updateDrivingSettings = asyncHandler(async (req, res) => {
   return sendResponse(res, 200, "Global required driving hours updated successfully.", {
     requiredHours: normalizedHours,
     requiredSkillsPercentage: normalizedSkills,
+    contactRecipientEmail,
   });
 });
 

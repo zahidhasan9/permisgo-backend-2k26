@@ -23,7 +23,8 @@
     "seed:offers": "node seeders/offerSeeder.js",
     "docs:generate": "node scripts/generateOpenApi.js",
     "upload:blog-images": "node seeders/uploadBlogSeedImages.js",
-    "seed:testimonials": "node seeders/testimonialSeeder.js"
+    "seed:testimonials": "node seeders/testimonialSeeder.js",
+    "seed:demo-teachers": "node seeders/demoTeacherSeeder.js"
   },
   "keywords": [
     "permisgo",
