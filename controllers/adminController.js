@@ -268,13 +268,14 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
 // @access  Admin
 export const getDrivingSettings = asyncHandler(async (req, res) => {
   const settings = await Setting.find({
-    key: { $in: ["requiredDrivingHours", "requiredSkillsPercentage", "contactRecipientEmail"] },
+    key: { $in: ["requiredDrivingHours", "requiredSkillsPercentage", "contactRecipientEmail", "whatsappNumber"] },
   }).lean();
   const values = new Map(settings.map((item) => [item.key, item.value]));
   return sendResponse(res, 200, "Driving settings fetched successfully.", {
     requiredHours: Number(values.get("requiredDrivingHours") || 20),
     requiredSkillsPercentage: Number(values.get("requiredSkillsPercentage") || 60),
     contactRecipientEmail: String(values.get("contactRecipientEmail") || ""),
+    whatsappNumber: String(values.get("whatsappNumber") || ""),
   });
 });
 
@@ -285,6 +286,7 @@ export const updateDrivingSettings = asyncHandler(async (req, res) => {
   const requiredHours = Number(req.body.requiredHours);
   const requiredSkillsPercentage = Number(req.body.requiredSkillsPercentage);
   const contactRecipientEmail = String(req.body.contactRecipientEmail || "").trim().toLowerCase();
+  const whatsappNumber = String(req.body.whatsappNumber || "").trim();
 
   if (!Number.isFinite(requiredHours) || requiredHours < 1 || requiredHours > 200) {
     return fail(res, 400, "Required driving hours must be between 1 and 200.");
@@ -299,6 +301,9 @@ export const updateDrivingSettings = asyncHandler(async (req, res) => {
   }
   if (contactRecipientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactRecipientEmail)) {
     return fail(res, 400, "Please enter a valid contact recipient email.");
+  }
+  if (whatsappNumber && !/^\+?[0-9\s()-]{7,25}$/.test(whatsappNumber)) {
+    return fail(res, 400, "Please enter a valid WhatsApp number with country code.");
   }
 
   const normalizedHours = Math.round(requiredHours * 10) / 10;
@@ -319,12 +324,18 @@ export const updateDrivingSettings = asyncHandler(async (req, res) => {
       { $set: { value: normalizedSkills, group: "driving" }, $setOnInsert: { key: "requiredSkillsPercentage" } },
       { new: true, upsert: true, runValidators: true },
     ),
+    Setting.findOneAndUpdate(
+      { key: "whatsappNumber" },
+      { $set: { value: whatsappNumber, group: "contact" }, $setOnInsert: { key: "whatsappNumber" } },
+      { new: true, upsert: true, runValidators: true },
+    ),
   ]);
 
   return sendResponse(res, 200, "Global required driving hours updated successfully.", {
     requiredHours: normalizedHours,
     requiredSkillsPercentage: normalizedSkills,
     contactRecipientEmail,
+    whatsappNumber,
   });
 });
 

@@ -32,6 +32,13 @@ export const createContactSubmission = asyncHandler(async (req, res) => {
   sendResponse(res, 201, "Your message has been sent successfully.", { id: submission._id });
 });
 
+export const getPublicContactConfig = asyncHandler(async (req, res) => {
+  const setting = await Setting.findOne({ key: "whatsappNumber" }).lean();
+  sendResponse(res, 200, "Public contact configuration fetched.", {
+    whatsappNumber: clean(setting?.value),
+  });
+});
+
 export const getContactSubmissions = asyncHandler(async (req, res) => {
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
