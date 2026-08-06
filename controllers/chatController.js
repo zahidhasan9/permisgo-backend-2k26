@@ -41,6 +41,36 @@ export const getContacts = asyncHandler(async (req, res) => {
 });
 
 export const getIceConfig = asyncHandler(async (req, res) => {
+  const meteredDomain = String(process.env.METERED_DOMAIN || "")
+    .trim()
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
+  const meteredSecretKey = String(process.env.METERED_SECRET_KEY || "").trim();
+  if (meteredDomain && meteredSecretKey) {
+    const createUrl = new URL(`https://${meteredDomain}/api/v1/turn/credential`);
+    createUrl.searchParams.set("secretKey", meteredSecretKey);
+    const credentialResponse = await fetch(createUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expiryInSeconds: 14400, label: `permisgo-${req.user._id}-${Date.now()}` }),
+    });
+    if (!credentialResponse.ok) {
+      const details = await credentialResponse.text();
+      console.error("Metered TURN credential request failed:", credentialResponse.status, details.slice(0, 300));
+      throw new Error("TURN credentials could not be generated.");
+    }
+    const credential = await credentialResponse.json();
+    let iceServers = Array.isArray(credential.iceServers) ? credential.iceServers : [];
+    if (!iceServers.length && credential.apiKey) {
+      const iceUrl = new URL(`https://${meteredDomain}/api/v1/turn/credentials`);
+      iceUrl.searchParams.set("apiKey", credential.apiKey);
+      const iceResponse = await fetch(iceUrl);
+      if (iceResponse.ok) iceServers = await iceResponse.json();
+    }
+    if (!Array.isArray(iceServers) || !iceServers.length) throw new Error("Metered returned an empty ICE server list.");
+    return sendResponse(res, 200, "Temporary ICE configuration fetched.", { iceServers });
+  }
+
   const stunUrl = process.env.STUN_URL || process.env.NEXT_PUBLIC_STUN_URL;
   const turnUrl = process.env.TURN_URL || process.env.NEXT_PUBLIC_TURN_URL;
   const turnUsername = process.env.TURN_USERNAME || process.env.NEXT_PUBLIC_TURN_USERNAME;
