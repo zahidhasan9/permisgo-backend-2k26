@@ -13,12 +13,38 @@ export const initializeChatSocket = async (httpServer, allowedOrigins) => {
   const io = new Server(httpServer, { cors: { origin: allowedOrigins, credentials: true } });
 
   if (process.env.REDIS_URL) {
-    const pubClient = new Redis(process.env.REDIS_URL, { maxRetriesPerRequest: null, enableReadyCheck: true });
+    let adapterActivated = false;
+    let redisErrorLogged = false;
+    const redisOptions = {
+      lazyConnect: true,
+      connectTimeout: 3000,
+      maxRetriesPerRequest: null,
+      enableReadyCheck: true,
+      retryStrategy: (times) =>
+        adapterActivated ? Math.min(times * 200, 2000) : null,
+    };
+    const pubClient = new Redis(process.env.REDIS_URL, redisOptions);
     const subClient = pubClient.duplicate();
-    pubClient.on("error", (error) => console.error("Redis publisher error:", error.message));
-    subClient.on("error", (error) => console.error("Redis subscriber error:", error.message));
-    io.adapter(createAdapter(pubClient, subClient, { publishOnSpecificResponseChannel: true }));
-    console.log("Socket.IO Redis adapter enabled");
+    const logRedisError = (role, error) => {
+      if (redisErrorLogged) return;
+      redisErrorLogged = true;
+      const reason = error?.message || error?.code || error?.cause?.message || "Connection unavailable";
+      console.warn(`Redis ${role} unavailable: ${reason}`);
+    };
+    pubClient.on("error", (error) => logRedisError("publisher", error));
+    subClient.on("error", (error) => logRedisError("subscriber", error));
+
+    try {
+      await Promise.all([pubClient.connect(), subClient.connect()]);
+      adapterActivated = true;
+      io.adapter(createAdapter(pubClient, subClient, { publishOnSpecificResponseChannel: true }));
+      console.log("Socket.IO Redis adapter enabled");
+    } catch (error) {
+      logRedisError("adapter", error);
+      pubClient.disconnect();
+      subClient.disconnect();
+      console.warn("Socket.IO is running in single-instance mode because Redis is unavailable.");
+    }
   } else {
     console.warn("REDIS_URL is not configured; Socket.IO is running in single-instance mode.");
   }
