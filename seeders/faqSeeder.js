@@ -3,6 +3,14 @@ import mongoose from "mongoose";
 import { connectDB } from "../config/db.js";
 import FAQ from "../models/FAQ.js";
 
+const homeTranslations = {
+  "How many driving lessons will I need?": { bn: { question: "আমার কতটি ড্রাইভিং ক্লাস প্রয়োজন হবে?", answer: "অভিজ্ঞতা ও শেখার গতির ওপর ক্লাসের সংখ্যা নির্ভর করে। মূল্যায়ন ক্লাসের পর প্রশিক্ষক একটি পরিকল্পনা দেবেন এবং নিয়মিত অগ্রগতি পর্যালোচনা করবেন।" }, fr: { question: "De combien de leçons de conduite aurai-je besoin ?", answer: "Le nombre dépend de votre expérience et de votre rythme. Après une leçon d'évaluation, votre moniteur recommandera un programme et suivra régulièrement vos progrès." } },
+  "Can I choose a manual or automatic car?": { bn: { question: "আমি কি ম্যানুয়াল বা অটোমেটিক গাড়ি বেছে নিতে পারি?", answer: "হ্যাঁ। প্রশিক্ষক খোঁজা বা ক্লাস বুক করার সময় পছন্দের ট্রান্সমিশন নির্বাচন করুন। আপনার এলাকায় থাকা গাড়ির ওপর প্রাপ্যতা নির্ভর করবে।" }, fr: { question: "Puis-je choisir une voiture manuelle ou automatique ?", answer: "Oui. Sélectionnez la transmission souhaitée lors de la recherche ou de la réservation. La disponibilité dépend des véhicules proposés dans votre secteur." } },
+  "Can I change the date of a booked lesson?": { bn: { question: "বুক করা ক্লাসের তারিখ কি পরিবর্তন করতে পারি?", answer: "আপনার lesson area থেকে reschedule অনুরোধ করতে পারবেন। নির্ধারিত সময়সীমার আগে পাঠালে প্রশিক্ষক বা admin সেটি পর্যালোচনা করতে পারবেন।" }, fr: { question: "Puis-je modifier la date d'une leçon réservée ?", answer: "Vous pouvez demander un report depuis votre espace leçons. Envoyez la demande avant la limite d'annulation afin que le moniteur ou l'administrateur puisse l'examiner." } },
+  "Which documents do I need before driving?": { bn: { question: "গাড়ি চালানোর আগে কোন নথি প্রয়োজন?", answer: "সাধারণত বৈধ provisional licence এবং account checklist-এ চাওয়া পরিচয় বা যোগ্যতার নথি প্রয়োজন।" }, fr: { question: "Quels documents faut-il avant de conduire ?", answer: "Vous avez généralement besoin d'un permis provisoire valide et des justificatifs d'identité ou d'éligibilité demandés dans votre compte." } },
+  "Are PermisGo instructors verified?": { bn: { question: "PermisGo প্রশিক্ষকেরা কি যাচাইকৃত?", answer: "অনুমোদনের আগে admin team প্রশিক্ষকের profile ও গাড়ির নথি যাচাই করে। Platform-এ verification status দেখা যায়।" }, fr: { question: "Les moniteurs PermisGo sont-ils vérifiés ?", answer: "L'équipe administrative contrôle les profils et les documents des véhicules avant validation. Le statut de vérification est affiché sur la plateforme." } },
+};
+
 const entries = [
   ["home", "Driving lessons", "How many driving lessons will I need?", "The number varies with experience and learning pace. After an assessment lesson, your instructor will recommend a plan and review your progress regularly."],
   ["home", "Bookings", "Can I choose a manual or automatic car?", "Yes. Select your preferred transmission while searching for an instructor or booking a lesson. Availability depends on vehicles offered in your area."],
@@ -32,7 +40,7 @@ const entries = [
   ["driving-code", "Road signs", "What is the best way to remember road signs?", "Learn signs by shape and purpose, then connect each sign to the driving action it requires: warning, restriction, direction or information."],
   ["driving-code", "Mock tests", "How many mock tests should I complete?", "Continue until you pass consistently within the time limit and understand why each answer is correct. Quality of review matters more than the total number."],
   ["driving-code", "Learning progress", "Does the platform save my learning progress?", "Yes. Supported lessons, ebook content and quiz attempts record progress so you can continue and review your history later."],
-].map(([section, category, question, answer], index) => ({ section, category, question, answer, order: (index % 5) + 1, status: "active" }));
+].map(([section, category, question, answer], index) => ({ section, category, question, answer, translations: homeTranslations[question] || {}, order: (index % 5) + 1, status: "active" }));
 
 const run = async () => { await connectDB(); for (const item of entries) await FAQ.findOneAndUpdate({ section: item.section, question: item.question }, item, { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }); console.log(`FAQs inserted/updated: ${entries.length}`); await mongoose.connection.close(); };
 run().catch(async (error) => { console.error(error); await mongoose.connection.close(); process.exit(1); });

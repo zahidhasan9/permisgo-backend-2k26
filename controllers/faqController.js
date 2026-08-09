@@ -12,13 +12,19 @@ const cleanPayload = (body) => ({
   category: String(body.category || "Driving lessons").trim(),
   order: Number.isFinite(Number(body.order)) ? Number(body.order) : 0,
   status: body.status === "inactive" ? "inactive" : "active",
+  translations: {
+    bn: { question: String(body.question_bn || "").trim(), answer: String(body.answer_bn || "").trim() },
+    fr: { question: String(body.question_fr || "").trim(), answer: String(body.answer_fr || "").trim() },
+  },
 });
+
+const localize = (item, lang) => { const data = item.toObject ? item.toObject() : item; if (!["bn", "fr"].includes(lang)) return data; const value = data.translations?.[lang] || {}; return { ...data, question: value.question || data.question, answer: value.answer || data.answer, language: lang }; };
 
 export const getFaqs = asyncHandler(async (req, res) => {
   const filter = { status: "active" };
   if (sections.includes(req.query.section)) filter.section = req.query.section;
   const faqs = await FAQ.find(filter).sort({ section: 1, order: 1, createdAt: 1 });
-  sendResponse(res, 200, "FAQs fetched.", faqs);
+  sendResponse(res, 200, "FAQs fetched.", faqs.map((item) => localize(item, req.query.lang)));
 });
 
 export const getAdminFaqs = asyncHandler(async (req, res) => {

@@ -7,6 +7,10 @@ const blogSchema = new mongoose.Schema(
     slug: { type: String, unique: true, lowercase: true },
     excerpt: String,
     content: String,
+    translations: {
+      bn: { title: { type: String, trim: true, default: "" }, excerpt: { type: String, trim: true, default: "" }, content: { type: String, trim: true, default: "" } },
+      fr: { title: { type: String, trim: true, default: "" }, excerpt: { type: String, trim: true, default: "" }, content: { type: String, trim: true, default: "" } },
+    },
     coverImage: String,
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     status: { type: String, enum: ["draft", "published"], default: "draft" },

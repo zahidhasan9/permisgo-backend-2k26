@@ -12,6 +12,19 @@ import {
 const normalizeStatus = (value) =>
   value === "published" ? "published" : "draft";
 
+const clean = (value) => String(value || "").trim();
+const getLanguage = (value) => ["bn", "fr"].includes(value) ? value : "en";
+const localizeBlog = (blog, language) => {
+  const item = blog.toObject ? blog.toObject() : blog;
+  if (language === "en") return item;
+  const translated = item.translations?.[language] || {};
+  return { ...item, title: translated.title || item.title, excerpt: translated.excerpt || item.excerpt, content: translated.content || item.content, language };
+};
+const translationPayload = (body) => ({
+  bn: { title: clean(body.title_bn), excerpt: clean(body.excerpt_bn), content: clean(body.content_bn) },
+  fr: { title: clean(body.title_fr), excerpt: clean(body.excerpt_fr), content: clean(body.content_fr) },
+});
+
 const buildUniqueSlug = async (title, ignoredId = null) => {
   const base = slugify(String(title || "blog"), {
     lower: true,
@@ -33,12 +46,13 @@ const buildUniqueSlug = async (title, ignoredId = null) => {
 };
 
 export const getBlogs = asyncHandler(async (req, res) => {
+  const language = getLanguage(req.query.lang);
   const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 100);
   const blogs = await Blog.find({ status: "published" })
     .populate("author", "name")
     .sort({ publishedAt: -1, createdAt: -1 })
     .limit(limit);
-  sendResponse(res, 200, "Blogs fetched.", blogs);
+  sendResponse(res, 200, "Blogs fetched.", blogs.map((blog) => localizeBlog(blog, language)));
 });
 
 export const getAdminBlogs = asyncHandler(async (req, res) => {
@@ -52,6 +66,7 @@ export const getAdminBlogs = asyncHandler(async (req, res) => {
 });
 
 export const getBlog = asyncHandler(async (req, res) => {
+  const language = getLanguage(req.query.lang);
   const numericPosition = /^\d+$/.test(req.params.slug)
     ? Number(req.params.slug)
     : null;
@@ -62,7 +77,7 @@ export const getBlog = asyncHandler(async (req, res) => {
     : Blog.findOne({ slug: req.params.slug, status: "published" });
   const blog = await query.populate("author", "name");
   if (!blog) throw new ApiError(404, "Blog not found.");
-  sendResponse(res, 200, "Blog fetched.", blog);
+  sendResponse(res, 200, "Blog fetched.", localizeBlog(blog, language));
 });
 
 export const createBlog = asyncHandler(async (req, res) => {
@@ -76,6 +91,7 @@ export const createBlog = asyncHandler(async (req, res) => {
     slug: await buildUniqueSlug(title),
     excerpt: String(req.body.excerpt || "").trim(),
     content: String(req.body.content || "").trim(),
+    translations: translationPayload(req.body),
     coverImage: getUploadedFileUrl(req.file),
     author: req.user._id,
     status,
@@ -97,6 +113,12 @@ export const updateBlog = asyncHandler(async (req, res) => {
   }
   if (req.body.excerpt !== undefined) blog.excerpt = String(req.body.excerpt).trim();
   if (req.body.content !== undefined) blog.content = String(req.body.content).trim();
+  for (const language of ["bn", "fr"]) {
+    for (const field of ["title", "excerpt", "content"]) {
+      const key = `${field}_${language}`;
+      if (req.body[key] !== undefined) blog.set(`translations.${language}.${field}`, clean(req.body[key]));
+    }
+  }
   if (req.body.status !== undefined) {
     const nextStatus = normalizeStatus(req.body.status);
     if (nextStatus === "published" && blog.status !== "published") {

@@ -4,6 +4,10 @@ const faqSchema = new mongoose.Schema(
   {
     question: { type: String, required: true },
     answer: { type: String, required: true },
+    translations: {
+      bn: { question: { type: String, default: "", trim: true }, answer: { type: String, default: "", trim: true } },
+      fr: { question: { type: String, default: "", trim: true }, answer: { type: String, default: "", trim: true } },
+    },
     section: {
       type: String,
       enum: ["home", "general", "instructors", "locations", "driving-code"],

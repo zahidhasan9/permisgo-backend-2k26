@@ -4,6 +4,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import sendResponse from "../utils/ApiResponse.js";
 import sendEmail from "../utils/sendEmail.js";
+import { buildSiteSettings, SITE_SETTING_KEYS } from "../config/siteSettings.js";
 
 const clean = (value) => String(value || "").trim();
 const escapeHtml = (value) => clean(value).replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
@@ -33,10 +34,8 @@ export const createContactSubmission = asyncHandler(async (req, res) => {
 });
 
 export const getPublicContactConfig = asyncHandler(async (req, res) => {
-  const setting = await Setting.findOne({ key: "whatsappNumber" }).lean();
-  sendResponse(res, 200, "Public contact configuration fetched.", {
-    whatsappNumber: clean(setting?.value),
-  });
+  const settings = await Setting.find({ key: { $in: SITE_SETTING_KEYS } }).lean();
+  sendResponse(res, 200, "Public contact configuration fetched.", buildSiteSettings(settings));
 });
 
 export const getContactSubmissions = asyncHandler(async (req, res) => {
