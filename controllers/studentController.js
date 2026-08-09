@@ -431,7 +431,7 @@ export const getDashboard = asyncHandler(async (req, res) => {
   const profile = await ensureStudentProfile(userId);
   const [registrationUser, registrationDocuments] = await Promise.all([
     User.findById(userId)
-      .select("name email phone gender dateOfBirth address city")
+      .select("name email phone avatar gender dateOfBirth address city")
       .lean(),
     Document.find({ user: userId })
       .select("requirementKey status createdAt")
@@ -585,6 +585,61 @@ export const getDashboard = asyncHandler(async (req, res) => {
     approvedDocumentKeys.has(key),
   ).length;
   const documentsApproved = approvedRequiredDocuments === requiredDocumentKeys.length;
+  const hasValue = (value) => String(value || "").trim().length > 0;
+  const profileCompletionItems = [
+    {
+      code: "account_setup",
+      label: "Account Setup",
+      weight: 10,
+      completed: [registrationUser?.name, registrationUser?.email].every(hasValue),
+    },
+    {
+      code: "profile_photo",
+      label: "Profile Photo",
+      weight: 10,
+      completed: hasValue(registrationUser?.avatar),
+    },
+    {
+      code: "personal_info",
+      label: "Personal Info",
+      weight: 20,
+      completed: [
+        registrationUser?.dateOfBirth || profile?.dateOfBirth,
+        registrationUser?.gender || profile?.gender,
+      ].every(hasValue),
+    },
+    {
+      code: "driving_info",
+      label: "Driving Info (+20%)",
+      weight: 20,
+      completed: [
+        profile?.drivingInfo?.licenseType,
+        profile?.drivingInfo?.currentLevel,
+        profile?.drivingInfo?.preferredVehicleType,
+        profile?.drivingInfo?.previousExperience,
+      ].every(hasValue),
+    },
+    {
+      code: "contact",
+      label: "Contact",
+      weight: 20,
+      completed: [
+        registrationUser?.phone,
+        registrationUser?.address || profile?.address,
+        registrationUser?.city || profile?.city,
+      ].every(hasValue),
+    },
+    {
+      code: "documents",
+      label: "Documents (+20%)",
+      weight: 20,
+      completed: documentsApproved,
+    },
+  ];
+  const profileCompletionPercentage = profileCompletionItems.reduce(
+    (total, item) => total + (item.completed ? item.weight : 0),
+    0,
+  );
   const registrationComplete = profileComplete && documentsApproved;
   const firstLessonComplete = Number(completedLessonSummary[0]?.count || 0) > 0;
   const journeySteps = [
@@ -628,6 +683,10 @@ export const getDashboard = asyncHandler(async (req, res) => {
     lessonProgress: completedLessons.map(mapLesson),
     upcomingSchedule: upcomingLessons.map(mapLesson),
     bookedInstructors,
+    profileCompletion: {
+      percentage: profileCompletionPercentage,
+      items: profileCompletionItems,
+    },
     practiceDriving: {
       scheduled: upcomingLessons.length > 0,
       lesson: upcomingLessons.length ? mapLesson(upcomingLessons[0]) : null,

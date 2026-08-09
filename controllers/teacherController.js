@@ -163,12 +163,64 @@ export const getStudentBookletSkills = asyncHandler(async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.studentId)) throw new ApiError(400, "Invalid student id.");
   const hasBooking = await Booking.exists({ teacher: req.user._id, student: req.params.studentId });
   if (!hasBooking) throw new ApiError(403, "This student has not booked a lesson with you.");
-  const [student, assessments] = await Promise.all([
+  const [student, assessments, completedLessons] = await Promise.all([
     User.findById(req.params.studentId).select("name fullName email avatar").lean(),
     StudentSkillAssessment.find({ student: req.params.studentId }).sort({ skill: 1 }).lean(),
+    Lesson.find({
+      teacher: req.user._id,
+      student: req.params.studentId,
+      status: "completed",
+    })
+      .select("title lessonDate startTime endTime duration lessonProgress.teacherNotes lessonProgress.teacherSubmittedAt")
+      .sort({ lessonDate: -1, startTime: -1 })
+      .limit(50)
+      .lean(),
   ]);
   if (!student) throw new ApiError(404, "Student not found.");
-  sendResponse(res, 200, "Student booklet skills fetched.", { student, assessments });
+  sendResponse(res, 200, "Student booklet skills fetched.", {
+    student,
+    assessments,
+    completedLessons,
+  });
+});
+
+export const updateStudentLessonNote = asyncHandler(async (req, res) => {
+  const { studentId } = req.params;
+  const lessonId = String(req.body.lessonId || "").trim();
+  const teacherNotes = String(req.body.teacherNotes || "").trim();
+
+  if (!mongoose.Types.ObjectId.isValid(studentId)) {
+    throw new ApiError(400, "Invalid student id.");
+  }
+  if (!mongoose.Types.ObjectId.isValid(lessonId)) {
+    throw new ApiError(400, "Select a valid completed lesson.");
+  }
+  if (!teacherNotes) {
+    throw new ApiError(400, "Instructor note is required.");
+  }
+  if (teacherNotes.length > 2000) {
+    throw new ApiError(400, "Instructor note cannot exceed 2000 characters.");
+  }
+
+  const lesson = await Lesson.findOne({
+    _id: lessonId,
+    teacher: req.user._id,
+    student: studentId,
+    status: "completed",
+  });
+
+  if (!lesson) {
+    throw new ApiError(
+      404,
+      "Completed lesson not found or it does not belong to this student.",
+    );
+  }
+
+  lesson.lessonProgress.teacherNotes = teacherNotes;
+  lesson.lessonProgress.teacherSubmittedAt = new Date();
+  await lesson.save();
+
+  sendResponse(res, 200, "Instructor note saved successfully.", lesson);
 });
 
 export const getMyExamStudents = asyncHandler(async (req, res) => {

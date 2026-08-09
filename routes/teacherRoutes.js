@@ -79,6 +79,7 @@ import {
   updateProfile,
   updateStudentBookletSkill,
   updateStudentBookletSkills,
+  updateStudentLessonNote,
 } from "../controllers/teacherController.js";
 
 import {
@@ -135,6 +136,7 @@ router.get("/students/:studentId", getMyStudentDetails);
 router.get("/students/:studentId/booklet", getStudentBookletSkills);
 router.put("/students/:studentId/booklet", updateStudentBookletSkill);
 router.put("/students/:studentId/booklet/bulk", updateStudentBookletSkills);
+router.put("/students/:studentId/booklet/lesson-note", updateStudentLessonNote);
 
 router.get("/profile", getProfile);
 router.patch("/profile", updateProfile);
