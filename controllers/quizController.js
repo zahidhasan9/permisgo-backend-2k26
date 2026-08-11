@@ -192,12 +192,21 @@ const normalizeOptionsFromRequest = (req, existingOptions = []) => {
     };
   });
 
-  while (options.length < 4) {
-    options.push({ text: "", image: "", order: options.length });
+  const requiresFourOptions = Number(req.body.promptCount) === 2;
+  while (!requiresFourOptions && options.length > 2 && !options.at(-1)?.text) {
+    options.pop();
   }
 
-  if (options.some((option) => !option.text)) {
-    const error = new Error("All 4 option text fields are required.");
+  if (
+    options.length < 2 ||
+    options.some((option) => !option.text) ||
+    (requiresFourOptions && options.length !== 4)
+  ) {
+    const error = new Error(
+      requiresFourOptions
+        ? "All 4 option text fields are required for a two-part question."
+        : "Enter 2 to 4 options in order without leaving a gap.",
+    );
     error.statusCode = 400;
     throw error;
   }
@@ -958,6 +967,10 @@ export const createQuestion = asyncHandler(async (req, res) => {
   const promptCount = Number(req.body.promptCount) === 2 ? 2 : 1;
   const correctOptionIndexes = parseJSON(req.body.correctOptionIndexes, null) || [toNumber(req.body.correctOptionIndex, 0)];
   const questionVideoUrl = String(req.body.questionVideoUrl || "").trim();
+  if (correctOptionIndexes.some((index) => Number(index) < 0 || Number(index) >= options.length)) {
+    res.statusCode = 400;
+    throw new Error("The correct answer must reference an option that has text.");
+  }
   if (questionImageFile && questionVideoUrl) { res.statusCode = 400; throw new Error("Choose either a question image or a video, not both."); }
   if (promptCount === 2) {
     if (!String(req.body.secondaryQuestionText || "").trim()) { res.statusCode = 400; throw new Error("Second question text is required."); }
@@ -1059,6 +1072,13 @@ export const updateQuestion = asyncHandler(async (req, res) => {
     req.body.option1 !== undefined
   ) {
     question.options = normalizeOptionsFromRequest(req, question.options);
+    const correctIndexes = question.correctOptionIndexes?.length
+      ? question.correctOptionIndexes.map(Number)
+      : [Number(question.correctOptionIndex)];
+    if (correctIndexes.some((index) => index < 0 || index >= question.options.length)) {
+      res.statusCode = 400;
+      throw new Error("The correct answer must reference an option that has text.");
+    }
   }
 
   if (question.promptCount === 2) {
