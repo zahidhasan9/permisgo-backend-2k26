@@ -153,6 +153,7 @@ const sanitizeQuestionForStudent = (question) => ({
     order: option.order ?? index,
   })),
   answerMode: (question.correctOptionIndexes?.length || 0) > 1 ? "multiple" : "single",
+  requiredAnswerCount: Math.max(question.correctOptionIndexes?.length || 0, 1),
   topic: question.topic,
   difficulty: question.difficulty,
   order: question.order,
@@ -413,6 +414,14 @@ export const submitQuizAnswer = asyncHandler(async (req, res) => {
     (answer) => String(answer.question) === String(question._id),
   );
   const correctIndexes = [...new Set((question.correctOptionIndexes?.length ? question.correctOptionIndexes : [question.correctOptionIndex]).map(Number))].sort();
+  if (selectedIndexes.length !== correctIndexes.length) {
+    res.statusCode = 400;
+    throw new Error(
+      correctIndexes.length > 1
+        ? `Please select exactly ${correctIndexes.length} answers.`
+        : "Please select one answer.",
+    );
+  }
   const isCorrect = selectedIndexes.length === correctIndexes.length && selectedIndexes.every((value, index) => value === correctIndexes[index]);
 
   if (!existingAnswer) {

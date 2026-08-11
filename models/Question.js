@@ -109,9 +109,12 @@ const questionSchema = new mongoose.Schema(
       type: [questionOptionSchema],
       validate: {
         validator: function (value) {
-          return Array.isArray(value) && value.length === 4;
+          if (!Array.isArray(value)) return false;
+          return Number(this.promptCount) === 2
+            ? value.length === 4
+            : value.length >= 2 && value.length <= 4;
         },
-        message: "Question must have exactly 4 options.",
+        message: "A question must have 2 to 4 options; a two-part question must have exactly 4 options.",
       },
       required: true,
     },
