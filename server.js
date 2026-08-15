@@ -138,8 +138,15 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-const httpServer = http.createServer(app);
-await initializeChatSocket(httpServer, allowedOrigins);
-httpServer.listen(PORT, () => {
-  console.log(`server [STARTED] ~ http://localhost:${PORT}`);
-});
+
+// Vercel invokes the exported Express application as a serverless function.
+// A long-running HTTP/Socket.IO listener is only created outside Vercel.
+if (!process.env.VERCEL) {
+  const httpServer = http.createServer(app);
+  await initializeChatSocket(httpServer, allowedOrigins);
+  httpServer.listen(PORT, () => {
+    console.log(`server [STARTED] ~ http://localhost:${PORT}`);
+  });
+}
+
+export default app;

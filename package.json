@@ -10,6 +10,7 @@
     "seed:admin": "node seeders/adminSeeder.js",
     "seed:simple-series": "node seeders/importTwentySimpleSeries.js",
     "seed:french-simple-series": "node seeders/importFrenchSimpleSeries.js",
+    "seed:mock-test": "node seeders/insertMockTestQuestions.js",
     "seed:thematic-crash": "node seeders/importThematicAndCrashTests.js",
     "seed:code-ebooks": "node seeders/importStandardCodeEbooks.js",
     "migrate:ebook-images": "node seeders/migrateEbookImagesToCloudinary.js",
@@ -23,6 +24,7 @@
     "seed:faqs": "node seeders/faqSeeder.js",
     "seed:offers": "node seeders/offerSeeder.js",
     "docs:generate": "node scripts/generateOpenApi.js",
+    "vercel-build": "npm run docs:generate",
     "upload:blog-images": "node seeders/uploadBlogSeedImages.js",
     "seed:testimonials": "node seeders/testimonialSeeder.js",
     "seed:demo-teachers": "node seeders/demoTeacherSeeder.js"
