@@ -27,7 +27,8 @@ export const getPublicTeachers = asyncHandler(async (req, res) => {
   )
     ? req.query.vehicleType
     : "";
-  const hasSlotFilter = req.query.date && req.query.startTime && req.query.endTime;
+  const hasSlotFilter =
+    req.query.date && req.query.startTime && req.query.endTime;
   const startTime = hasSlotFilter
     ? normalizeTime(req.query.startTime, "Start time")
     : "";
@@ -72,7 +73,8 @@ export const getPublicTeachers = asyncHandler(async (req, res) => {
     .lean();
 
   let availableTeachers = teachers.filter(
-    (teacher) => teacher.user && teacher.vehicles?.length && teacher.locations?.length,
+    (teacher) =>
+      teacher.user && teacher.vehicles?.length && teacher.locations?.length,
   );
 
   if (dateRange && availableTeachers.length) {
@@ -93,7 +95,10 @@ export const getPublicTeachers = asyncHandler(async (req, res) => {
     const bookingsByTeacher = new Map();
     bookings.forEach((booking) => {
       const key = String(booking.teacher);
-      bookingsByTeacher.set(key, [...(bookingsByTeacher.get(key) || []), booking]);
+      bookingsByTeacher.set(key, [
+        ...(bookingsByTeacher.get(key) || []),
+        booking,
+      ]);
     });
     availableTeachers = availableTeachers.filter((teacher) => {
       const teacherId = String(teacher.user._id);
@@ -124,25 +129,45 @@ export const getPublicTeachers = asyncHandler(async (req, res) => {
 });
 
 export const getBookedTeacherProfile = asyncHandler(async (req, res) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.teacherId)) throw new ApiError(400, "Invalid teacher id.");
+  if (!mongoose.Types.ObjectId.isValid(req.params.teacherId))
+    throw new ApiError(400, "Invalid teacher id.");
   const teacherId = req.params.teacherId;
   if (req.user.role === "student") {
-    const hasBooking = await Booking.exists({ student: req.user._id, teacher: teacherId });
-    if (!hasBooking) throw new ApiError(403, "You can only view an instructor you have booked.");
+    const hasBooking = await Booking.exists({
+      student: req.user._id,
+      teacher: teacherId,
+    });
+    if (!hasBooking)
+      throw new ApiError(
+        403,
+        "You can only view an instructor you have booked.",
+      );
   }
 
-  const [profile, vehicles, locations, availability, lessons, documents] = await Promise.all([
-    TeacherProfile.findOne({ user: teacherId }).populate("user", "name fullName email phone avatar city address dateOfBirth").lean(),
-    TeacherVehicle.find({ teacher: teacherId, status: "active" }).lean(),
-    TeacherLocation.find({ teacher: teacherId, status: "active" }).lean(),
-    TeacherAvailability.findOne({ teacher: teacherId }).lean(),
-    Lesson.find({ teacher: teacherId }).select("student status duration").lean(),
-    Document.find({ user: teacherId }).select("requirementKey title type status").lean(),
-  ]);
+  const [profile, vehicles, locations, availability, lessons, documents] =
+    await Promise.all([
+      TeacherProfile.findOne({ user: teacherId })
+        .populate(
+          "user",
+          "name fullName email phone avatar city address dateOfBirth",
+        )
+        .lean(),
+      TeacherVehicle.find({ teacher: teacherId, status: "active" }).lean(),
+      TeacherLocation.find({ teacher: teacherId, status: "active" }).lean(),
+      TeacherAvailability.findOne({ teacher: teacherId }).lean(),
+      Lesson.find({ teacher: teacherId })
+        .select("student status duration")
+        .lean(),
+      Document.find({ user: teacherId })
+        .select("requirementKey title type status")
+        .lean(),
+    ]);
   if (!profile?.user) throw new ApiError(404, "Instructor profile not found.");
 
   const completed = lessons.filter((lesson) => lesson.status === "completed");
-  const decided = lessons.filter((lesson) => ["completed", "cancelled", "no_show"].includes(lesson.status));
+  const decided = lessons.filter((lesson) =>
+    ["completed", "cancelled", "no_show"].includes(lesson.status),
+  );
   sendResponse(res, 200, "Booked instructor profile fetched.", {
     ...profile,
     vehicles,
@@ -150,28 +175,51 @@ export const getBookedTeacherProfile = asyncHandler(async (req, res) => {
     availability,
     documents,
     stats: {
-      studentsTrained: new Set(completed.map((lesson) => String(lesson.student))).size,
-      completionRate: decided.length ? Math.round((completed.length / decided.length) * 100) : 0,
+      studentsTrained: new Set(
+        completed.map((lesson) => String(lesson.student)),
+      ).size,
+      completionRate: decided.length
+        ? Math.round((completed.length / decided.length) * 100)
+        : 0,
       lessonsCompleted: completed.length,
-      hoursWorked: Math.round((completed.reduce((sum, lesson) => sum + Number(lesson.duration || 0), 0) / 60) * 10) / 10,
+      hoursWorked:
+        Math.round(
+          (completed.reduce(
+            (sum, lesson) => sum + Number(lesson.duration || 0),
+            0,
+          ) /
+            60) *
+            10,
+        ) / 10,
       reviews: Number(profile.rating?.totalReviews || 0),
     },
   });
 });
 
 export const getStudentBookletSkills = asyncHandler(async (req, res) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.studentId)) throw new ApiError(400, "Invalid student id.");
-  const hasBooking = await Booking.exists({ teacher: req.user._id, student: req.params.studentId });
-  if (!hasBooking) throw new ApiError(403, "This student has not booked a lesson with you.");
+  if (!mongoose.Types.ObjectId.isValid(req.params.studentId))
+    throw new ApiError(400, "Invalid student id.");
+  const hasBooking = await Booking.exists({
+    teacher: req.user._id,
+    student: req.params.studentId,
+  });
+  if (!hasBooking)
+    throw new ApiError(403, "This student has not booked a lesson with you.");
   const [student, assessments, completedLessons] = await Promise.all([
-    User.findById(req.params.studentId).select("name fullName email avatar").lean(),
-    StudentSkillAssessment.find({ student: req.params.studentId }).sort({ skill: 1 }).lean(),
+    User.findById(req.params.studentId)
+      .select("name fullName email avatar")
+      .lean(),
+    StudentSkillAssessment.find({ student: req.params.studentId })
+      .sort({ skill: 1 })
+      .lean(),
     Lesson.find({
       teacher: req.user._id,
       student: req.params.studentId,
       status: "completed",
     })
-      .select("title lessonDate startTime endTime duration lessonProgress.teacherNotes lessonProgress.teacherSubmittedAt")
+      .select(
+        "title lessonDate startTime endTime duration lessonProgress.teacherNotes lessonProgress.teacherSubmittedAt",
+      )
       .sort({ lessonDate: -1, startTime: -1 })
       .limit(50)
       .lean(),
@@ -234,9 +282,17 @@ export const getMyExamStudents = asyncHandler(async (req, res) => {
     .sort({ lessonDate: -1, startTime: -1 })
     .lean();
 
-  const studentIds = [...new Set(lessons.filter((item) => item.student).map((item) => String(item.student._id)))];
+  const studentIds = [
+    ...new Set(
+      lessons
+        .filter((item) => item.student)
+        .map((item) => String(item.student._id)),
+    ),
+  ];
   const [assessments, targetSetting] = await Promise.all([
-    StudentSkillAssessment.find({ student: { $in: studentIds } }).select("student status").lean(),
+    StudentSkillAssessment.find({ student: { $in: studentIds } })
+      .select("student status")
+      .lean(),
     Setting.findOne({ key: "requiredSkillsPercentage" }).lean(),
   ]);
   const targetScore = Number(targetSetting?.value || 60);
@@ -244,42 +300,65 @@ export const getMyExamStudents = asyncHandler(async (req, res) => {
   assessments.forEach((item) => {
     const key = String(item.student);
     const current = scoreMap.get(key) || { points: 0, count: 0 };
-    current.points += item.status === "acquired" ? 100 : item.status === "to_work" ? 50 : 0;
+    current.points +=
+      item.status === "acquired" ? 100 : item.status === "to_work" ? 50 : 0;
     current.count += 1;
     scoreMap.set(key, current);
   });
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const rows = lessons.filter((lesson) => lesson.student).map((lesson) => {
-    const score = scoreMap.get(String(lesson.student._id)) || { points: 0, count: 0 };
-    const bookletAverage = score.count ? Math.round(score.points / Math.max(34, score.count)) : 0;
-    const lessonDay = new Date(lesson.lessonDate);
-    lessonDay.setHours(0, 0, 0, 0);
-    const examStatus = lessonDay >= today ? "upcoming" : bookletAverage >= targetScore ? "passed" : "failed";
-    const location = lesson.booking?.location || {};
-    return {
-      _id: lesson._id,
-      student: lesson.student,
-      examCenter: [location.address, location.city].filter(Boolean).join(", ") || "Location not available",
-      date: lesson.lessonDate,
-      startTime: lesson.startTime,
-      endTime: lesson.endTime,
-      status: examStatus,
-      bookletAverage,
-      targetScore,
-    };
-  });
+  const rows = lessons
+    .filter((lesson) => lesson.student)
+    .map((lesson) => {
+      const score = scoreMap.get(String(lesson.student._id)) || {
+        points: 0,
+        count: 0,
+      };
+      const bookletAverage = score.count
+        ? Math.round(score.points / Math.max(34, score.count))
+        : 0;
+      const lessonDay = new Date(lesson.lessonDate);
+      lessonDay.setHours(0, 0, 0, 0);
+      const examStatus =
+        lessonDay >= today
+          ? "upcoming"
+          : bookletAverage >= targetScore
+            ? "passed"
+            : "failed";
+      const location = lesson.booking?.location || {};
+      return {
+        _id: lesson._id,
+        student: lesson.student,
+        examCenter:
+          [location.address, location.city].filter(Boolean).join(", ") ||
+          "Location not available",
+        date: lesson.lessonDate,
+        startTime: lesson.startTime,
+        endTime: lesson.endTime,
+        status: examStatus,
+        bookletAverage,
+        targetScore,
+      };
+    });
   sendResponse(res, 200, "Teacher examination list fetched.", rows);
 });
 
 export const updateStudentBookletSkill = asyncHandler(async (req, res) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.studentId)) throw new ApiError(400, "Invalid student id.");
+  if (!mongoose.Types.ObjectId.isValid(req.params.studentId))
+    throw new ApiError(400, "Invalid student id.");
   const skill = String(req.body.skill || "").trim();
   const status = String(req.body.status || "");
-  const category = ["C1", "C2", "C3", "C4"].includes(req.body.category) ? req.body.category : "C1";
-  if (!skill || !["not_acquired", "to_work", "acquired"].includes(status)) throw new ApiError(400, "A valid skill and status are required.");
-  const hasBooking = await Booking.exists({ teacher: req.user._id, student: req.params.studentId });
-  if (!hasBooking) throw new ApiError(403, "This student has not booked a lesson with you.");
+  const category = ["C1", "C2", "C3", "C4"].includes(req.body.category)
+    ? req.body.category
+    : "C1";
+  if (!skill || !["not_acquired", "to_work", "acquired"].includes(status))
+    throw new ApiError(400, "A valid skill and status are required.");
+  const hasBooking = await Booking.exists({
+    teacher: req.user._id,
+    student: req.params.studentId,
+  });
+  if (!hasBooking)
+    throw new ApiError(403, "This student has not booked a lesson with you.");
   const assessment = await StudentSkillAssessment.findOneAndUpdate(
     { student: req.params.studentId, skill },
     { $set: { status, category, teacher: req.user._id } },
@@ -289,20 +368,45 @@ export const updateStudentBookletSkill = asyncHandler(async (req, res) => {
 });
 
 export const updateStudentBookletSkills = asyncHandler(async (req, res) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.studentId)) throw new ApiError(400, "Invalid student id.");
-  const hasBooking = await Booking.exists({ teacher: req.user._id, student: req.params.studentId });
-  if (!hasBooking) throw new ApiError(403, "This student has not booked a lesson with you.");
-  const assessments = Array.isArray(req.body.assessments) ? req.body.assessments : [];
-  if (!assessments.length || assessments.length > 50) throw new ApiError(400, "Provide between 1 and 50 skill assessments.");
+  if (!mongoose.Types.ObjectId.isValid(req.params.studentId))
+    throw new ApiError(400, "Invalid student id.");
+  const hasBooking = await Booking.exists({
+    teacher: req.user._id,
+    student: req.params.studentId,
+  });
+  if (!hasBooking)
+    throw new ApiError(403, "This student has not booked a lesson with you.");
+  const assessments = Array.isArray(req.body.assessments)
+    ? req.body.assessments
+    : [];
+  if (!assessments.length || assessments.length > 50)
+    throw new ApiError(400, "Provide between 1 and 50 skill assessments.");
   const cleaned = assessments.map((item) => {
     const skill = String(item.skill || "").trim();
     const status = String(item.status || "");
-    const category = ["C1", "C2", "C3", "C4"].includes(item.category) ? item.category : "C1";
-    if (!skill || !["not_acquired", "to_work", "acquired"].includes(status)) throw new ApiError(400, "Every assessment requires a valid skill and status.");
+    const category = ["C1", "C2", "C3", "C4"].includes(item.category)
+      ? item.category
+      : "C1";
+    if (!skill || !["not_acquired", "to_work", "acquired"].includes(status))
+      throw new ApiError(
+        400,
+        "Every assessment requires a valid skill and status.",
+      );
     return { skill, status, category };
   });
-  await StudentSkillAssessment.bulkWrite(cleaned.map((item) => ({ updateOne: { filter: { student: req.params.studentId, skill: item.skill }, update: { $set: { ...item, teacher: req.user._id } }, upsert: true } })));
-  const saved = await StudentSkillAssessment.find({ student: req.params.studentId, skill: { $in: cleaned.map((item) => item.skill) } }).lean();
+  await StudentSkillAssessment.bulkWrite(
+    cleaned.map((item) => ({
+      updateOne: {
+        filter: { student: req.params.studentId, skill: item.skill },
+        update: { $set: { ...item, teacher: req.user._id } },
+        upsert: true,
+      },
+    })),
+  );
+  const saved = await StudentSkillAssessment.find({
+    student: req.params.studentId,
+    skill: { $in: cleaned.map((item) => item.skill) },
+  }).lean();
   sendResponse(res, 200, "Booklet skills updated.", saved);
 });
 
@@ -342,7 +446,10 @@ export const getDashboard = asyncHandler(async (req, res) => {
       .sort({ startTime: 1 })
       .limit(5)
       .populate("student", "name email phone avatar")
-      .populate({ path: "booking", populate: { path: "offer", select: "title" } }),
+      .populate({
+        path: "booking",
+        populate: { path: "offer", select: "title" },
+      }),
     Booking.find({ teacher: req.user._id, status: "pending" })
       .sort({ bookingDate: 1, startTime: 1 })
       .limit(5)
@@ -406,7 +513,12 @@ export const getDashboard = asyncHandler(async (req, res) => {
   const seenStudentIds = new Set();
   recentBookingRows.forEach((booking) => {
     const studentId = String(booking.student?._id || "");
-    if (!studentId || seenStudentIds.has(studentId) || recentStudents.length >= 2) return;
+    if (
+      !studentId ||
+      seenStudentIds.has(studentId) ||
+      recentStudents.length >= 2
+    )
+      return;
     seenStudentIds.add(studentId);
     recentStudents.push(booking);
   });
@@ -452,9 +564,9 @@ export const getDashboard = asyncHandler(async (req, res) => {
   const readiness = {
     profile: Boolean(
       profile?.user?.name &&
-        profile?.user?.phone &&
-        profile?.qualification &&
-        profile?.bio,
+      profile?.user?.phone &&
+      profile?.qualification &&
+      profile?.bio,
     ),
     verified: profile?.verificationStatus === "verified",
     vehicle: approvedVehicles > 0,
@@ -586,10 +698,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
       experienceYears < 0 ||
       experienceYears > 80
     ) {
-      throw new ApiError(
-        400,
-        "Experience years must be between 0 and 80.",
-      );
+      throw new ApiError(400, "Experience years must be between 0 and 80.");
     }
 
     updateData.experienceYears = experienceYears;
@@ -667,7 +776,9 @@ export const updateProfile = asyncHandler(async (req, res) => {
 export const getMyStudents = asyncHandler(async (req, res) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
-  const search = String(req.query.search || "").trim().slice(0, 80);
+  const search = String(req.query.search || "")
+    .trim()
+    .slice(0, 80);
 
   const [lessonStudentIds, bookingStudentIds] = await Promise.all([
     Lesson.distinct("student", { teacher: req.user._id }),
@@ -686,7 +797,9 @@ export const getMyStudents = asyncHandler(async (req, res) => {
     userFilter.$or = [{ name: regex }, { email: regex }, { phone: regex }];
   }
   ["name", "email", "phone"].forEach((field) => {
-    const value = String(req.query[field] || "").trim().slice(0, 80);
+    const value = String(req.query[field] || "")
+      .trim()
+      .slice(0, 80);
     if (value) {
       const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       userFilter[field] = new RegExp(escaped, "i");
@@ -754,7 +867,9 @@ export const getMyStudents = asyncHandler(async (req, res) => {
   ]);
 
   const lessonMap = new Map(lessonRows.map((row) => [String(row._id), row]));
-  const pendingMap = new Map(pendingRows.map((row) => [String(row._id), row.count]));
+  const pendingMap = new Map(
+    pendingRows.map((row) => [String(row._id), row.count]),
+  );
   const bookingMap = new Map();
   latestBookings.forEach((booking) => {
     const key = String(booking.student);
@@ -859,7 +974,8 @@ export const getMyStudentDetails = asyncHandler(async (req, res) => {
     statusRows.map((row) => [row._id, row.count]),
   );
   const completed = Number(counts.completed || 0);
-  const assessableTotal = total - Number(counts.cancelled || 0) - Number(counts.no_show || 0);
+  const assessableTotal =
+    total - Number(counts.cancelled || 0) - Number(counts.no_show || 0);
   const latestReport = await Lesson.findOne({
     ...accessFilter,
     "lessonProgress.teacherSubmittedAt": { $exists: true },

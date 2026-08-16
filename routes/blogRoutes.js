@@ -27,11 +27,6 @@ router.patch(
   blogImageUpload,
   blogController.updateBlog,
 );
-router.delete(
-  "/:id",
-  protect,
-  authorize("admin"),
-  blogController.deleteBlog,
-);
+router.delete("/:id", protect, authorize("admin"), blogController.deleteBlog);
 
 export default router;

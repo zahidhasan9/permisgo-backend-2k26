@@ -1,6 +1,11 @@
 import express from "express";
 import { authorize, protect } from "../middlewares/authMiddleware.js";
-import { createContactSubmission, getContactSubmissions, getPublicContactConfig, updateContactStatus } from "../controllers/contactController.js";
+import {
+  createContactSubmission,
+  getContactSubmissions,
+  getPublicContactConfig,
+  updateContactStatus,
+} from "../controllers/contactController.js";
 
 const router = express.Router();
 router.post("/", createContactSubmission);

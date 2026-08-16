@@ -29,7 +29,9 @@ export const getTeacherReviews = asyncHandler(async (req, res) => {
     "lessonProgress.feedbackSubmittedAt": { $ne: null },
     "lessonProgress.rating": { $gte: 1, $lte: 5 },
   })
-    .select("student teacher lessonProgress.rating lessonProgress.studentNotes lessonProgress.feedbackSubmittedAt")
+    .select(
+      "student teacher lessonProgress.rating lessonProgress.studentNotes lessonProgress.feedbackSubmittedAt",
+    )
     .lean();
 
   if (ratedLessons.length) {
@@ -60,11 +62,17 @@ export const getTeacherReviews = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 });
 
   const average = reviews.length
-    ? reviews.reduce((total, review) => total + Number(review.rating || 0), 0) / reviews.length
+    ? reviews.reduce((total, review) => total + Number(review.rating || 0), 0) /
+      reviews.length
     : 0;
   await TeacherProfile.findOneAndUpdate(
     { user: req.params.teacherId },
-    { $set: { "rating.average": average, "rating.totalReviews": reviews.length } },
+    {
+      $set: {
+        "rating.average": average,
+        "rating.totalReviews": reviews.length,
+      },
+    },
   );
   sendResponse(res, 200, "Reviews fetched.", reviews);
 });

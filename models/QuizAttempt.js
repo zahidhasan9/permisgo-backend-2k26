@@ -9,8 +9,14 @@ const attemptAnswerSchema = new mongoose.Schema(
     },
     selectedOptionIndex: { type: Number, min: 0, max: 3, required: true },
     correctOptionIndex: { type: Number, min: 0, max: 3, required: true },
-    selectedOptionIndexes: { type: [{ type: Number, min: 0, max: 3 }], default: undefined },
-    correctOptionIndexes: { type: [{ type: Number, min: 0, max: 3 }], default: undefined },
+    selectedOptionIndexes: {
+      type: [{ type: Number, min: 0, max: 3 }],
+      default: undefined,
+    },
+    correctOptionIndexes: {
+      type: [{ type: Number, min: 0, max: 3 }],
+      default: undefined,
+    },
     isCorrect: { type: Boolean, required: true },
     timeSpentSeconds: { type: Number, default: 0 },
     answeredAt: { type: Date, default: Date.now },

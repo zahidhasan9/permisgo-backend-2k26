@@ -4,7 +4,10 @@ import ChatMessage from "../models/ChatMessage.js";
 import Conversation from "../models/Conversation.js";
 import User from "../models/User.js";
 import Booking from "../models/Booking.js";
-import { findOrCreateConversation, getChatRecipient } from "../services/chatService.js";
+import {
+  findOrCreateConversation,
+  getChatRecipient,
+} from "../services/chatService.js";
 import { getUploadedFileUrl } from "../utils/uploadHelpers.js";
 
 export const getContacts = asyncHandler(async (req, res) => {
@@ -21,22 +24,40 @@ export const getContacts = asyncHandler(async (req, res) => {
     role: targetRole,
     status: "active",
     _id: { $in: bookedContactIds, $ne: req.user._id },
-  }).select("name email role avatar").sort({ name: 1 });
-  const conversations = await Conversation.find({ participants: req.user._id }).populate("lastMessage").lean();
+  })
+    .select("name email role avatar")
+    .sort({ name: 1 });
+  const conversations = await Conversation.find({ participants: req.user._id })
+    .populate("lastMessage")
+    .lean();
   const byUser = new Map();
   conversations.forEach((conversation) => {
-    const contactId = conversation.participants.find((id) => String(id) !== String(req.user._id));
+    const contactId = conversation.participants.find(
+      (id) => String(id) !== String(req.user._id),
+    );
     if (contactId) byUser.set(String(contactId), conversation);
   });
   const unread = await ChatMessage.aggregate([
     { $match: { receiver: req.user._id, readAt: null } },
     { $group: { _id: "$sender", count: { $sum: 1 } } },
   ]);
-  const unreadMap = new Map(unread.map((item) => [String(item._id), item.count]));
-  const contacts = users.map((user) => {
-    const conversation = byUser.get(String(user._id));
-    return { ...user.toObject(), lastMessage: conversation?.lastMessage || null, unreadCount: unreadMap.get(String(user._id)) || 0 };
-  }).sort((a, b) => new Date(b.lastMessage?.createdAt || 0) - new Date(a.lastMessage?.createdAt || 0));
+  const unreadMap = new Map(
+    unread.map((item) => [String(item._id), item.count]),
+  );
+  const contacts = users
+    .map((user) => {
+      const conversation = byUser.get(String(user._id));
+      return {
+        ...user.toObject(),
+        lastMessage: conversation?.lastMessage || null,
+        unreadCount: unreadMap.get(String(user._id)) || 0,
+      };
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.lastMessage?.createdAt || 0) -
+        new Date(a.lastMessage?.createdAt || 0),
+    );
   sendResponse(res, 200, "Chat contacts fetched.", contacts);
 });
 
@@ -47,34 +68,52 @@ export const getIceConfig = asyncHandler(async (req, res) => {
     .replace(/\/$/, "");
   const meteredSecretKey = String(process.env.METERED_SECRET_KEY || "").trim();
   if (meteredDomain && meteredSecretKey) {
-    const createUrl = new URL(`https://${meteredDomain}/api/v1/turn/credential`);
+    const createUrl = new URL(
+      `https://${meteredDomain}/api/v1/turn/credential`,
+    );
     createUrl.searchParams.set("secretKey", meteredSecretKey);
     const credentialResponse = await fetch(createUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ expiryInSeconds: 14400, label: `permisgo-${req.user._id}-${Date.now()}` }),
+      body: JSON.stringify({
+        expiryInSeconds: 14400,
+        label: `permisgo-${req.user._id}-${Date.now()}`,
+      }),
     });
     if (!credentialResponse.ok) {
       const details = await credentialResponse.text();
-      console.error("Metered TURN credential request failed:", credentialResponse.status, details.slice(0, 300));
+      console.error(
+        "Metered TURN credential request failed:",
+        credentialResponse.status,
+        details.slice(0, 300),
+      );
       throw new Error("TURN credentials could not be generated.");
     }
     const credential = await credentialResponse.json();
-    let iceServers = Array.isArray(credential.iceServers) ? credential.iceServers : [];
+    let iceServers = Array.isArray(credential.iceServers)
+      ? credential.iceServers
+      : [];
     if (!iceServers.length && credential.apiKey) {
-      const iceUrl = new URL(`https://${meteredDomain}/api/v1/turn/credentials`);
+      const iceUrl = new URL(
+        `https://${meteredDomain}/api/v1/turn/credentials`,
+      );
       iceUrl.searchParams.set("apiKey", credential.apiKey);
       const iceResponse = await fetch(iceUrl);
       if (iceResponse.ok) iceServers = await iceResponse.json();
     }
-    if (!Array.isArray(iceServers) || !iceServers.length) throw new Error("Metered returned an empty ICE server list.");
-    return sendResponse(res, 200, "Temporary ICE configuration fetched.", { iceServers });
+    if (!Array.isArray(iceServers) || !iceServers.length)
+      throw new Error("Metered returned an empty ICE server list.");
+    return sendResponse(res, 200, "Temporary ICE configuration fetched.", {
+      iceServers,
+    });
   }
 
   const stunUrl = process.env.STUN_URL || process.env.NEXT_PUBLIC_STUN_URL;
   const turnUrl = process.env.TURN_URL || process.env.NEXT_PUBLIC_TURN_URL;
-  const turnUsername = process.env.TURN_USERNAME || process.env.NEXT_PUBLIC_TURN_USERNAME;
-  const turnCredential = process.env.TURN_CREDENTIAL || process.env.NEXT_PUBLIC_TURN_CREDENTIAL;
+  const turnUsername =
+    process.env.TURN_USERNAME || process.env.NEXT_PUBLIC_TURN_USERNAME;
+  const turnCredential =
+    process.env.TURN_CREDENTIAL || process.env.NEXT_PUBLIC_TURN_CREDENTIAL;
   const iceServers = [
     {
       urls: (stunUrl || "stun:stun.l.google.com:19302")
@@ -85,7 +124,8 @@ export const getIceConfig = asyncHandler(async (req, res) => {
   ];
   if (turnUrl) {
     iceServers.push({
-      urls: turnUrl.split(",")
+      urls: turnUrl
+        .split(",")
         .map((value) => value.trim())
         .filter(Boolean),
       username: turnUsername || "",
@@ -97,10 +137,19 @@ export const getIceConfig = asyncHandler(async (req, res) => {
 
 export const getMessages = asyncHandler(async (req, res) => {
   await getChatRecipient(req.user, req.params.userId);
-  const conversation = await findOrCreateConversation(req.user._id, req.params.userId);
+  const conversation = await findOrCreateConversation(
+    req.user._id,
+    req.params.userId,
+  );
   const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 100);
-  const messages = await ChatMessage.find({ conversation: conversation._id }).sort({ createdAt: -1 }).limit(limit).lean();
-  await ChatMessage.updateMany({ conversation: conversation._id, receiver: req.user._id, readAt: null }, { readAt: new Date() });
+  const messages = await ChatMessage.find({ conversation: conversation._id })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
+  await ChatMessage.updateMany(
+    { conversation: conversation._id, receiver: req.user._id, readAt: null },
+    { readAt: new Date() },
+  );
   sendResponse(res, 200, "Messages fetched.", messages.reverse());
 });
 

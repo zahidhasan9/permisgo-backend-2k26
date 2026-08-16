@@ -9,7 +9,10 @@ const createUniqueReferralCode = async (user) => {
 
   while (exists) {
     const prefix =
-      user.name?.replace(/[^a-zA-Z]/g, "").slice(0, 3).toUpperCase() || "PG";
+      user.name
+        ?.replace(/[^a-zA-Z]/g, "")
+        .slice(0, 3)
+        .toUpperCase() || "PG";
     referralCode = `${prefix}${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
     exists = await Referral.exists({ referralCode });
   }

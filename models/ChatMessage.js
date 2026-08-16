@@ -2,9 +2,22 @@ import mongoose from "mongoose";
 
 const chatMessageSchema = new mongoose.Schema(
   {
-    conversation: { type: mongoose.Schema.Types.ObjectId, ref: "Conversation", required: true, index: true },
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    receiver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    conversation: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Conversation",
+      required: true,
+      index: true,
+    },
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    receiver: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     body: { type: String, default: "", trim: true, maxlength: 4000 },
     attachment: {
       url: { type: String, default: "" },

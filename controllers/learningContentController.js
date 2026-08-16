@@ -1,407 +1,3 @@
-// import mongoose from "mongoose";
-// import LearningContent from "../models/LearningContent.js";
-// import LearningProgress from "../models/LearningProgress.js";
-
-// const getFilePath = (file) => {
-//   if (!file) return "";
-//   return `/uploads/${file.filename}`;
-// };
-
-// const getSingleFile = (req, fieldName) => {
-//   if (!req.files) return null;
-
-//   if (Array.isArray(req.files)) {
-//     return req.files.find((file) => file.fieldname === fieldName) || null;
-//   }
-
-//   return req.files[fieldName]?.[0] || null;
-// };
-
-// const parseTags = (tags) => {
-//   if (!tags) return [];
-
-//   if (Array.isArray(tags)) return tags;
-
-//   return tags
-//     .split(",")
-//     .map((tag) => tag.trim())
-//     .filter(Boolean);
-// };
-
-// // Admin: create content
-// export const createLearningContent = async (req, res) => {
-//   try {
-//     const imageFile = getSingleFile(req, "image");
-//     const file = getSingleFile(req, "file");
-
-//     const {
-//       title,
-//       type,
-//       subtitle,
-//       category,
-//       topicCode,
-//       difficulty,
-//       description,
-//       content,
-//       videoUrl,
-//       tags,
-//       order,
-//       status,
-//       isFeatured,
-//     } = req.body;
-
-//     if (!title || !type) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Title and type are required",
-//       });
-//     }
-
-//     const learningContent = await LearningContent.create({
-//       title,
-//       type,
-//       subtitle,
-//       category,
-//       topicCode,
-//       difficulty,
-//       description,
-//       content,
-//       videoUrl,
-//       tags: parseTags(tags),
-//       order: Number(order || 0),
-//       status: status || "active",
-//       isFeatured: isFeatured === "true" || isFeatured === true,
-//       image: getFilePath(imageFile),
-//       fileUrl: getFilePath(file),
-//       createdBy: req.userId,
-//     });
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Learning content created successfully",
-//       data: learningContent,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// // Admin: get all content
-// export const getAdminLearningContents = async (req, res) => {
-//   try {
-//     const { type, status, search } = req.query;
-
-//     const filter = {};
-
-//     if (type) filter.type = type;
-//     if (status) filter.status = status;
-
-//     if (search) {
-//       filter.$or = [
-//         { title: { $regex: search, $options: "i" } },
-//         { subtitle: { $regex: search, $options: "i" } },
-//         { category: { $regex: search, $options: "i" } },
-//       ];
-//     }
-
-//     const contents = await LearningContent.find(filter).sort({
-//       order: 1,
-//       createdAt: -1,
-//     });
-
-//     res.status(200).json({
-//       success: true,
-//       data: contents,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// // Admin: update content
-// export const updateLearningContent = async (req, res) => {
-//   try {
-//     const contentItem = await LearningContent.findById(req.params.id);
-
-//     if (!contentItem) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Learning content not found",
-//       });
-//     }
-
-//     const imageFile = getSingleFile(req, "image");
-//     const file = getSingleFile(req, "file");
-
-//     const updateData = {
-//       ...req.body,
-//     };
-
-//     if (req.body.tags) {
-//       updateData.tags = parseTags(req.body.tags);
-//     }
-
-//     if (imageFile) {
-//       updateData.image = getFilePath(imageFile);
-//     }
-
-//     if (file) {
-//       updateData.fileUrl = getFilePath(file);
-//     }
-
-//     if (req.body.order) {
-//       updateData.order = Number(req.body.order);
-//     }
-
-//     if (req.body.isFeatured !== undefined) {
-//       updateData.isFeatured =
-//         req.body.isFeatured === "true" || req.body.isFeatured === true;
-//     }
-
-//     const updated = await LearningContent.findByIdAndUpdate(
-//       req.params.id,
-//       updateData,
-//       { new: true },
-//     );
-
-//     res.status(200).json({
-//       success: true,
-//       message: "Learning content updated successfully",
-//       data: updated,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// // Admin: inactive content
-// export const deleteLearningContent = async (req, res) => {
-//   try {
-//     const contentItem = await LearningContent.findById(req.params.id);
-
-//     if (!contentItem) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Learning content not found",
-//       });
-//     }
-
-//     contentItem.status = "inactive";
-//     await contentItem.save();
-
-//     res.status(200).json({
-//       success: true,
-//       message: "Learning content inactive successfully",
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// // Student: get active content
-// export const getLearningContents = async (req, res) => {
-//   try {
-//     const { type, category, topicCode, search } = req.query;
-
-//     const filter = {
-//       status: "active",
-//     };
-
-//     if (type) filter.type = type;
-//     if (category) filter.category = category;
-//     if (topicCode) filter.topicCode = topicCode;
-
-//     if (search) {
-//       filter.$or = [
-//         { title: { $regex: search, $options: "i" } },
-//         { subtitle: { $regex: search, $options: "i" } },
-//         { category: { $regex: search, $options: "i" } },
-//       ];
-//     }
-
-//     const contents = await LearningContent.find(filter).sort({
-//       order: 1,
-//       createdAt: -1,
-//     });
-
-//     const progressList = await LearningProgress.find({
-//       student: req.userId,
-//       content: { $in: contents.map((item) => item._id) },
-//     });
-
-//     const progressMap = new Map(
-//       progressList.map((progress) => [progress.content.toString(), progress]),
-//     );
-
-//     const finalData = contents.map((item) => {
-//       const obj = item.toObject();
-//       obj.progress = progressMap.get(item._id.toString()) || null;
-//       return obj;
-//     });
-
-//     res.status(200).json({
-//       success: true,
-//       data: finalData,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// // Student: update progress
-// export const updateLearningProgress = async (req, res) => {
-//   try {
-//     const contentItem = await LearningContent.findById(req.params.id);
-
-//     if (!contentItem) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Learning content not found",
-//       });
-//     }
-
-//     const { status, readPercent, watchedSeconds, score } = req.body;
-
-//     const updateData = {
-//       contentType: contentItem.type,
-//       lastViewedAt: new Date(),
-//     };
-
-//     if (status) updateData.status = status;
-//     if (readPercent !== undefined) updateData.readPercent = Number(readPercent);
-//     if (watchedSeconds !== undefined)
-//       updateData.watchedSeconds = Number(watchedSeconds);
-//     if (score !== undefined) updateData.score = Number(score);
-
-//     if (status === "completed") {
-//       updateData.readPercent = 100;
-//       updateData.completedAt = new Date();
-//     }
-
-//     const progress = await LearningProgress.findOneAndUpdate(
-//       {
-//         student: req.userId,
-//         content: contentItem._id,
-//       },
-//       {
-//         $set: updateData,
-//       },
-//       {
-//         new: true,
-//         upsert: true,
-//         setDefaultsOnInsert: true,
-//       },
-//     );
-
-//     res.status(200).json({
-//       success: true,
-//       message: "Progress updated",
-//       data: progress,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// // Student: favorite
-// export const toggleLearningFavorite = async (req, res) => {
-//   try {
-//     const contentItem = await LearningContent.findById(req.params.id);
-
-//     if (!contentItem) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Learning content not found",
-//       });
-//     }
-
-//     let progress = await LearningProgress.findOne({
-//       student: req.userId,
-//       content: contentItem._id,
-//     });
-
-//     if (!progress) {
-//       progress = await LearningProgress.create({
-//         student: req.userId,
-//         content: contentItem._id,
-//         contentType: contentItem.type,
-//         isFavorite: true,
-//       });
-//     } else {
-//       progress.isFavorite = !progress.isFavorite;
-//       await progress.save();
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       message: "Favorite updated",
-//       data: progress,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// // Student: progress summary
-// export const getLearningSummary = async (req, res) => {
-//   try {
-//     const types = ["road-sign", "code-ebook", "knowledge-sheet", "live-replay"];
-
-//     const summary = [];
-
-//     for (const type of types) {
-//       const total = await LearningContent.countDocuments({
-//         type,
-//         status: "active",
-//       });
-
-//       const completed = await LearningProgress.countDocuments({
-//         student: req.userId,
-//         contentType: type,
-//         status: "completed",
-//       });
-
-//       summary.push({
-//         type,
-//         total,
-//         completed,
-//         percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
-//       });
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       data: summary,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
 import fs from "fs";
 import path from "path";
 import LearningContent from "../models/LearningContent.js";
@@ -429,7 +25,8 @@ const getSingleFile = (req, fieldName) => {
 
 const getFiles = (req, fieldName) => {
   if (!req.files) return [];
-  if (Array.isArray(req.files)) return req.files.filter((file) => file.fieldname === fieldName);
+  if (Array.isArray(req.files))
+    return req.files.filter((file) => file.fieldname === fieldName);
   return req.files[fieldName] || [];
 };
 
@@ -463,13 +60,20 @@ const isYouTubeUrl = (value) => {
   try {
     const host = new URL(value).hostname.replace(/^www\./, "");
     return ["youtube.com", "m.youtube.com", "youtu.be"].includes(host);
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 };
 
 export const uploadLearningEditorImage = async (req, res) => {
   const imageFile = getSingleFile(req, "upload");
-  if (!imageFile) return res.status(400).json({ success: false, message: "Image is required" });
-  return res.status(201).json({ success: true, data: { url: getUploadedFileUrl(imageFile) } });
+  if (!imageFile)
+    return res
+      .status(400)
+      .json({ success: false, message: "Image is required" });
+  return res
+    .status(201)
+    .json({ success: true, data: { url: getUploadedFileUrl(imageFile) } });
 };
 
 // Admin: create content
@@ -506,11 +110,24 @@ export const createLearningContent = async (req, res) => {
       });
     }
 
-    if (type === "knowledge-sheet" && (!file || file.mimetype !== "application/pdf")) {
-      return res.status(400).json({ success: false, message: "A PDF file is required for a knowledge sheet" });
+    if (
+      type === "knowledge-sheet" &&
+      (!file || file.mimetype !== "application/pdf")
+    ) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "A PDF file is required for a knowledge sheet",
+        });
     }
-    if (["live-replay", "e-learning-video"].includes(type) && !isYouTubeUrl(videoUrl)) {
-      return res.status(400).json({ success: false, message: "A valid YouTube URL is required" });
+    if (
+      ["live-replay", "e-learning-video"].includes(type) &&
+      !isYouTubeUrl(videoUrl)
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "A valid YouTube URL is required" });
     }
 
     const blockMeta = parseJsonArray(req.body.contentBlocks);
@@ -534,15 +151,24 @@ export const createLearningContent = async (req, res) => {
       contentImages: contentImageFiles.map(getFilePath),
       contentBlocks: blockMeta.map((block, index) => ({
         title: block.title || "",
-        image: getFilePath(blockImageFiles[Number(block.fileIndex)]) || block.image || "",
+        image:
+          getFilePath(blockImageFiles[Number(block.fileIndex)]) ||
+          block.image ||
+          "",
         description: block.description || "",
-        bulletPoints: Array.isArray(block.bulletPoints) ? block.bulletPoints : [],
+        bulletPoints: Array.isArray(block.bulletPoints)
+          ? block.bulletPoints
+          : [],
         footerText: block.footerText || "",
       })),
       videos: parseJsonArray(req.body.videos),
       materials: materialFiles.map((material, index) => {
         const meta = parseJsonArray(req.body.materialMeta)[index] || {};
-        return { title: meta.title || material.originalname, readMinutes: Number(meta.readMinutes) || 0, fileUrl: getFilePath(material) };
+        return {
+          title: meta.title || material.originalname,
+          readMinutes: Number(meta.readMinutes) || 0,
+          fileUrl: getFilePath(material),
+        };
       }),
       fileUrl: getFilePath(file),
       readMinutes: Number(req.body.readMinutes) || 0,
@@ -636,7 +262,10 @@ export const updateLearningContent = async (req, res) => {
       content: req.body.content,
       videoUrl: req.body.videoUrl,
       status: req.body.status,
-      readMinutes: req.body.readMinutes !== undefined ? Number(req.body.readMinutes) || 0 : undefined,
+      readMinutes:
+        req.body.readMinutes !== undefined
+          ? Number(req.body.readMinutes) || 0
+          : undefined,
     };
 
     Object.keys(updateData).forEach((key) => {
@@ -667,14 +296,27 @@ export const updateLearningContent = async (req, res) => {
     }
 
     if (file) {
-      if (contentItem.type === "knowledge-sheet" && file.mimetype !== "application/pdf") {
-        return res.status(400).json({ success: false, message: "Only PDF files are allowed" });
+      if (
+        contentItem.type === "knowledge-sheet" &&
+        file.mimetype !== "application/pdf"
+      ) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Only PDF files are allowed" });
       }
       updateData.fileUrl = getUploadedFileUrl(file);
     }
 
-    if (["live-replay", "e-learning-video"].includes(req.body.type || contentItem.type) && req.body.videoUrl !== undefined && !isYouTubeUrl(req.body.videoUrl)) {
-      return res.status(400).json({ success: false, message: "A valid YouTube URL is required" });
+    if (
+      ["live-replay", "e-learning-video"].includes(
+        req.body.type || contentItem.type,
+      ) &&
+      req.body.videoUrl !== undefined &&
+      !isYouTubeUrl(req.body.videoUrl)
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "A valid YouTube URL is required" });
     }
 
     if (contentImageFiles.length) {
@@ -688,19 +330,29 @@ export const updateLearningContent = async (req, res) => {
       const blocks = parseJsonArray(req.body.contentBlocks);
       updateData.contentBlocks = blocks.map((block, index) => ({
         title: block.title || "",
-        image: getUploadedFileUrl(blockImageFiles[Number(block.fileIndex)]) || block.image || "",
+        image:
+          getUploadedFileUrl(blockImageFiles[Number(block.fileIndex)]) ||
+          block.image ||
+          "",
         description: block.description || "",
-        bulletPoints: Array.isArray(block.bulletPoints) ? block.bulletPoints : [],
+        bulletPoints: Array.isArray(block.bulletPoints)
+          ? block.bulletPoints
+          : [],
         footerText: block.footerText || "",
       }));
     }
 
-    if (req.body.videos !== undefined) updateData.videos = parseJsonArray(req.body.videos);
+    if (req.body.videos !== undefined)
+      updateData.videos = parseJsonArray(req.body.videos);
     if (materialFiles.length) {
       const meta = parseJsonArray(req.body.materialMeta);
       updateData.materials = [
         ...(contentItem.materials || []),
-        ...materialFiles.map((material, index) => ({ title: meta[index]?.title || material.originalname, readMinutes: Number(meta[index]?.readMinutes) || 0, fileUrl: getUploadedFileUrl(material) })),
+        ...materialFiles.map((material, index) => ({
+          title: meta[index]?.title || material.originalname,
+          readMinutes: Number(meta[index]?.readMinutes) || 0,
+          fileUrl: getUploadedFileUrl(material),
+        })),
       ];
     }
 
@@ -829,11 +481,27 @@ export const getLearningContents = async (req, res) => {
 export const permanentlyDeleteLearningContent = async (req, res) => {
   try {
     const contentItem = await LearningContent.findById(req.params.id);
-    if (!contentItem) return res.status(404).json({ success: false, message: "Learning content not found" });
-    const files = [contentItem.image, contentItem.fileUrl, ...(contentItem.contentImages || []), ...(contentItem.materials || []).map((item) => item.fileUrl)].filter(Boolean);
+    if (!contentItem)
+      return res
+        .status(404)
+        .json({ success: false, message: "Learning content not found" });
+    const files = [
+      contentItem.image,
+      contentItem.fileUrl,
+      ...(contentItem.contentImages || []),
+      ...(contentItem.materials || []).map((item) => item.fileUrl),
+    ].filter(Boolean);
     await contentItem.deleteOne();
-    await Promise.all(files.map((file) => deleteStoredFile(file).catch(() => null)));
-    return res.status(200).json({ success: true, message: "Learning content permanently deleted", data: { id: req.params.id } });
+    await Promise.all(
+      files.map((file) => deleteStoredFile(file).catch(() => null)),
+    );
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Learning content permanently deleted",
+        data: { id: req.params.id },
+      });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -845,7 +513,10 @@ export const getLearningContentById = async (req, res) => {
       _id: req.params.id,
       status: "active",
     });
-    if (!contentItem) return res.status(404).json({ success: false, message: "Lesson not found" });
+    if (!contentItem)
+      return res
+        .status(404)
+        .json({ success: false, message: "Lesson not found" });
     res.status(200).json({ success: true, data: contentItem });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -854,9 +525,19 @@ export const getLearningContentById = async (req, res) => {
 
 export const downloadLearningContentFile = async (req, res) => {
   try {
-    const contentItem = await LearningContent.findOne({ _id: req.params.id, status: "active" });
-    if (!contentItem?.fileUrl) return res.status(404).json({ success: false, message: "PDF file not found" });
-    const safeName = `${String(contentItem.title || "knowledge-sheet").replace(/[^a-z0-9-_ ]/gi, "").trim() || "knowledge-sheet"}.pdf`;
+    const contentItem = await LearningContent.findOne({
+      _id: req.params.id,
+      status: "active",
+    });
+    if (!contentItem?.fileUrl)
+      return res
+        .status(404)
+        .json({ success: false, message: "PDF file not found" });
+    const safeName = `${
+      String(contentItem.title || "knowledge-sheet")
+        .replace(/[^a-z0-9-_ ]/gi, "")
+        .trim() || "knowledge-sheet"
+    }.pdf`;
     res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);
     res.setHeader("Content-Type", "application/pdf");
     if (/^https?:\/\//i.test(contentItem.fileUrl)) {
@@ -867,27 +548,41 @@ export const downloadLearningContentFile = async (req, res) => {
         const uploadIndex = parts.indexOf("upload");
         const resourceType = parts[1] || "image";
         let assetParts = parts.slice(uploadIndex + 1);
-        if (/^v\d+$/.test(assetParts[0] || "")) assetParts = assetParts.slice(1);
+        if (/^v\d+$/.test(assetParts[0] || ""))
+          assetParts = assetParts.slice(1);
         const assetPath = decodeURIComponent(assetParts.join("/"));
         const format = assetPath.match(/\.([^./]+)$/)?.[1] || "pdf";
         const publicId = assetPath.replace(/\.[^/.]+$/, "");
-        const signedUrl = cloudinary.utils.private_download_url(publicId, format, {
-          resource_type: resourceType,
-          type: "upload",
-          expires_at: Math.floor(Date.now() / 1000) + 300,
-        });
+        const signedUrl = cloudinary.utils.private_download_url(
+          publicId,
+          format,
+          {
+            resource_type: resourceType,
+            type: "upload",
+            expires_at: Math.floor(Date.now() / 1000) + 300,
+          },
+        );
         remote = await fetch(signedUrl);
       }
       if (!remote.ok) {
         const cloudinaryError = remote.headers.get("x-cld-error");
-        throw new Error(cloudinaryError || "Cloudinary PDF delivery is blocked. Enable 'Allow delivery of PDF and ZIP files' in Cloudinary Security settings.");
+        throw new Error(
+          cloudinaryError ||
+            "Cloudinary PDF delivery is blocked. Enable 'Allow delivery of PDF and ZIP files' in Cloudinary Security settings.",
+        );
       }
       return res.send(Buffer.from(await remote.arrayBuffer()));
     }
     const uploadsRoot = path.resolve(process.env.UPLOAD_DIR || "uploads");
     const relative = String(contentItem.fileUrl).replace(/^\/uploads\//, "");
     const absolute = path.resolve(uploadsRoot, relative);
-    if (!absolute.startsWith(`${uploadsRoot}${path.sep}`) || !fs.existsSync(absolute)) return res.status(404).json({ success: false, message: "PDF file not found" });
+    if (
+      !absolute.startsWith(`${uploadsRoot}${path.sep}`) ||
+      !fs.existsSync(absolute)
+    )
+      return res
+        .status(404)
+        .json({ success: false, message: "PDF file not found" });
     return res.download(absolute, safeName);
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

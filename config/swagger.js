@@ -7,8 +7,14 @@ const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const documentPath = path.resolve(currentDirectory, "../docs/openapi.json");
 const swaggerDocument = JSON.parse(fs.readFileSync(documentPath, "utf8"));
 const require = createRequire(import.meta.url);
-const swaggerCss = fs.readFileSync(require.resolve("swagger-ui-dist/swagger-ui.css"), "utf8");
-const swaggerBundle = fs.readFileSync(require.resolve("swagger-ui-dist/swagger-ui-bundle.js"), "utf8");
+const swaggerCss = fs.readFileSync(
+  require.resolve("swagger-ui-dist/swagger-ui.css"),
+  "utf8",
+);
+const swaggerBundle = fs.readFileSync(
+  require.resolve("swagger-ui-dist/swagger-ui-bundle.js"),
+  "utf8",
+);
 const swaggerStandalonePreset = fs.readFileSync(
   require.resolve("swagger-ui-dist/swagger-ui-standalone-preset.js"),
   "utf8",

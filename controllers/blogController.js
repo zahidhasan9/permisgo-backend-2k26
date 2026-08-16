@@ -13,24 +13,39 @@ const normalizeStatus = (value) =>
   value === "published" ? "published" : "draft";
 
 const clean = (value) => String(value || "").trim();
-const getLanguage = (value) => ["bn", "fr"].includes(value) ? value : "en";
+const getLanguage = (value) => (["bn", "fr"].includes(value) ? value : "en");
 const localizeBlog = (blog, language) => {
   const item = blog.toObject ? blog.toObject() : blog;
   if (language === "en") return item;
   const translated = item.translations?.[language] || {};
-  return { ...item, title: translated.title || item.title, excerpt: translated.excerpt || item.excerpt, content: translated.content || item.content, language };
+  return {
+    ...item,
+    title: translated.title || item.title,
+    excerpt: translated.excerpt || item.excerpt,
+    content: translated.content || item.content,
+    language,
+  };
 };
 const translationPayload = (body) => ({
-  bn: { title: clean(body.title_bn), excerpt: clean(body.excerpt_bn), content: clean(body.content_bn) },
-  fr: { title: clean(body.title_fr), excerpt: clean(body.excerpt_fr), content: clean(body.content_fr) },
+  bn: {
+    title: clean(body.title_bn),
+    excerpt: clean(body.excerpt_bn),
+    content: clean(body.content_bn),
+  },
+  fr: {
+    title: clean(body.title_fr),
+    excerpt: clean(body.excerpt_fr),
+    content: clean(body.content_fr),
+  },
 });
 
 const buildUniqueSlug = async (title, ignoredId = null) => {
-  const base = slugify(String(title || "blog"), {
-    lower: true,
-    strict: true,
-    trim: true,
-  }) || "blog";
+  const base =
+    slugify(String(title || "blog"), {
+      lower: true,
+      strict: true,
+      trim: true,
+    }) || "blog";
   let slug = base;
   let suffix = 2;
 
@@ -52,7 +67,12 @@ export const getBlogs = asyncHandler(async (req, res) => {
     .populate("author", "name")
     .sort({ publishedAt: -1, createdAt: -1 })
     .limit(limit);
-  sendResponse(res, 200, "Blogs fetched.", blogs.map((blog) => localizeBlog(blog, language)));
+  sendResponse(
+    res,
+    200,
+    "Blogs fetched.",
+    blogs.map((blog) => localizeBlog(blog, language)),
+  );
 });
 
 export const getAdminBlogs = asyncHandler(async (req, res) => {
@@ -83,7 +103,8 @@ export const getBlog = asyncHandler(async (req, res) => {
 export const createBlog = asyncHandler(async (req, res) => {
   const title = String(req.body.title || "").trim();
   if (!title) throw new ApiError(400, "Blog title is required.");
-  if (!req.file) throw new ApiError(400, "A Cloudinary cover image is required.");
+  if (!req.file)
+    throw new ApiError(400, "A Cloudinary cover image is required.");
 
   const status = normalizeStatus(req.body.status);
   const blog = await Blog.create({
@@ -108,15 +129,19 @@ export const updateBlog = asyncHandler(async (req, res) => {
   if (req.body.title !== undefined) {
     const title = String(req.body.title).trim();
     if (!title) throw new ApiError(400, "Blog title is required.");
-    if (title !== blog.title) blog.slug = await buildUniqueSlug(title, blog._id);
+    if (title !== blog.title)
+      blog.slug = await buildUniqueSlug(title, blog._id);
     blog.title = title;
   }
-  if (req.body.excerpt !== undefined) blog.excerpt = String(req.body.excerpt).trim();
-  if (req.body.content !== undefined) blog.content = String(req.body.content).trim();
+  if (req.body.excerpt !== undefined)
+    blog.excerpt = String(req.body.excerpt).trim();
+  if (req.body.content !== undefined)
+    blog.content = String(req.body.content).trim();
   for (const language of ["bn", "fr"]) {
     for (const field of ["title", "excerpt", "content"]) {
       const key = `${field}_${language}`;
-      if (req.body[key] !== undefined) blog.set(`translations.${language}.${field}`, clean(req.body[key]));
+      if (req.body[key] !== undefined)
+        blog.set(`translations.${language}.${field}`, clean(req.body[key]));
     }
   }
   if (req.body.status !== undefined) {
@@ -131,7 +156,11 @@ export const updateBlog = asyncHandler(async (req, res) => {
   else if (removeCoverImage) blog.coverImage = "";
 
   await blog.save();
-  if ((req.file || removeCoverImage) && oldImage && oldImage !== blog.coverImage) {
+  if (
+    (req.file || removeCoverImage) &&
+    oldImage &&
+    oldImage !== blog.coverImage
+  ) {
     await deleteStoredFile(oldImage);
   }
   sendResponse(res, 200, "Blog updated.", blog);

@@ -8,8 +8,14 @@ const testimonialSchema = new mongoose.Schema(
     rating: { type: Number, default: 5, min: 1, max: 5 },
     message: { type: String, required: true },
     translations: {
-      bn: { role: { type: String, default: "", trim: true }, message: { type: String, default: "", trim: true } },
-      fr: { role: { type: String, default: "", trim: true }, message: { type: String, default: "", trim: true } },
+      bn: {
+        role: { type: String, default: "", trim: true },
+        message: { type: String, default: "", trim: true },
+      },
+      fr: {
+        role: { type: String, default: "", trim: true },
+        message: { type: String, default: "", trim: true },
+      },
     },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
   },

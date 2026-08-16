@@ -18,7 +18,10 @@ const validateTimeRanges = (slots = []) => {
       throw new ApiError(400, "Every end time must use HH:mm format.");
     }
     if (timeToMinutes(slot.endTime) <= timeToMinutes(slot.startTime)) {
-      throw new ApiError(400, "Availability end time must be after start time.");
+      throw new ApiError(
+        400,
+        "Availability end time must be after start time.",
+      );
     }
   });
 
@@ -78,7 +81,10 @@ const normalizeDateExceptions = (dateExceptions = []) => {
     date.setUTCHours(0, 0, 0, 0);
     const key = date.toISOString();
     if (dates.has(key)) {
-      throw new ApiError(400, "Date exceptions cannot contain duplicate dates.");
+      throw new ApiError(
+        400,
+        "Date exceptions cannot contain duplicate dates.",
+      );
     }
     dates.add(key);
 
@@ -87,7 +93,9 @@ const normalizeDateExceptions = (dateExceptions = []) => {
       date,
       unavailable,
       slots: unavailable ? [] : validateTimeRanges(exception.slots || []),
-      note: String(exception.note || "").trim().slice(0, 200),
+      note: String(exception.note || "")
+        .trim()
+        .slice(0, 200),
     };
   });
 };
@@ -118,9 +126,7 @@ export const updateMyAvailability = asyncHandler(async (req, res) => {
   const lessonDurationOptions = Array.isArray(req.body.lessonDurationOptions)
     ? [...new Set(req.body.lessonDurationOptions.map(Number))]
     : [30, 60, 90, 120];
-  const dateExceptions = normalizeDateExceptions(
-    req.body.dateExceptions || [],
-  );
+  const dateExceptions = normalizeDateExceptions(req.body.dateExceptions || []);
 
   if (bufferMinutes < 0 || bufferMinutes > 120) {
     throw new ApiError(400, "Buffer time must be between 0 and 120 minutes.");
@@ -132,7 +138,8 @@ export const updateMyAvailability = asyncHandler(async (req, res) => {
 
   if (
     lessonDurationOptions.some(
-      (duration) => !Number.isFinite(duration) || duration < 30 || duration > 240,
+      (duration) =>
+        !Number.isFinite(duration) || duration < 30 || duration > 240,
     )
   ) {
     throw new ApiError(

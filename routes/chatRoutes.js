@@ -1,6 +1,11 @@
 import express from "express";
 import upload from "../middlewares/uploadMiddleware.js";
-import { getContacts, getIceConfig, getMessages, uploadAttachment } from "../controllers/chatController.js";
+import {
+  getContacts,
+  getIceConfig,
+  getMessages,
+  uploadAttachment,
+} from "../controllers/chatController.js";
 import { authorize, protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();

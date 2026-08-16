@@ -22,6 +22,9 @@ export const SITE_SETTING_KEYS = Object.keys(SITE_SETTING_DEFAULTS);
 export const buildSiteSettings = (items = []) => {
   const values = new Map(items.map((item) => [item.key, item.value]));
   return Object.fromEntries(
-    SITE_SETTING_KEYS.map((key) => [key, String(values.get(key) || SITE_SETTING_DEFAULTS[key])]),
+    SITE_SETTING_KEYS.map((key) => [
+      key,
+      String(values.get(key) || SITE_SETTING_DEFAULTS[key]),
+    ]),
   );
 };

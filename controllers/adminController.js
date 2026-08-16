@@ -1,12 +1,3 @@
-// import User from "../models/User.js";
-// import Booking from "../models/Booking.js";
-// import Lesson from "../models/Lesson.js";
-// import Payment from "../models/Payment.js";
-// import SupportTicket from "../models/SupportTicket.js";
-// import TeacherProfile from "../models/TeacherProfile.js";
-// import asyncHandler from "../utils/asyncHandler.js";
-// import sendResponse from "../utils/ApiResponse.js";
-
 import User from "../models/User.js";
 import Booking from "../models/Booking.js";
 import Lesson from "../models/Lesson.js";
@@ -16,7 +7,10 @@ import TeacherProfile from "../models/TeacherProfile.js";
 import StudentProfile from "../models/StudentProfile.js";
 import Document from "../models/Document.js";
 import Setting from "../models/Setting.js";
-import { buildSiteSettings, SITE_SETTING_KEYS } from "../config/siteSettings.js";
+import {
+  buildSiteSettings,
+  SITE_SETTING_KEYS,
+} from "../config/siteSettings.js";
 
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/ApiResponse.js";
@@ -269,12 +263,21 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
 // @access  Admin
 export const getDrivingSettings = asyncHandler(async (req, res) => {
   const settings = await Setting.find({
-    key: { $in: ["requiredDrivingHours", "requiredSkillsPercentage", "contactRecipientEmail", ...SITE_SETTING_KEYS] },
+    key: {
+      $in: [
+        "requiredDrivingHours",
+        "requiredSkillsPercentage",
+        "contactRecipientEmail",
+        ...SITE_SETTING_KEYS,
+      ],
+    },
   }).lean();
   const values = new Map(settings.map((item) => [item.key, item.value]));
   return sendResponse(res, 200, "Driving settings fetched successfully.", {
     requiredHours: Number(values.get("requiredDrivingHours") || 20),
-    requiredSkillsPercentage: Number(values.get("requiredSkillsPercentage") || 60),
+    requiredSkillsPercentage: Number(
+      values.get("requiredSkillsPercentage") || 60,
+    ),
     contactRecipientEmail: String(values.get("contactRecipientEmail") || ""),
     ...buildSiteSettings(settings),
   });
@@ -286,14 +289,23 @@ export const getDrivingSettings = asyncHandler(async (req, res) => {
 export const updateDrivingSettings = asyncHandler(async (req, res) => {
   const requiredHours = Number(req.body.requiredHours);
   const requiredSkillsPercentage = Number(req.body.requiredSkillsPercentage);
-  const contactRecipientEmail = String(req.body.contactRecipientEmail || "").trim().toLowerCase();
+  const contactRecipientEmail = String(req.body.contactRecipientEmail || "")
+    .trim()
+    .toLowerCase();
   const whatsappNumber = String(req.body.whatsappNumber || "").trim();
   const siteSettings = Object.fromEntries(
-    SITE_SETTING_KEYS.map((key) => [key, String(req.body[key] || "").trim()]).filter(([, value]) => value),
+    SITE_SETTING_KEYS.map((key) => [
+      key,
+      String(req.body[key] || "").trim(),
+    ]).filter(([, value]) => value),
   );
   siteSettings.whatsappNumber = whatsappNumber;
 
-  if (!Number.isFinite(requiredHours) || requiredHours < 1 || requiredHours > 200) {
+  if (
+    !Number.isFinite(requiredHours) ||
+    requiredHours < 1 ||
+    requiredHours > 200
+  ) {
     return fail(res, 400, "Required driving hours must be between 1 and 200.");
   }
 
@@ -302,21 +314,47 @@ export const updateDrivingSettings = asyncHandler(async (req, res) => {
     requiredSkillsPercentage < 1 ||
     requiredSkillsPercentage > 100
   ) {
-    return fail(res, 400, "Required skills percentage must be between 1 and 100.");
+    return fail(
+      res,
+      400,
+      "Required skills percentage must be between 1 and 100.",
+    );
   }
-  if (contactRecipientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactRecipientEmail)) {
+  if (
+    contactRecipientEmail &&
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactRecipientEmail)
+  ) {
     return fail(res, 400, "Please enter a valid contact recipient email.");
   }
   if (whatsappNumber && !/^\+?[0-9\s()-]{7,25}$/.test(whatsappNumber)) {
-    return fail(res, 400, "Please enter a valid WhatsApp number with country code.");
+    return fail(
+      res,
+      400,
+      "Please enter a valid WhatsApp number with country code.",
+    );
   }
-  for (const key of ["websiteUrl", "whatsappUrl", "googleMapUrl", "facebookUrl", "instagramUrl", "tiktokUrl", "youtubeUrl"]) {
+  for (const key of [
+    "websiteUrl",
+    "whatsappUrl",
+    "googleMapUrl",
+    "facebookUrl",
+    "instagramUrl",
+    "tiktokUrl",
+    "youtubeUrl",
+  ]) {
     if (siteSettings[key]) {
-      try { new URL(siteSettings[key]); } catch { return fail(res, 400, `${key} must be a valid URL.`); }
+      try {
+        new URL(siteSettings[key]);
+      } catch {
+        return fail(res, 400, `${key} must be a valid URL.`);
+      }
     }
   }
   for (const key of ["supportEmail", "admissionEmail"]) {
-    if (siteSettings[key] && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(siteSettings[key])) {
+    if (
+      siteSettings[key] &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(siteSettings[key])
+    ) {
       return fail(res, 400, `${key} must be a valid email address.`);
     }
   }
@@ -326,22 +364,34 @@ export const updateDrivingSettings = asyncHandler(async (req, res) => {
   await Promise.all([
     Setting.findOneAndUpdate(
       { key: "requiredDrivingHours" },
-      { $set: { value: normalizedHours, group: "driving" }, $setOnInsert: { key: "requiredDrivingHours" } },
+      {
+        $set: { value: normalizedHours, group: "driving" },
+        $setOnInsert: { key: "requiredDrivingHours" },
+      },
       { new: true, upsert: true, runValidators: true },
     ),
     Setting.findOneAndUpdate(
       { key: "contactRecipientEmail" },
-      { $set: { value: contactRecipientEmail, group: "contact" }, $setOnInsert: { key: "contactRecipientEmail" } },
+      {
+        $set: { value: contactRecipientEmail, group: "contact" },
+        $setOnInsert: { key: "contactRecipientEmail" },
+      },
       { new: true, upsert: true, runValidators: true },
     ),
     Setting.findOneAndUpdate(
       { key: "requiredSkillsPercentage" },
-      { $set: { value: normalizedSkills, group: "driving" }, $setOnInsert: { key: "requiredSkillsPercentage" } },
+      {
+        $set: { value: normalizedSkills, group: "driving" },
+        $setOnInsert: { key: "requiredSkillsPercentage" },
+      },
       { new: true, upsert: true, runValidators: true },
     ),
     Setting.findOneAndUpdate(
       { key: "whatsappNumber" },
-      { $set: { value: whatsappNumber, group: "contact" }, $setOnInsert: { key: "whatsappNumber" } },
+      {
+        $set: { value: whatsappNumber, group: "contact" },
+        $setOnInsert: { key: "whatsappNumber" },
+      },
       { new: true, upsert: true, runValidators: true },
     ),
     ...Object.entries(siteSettings).map(([key, value]) =>
@@ -353,12 +403,17 @@ export const updateDrivingSettings = asyncHandler(async (req, res) => {
     ),
   ]);
 
-  return sendResponse(res, 200, "Global required driving hours updated successfully.", {
-    requiredHours: normalizedHours,
-    requiredSkillsPercentage: normalizedSkills,
-    contactRecipientEmail,
-    ...siteSettings,
-  });
+  return sendResponse(
+    res,
+    200,
+    "Global required driving hours updated successfully.",
+    {
+      requiredHours: normalizedHours,
+      requiredSkillsPercentage: normalizedSkills,
+      contactRecipientEmail,
+      ...siteSettings,
+    },
+  );
 });
 
 // @desc    Update user role

@@ -8,8 +8,16 @@ const blogSchema = new mongoose.Schema(
     excerpt: String,
     content: String,
     translations: {
-      bn: { title: { type: String, trim: true, default: "" }, excerpt: { type: String, trim: true, default: "" }, content: { type: String, trim: true, default: "" } },
-      fr: { title: { type: String, trim: true, default: "" }, excerpt: { type: String, trim: true, default: "" }, content: { type: String, trim: true, default: "" } },
+      bn: {
+        title: { type: String, trim: true, default: "" },
+        excerpt: { type: String, trim: true, default: "" },
+        content: { type: String, trim: true, default: "" },
+      },
+      fr: {
+        title: { type: String, trim: true, default: "" },
+        excerpt: { type: String, trim: true, default: "" },
+        content: { type: String, trim: true, default: "" },
+      },
     },
     coverImage: String,
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

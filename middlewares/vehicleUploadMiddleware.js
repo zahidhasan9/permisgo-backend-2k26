@@ -13,13 +13,8 @@ const maxVehicleImageSizeMb = Number(
     5,
 );
 
-if (
-  !Number.isFinite(maxVehicleImageSizeMb) ||
-  maxVehicleImageSizeMb <= 0
-) {
-  throw new Error(
-    "VEHICLE_UPLOAD_MAX_FILE_SIZE_MB must be a positive number.",
-  );
+if (!Number.isFinite(maxVehicleImageSizeMb) || maxVehicleImageSizeMb <= 0) {
+  throw new Error("VEHICLE_UPLOAD_MAX_FILE_SIZE_MB must be a positive number.");
 }
 
 const vehicleUpload = createUploadMiddleware({

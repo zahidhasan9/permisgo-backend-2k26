@@ -14,7 +14,9 @@ const parser = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter(req, file, callback) {
     if (!allowedTypes.has(file.mimetype)) {
-      return callback(new Error("Only JPG, PNG and WebP blog images are allowed."));
+      return callback(
+        new Error("Only JPG, PNG and WebP blog images are allowed."),
+      );
     }
     callback(null, true);
   },
