@@ -27,6 +27,8 @@
     "vercel-build": "npm run docs:generate",
     "upload:blog-images": "node seeders/uploadBlogSeedImages.js",
     "seed:testimonials": "node seeders/testimonialSeeder.js",
+    "seed:cms-pages": "node seeders/cmsPublicPagesSeeder.js",
+    "seed:cms-priority-pages": "node seeders/cmsPriorityPagesSeeder.js",
     "seed:demo-teachers": "node seeders/demoTeacherSeeder.js"
   },
   "keywords": [

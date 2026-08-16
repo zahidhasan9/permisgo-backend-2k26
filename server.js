@@ -27,6 +27,7 @@ import offerRoutes from "./routes/offerRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import faqRoutes from "./routes/faqRoutes.js";
+import cmsPageRoutes from "./routes/cmsPageRoutes.js";
 import testimonialRoutes from "./routes/testimonialRoutes.js";
 // import supportRoutes from"./routes/supportRoutes.js";
 // import notificationRoutes from"./routes/notificationRoutes.js";
@@ -85,6 +86,9 @@ app.use(compression());
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: Number(process.env.API_RATE_LIMIT || 500),
+  // Hot reloads and locale switches generate bursts of API requests locally.
+  // Keep production protected without locking the developer out for 15 minutes.
+  skip: () => process.env.NODE_ENV !== "production",
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -121,6 +125,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/faqs", faqRoutes);
+app.use("/api/cms-pages", cmsPageRoutes);
 app.use("/api/testimonials", testimonialRoutes);
 //app.use("/api/support", supportRoutes);
 //app.use("/api/notifications", notificationRoutes);
