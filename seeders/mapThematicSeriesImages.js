@@ -20,7 +20,9 @@ const sourceFiles = Array.from(
 const cloudinaryFolder = [
   String(process.env.CLOUDINARY_FOLDER || "permisgo").replace(/^\/|\/$/g, ""),
   "thematic-series",
-].filter(Boolean).join("/");
+]
+  .filter(Boolean)
+  .join("/");
 
 const run = async () => {
   const imageUrls = [];
@@ -55,24 +57,37 @@ const run = async () => {
         status: "active",
       }).sort({ order: 1, createdAt: 1 });
 
-      for (let questionIndex = 0; questionIndex < questions.length; questionIndex += 1) {
-        const imageIndex = (quizIndex * 2 + questionIndex + 3) % imageUrls.length;
+      for (
+        let questionIndex = 0;
+        questionIndex < questions.length;
+        questionIndex += 1
+      ) {
+        const imageIndex =
+          (quizIndex * 2 + questionIndex + 3) % imageUrls.length;
         const question = questions[questionIndex];
         question.questionImage = imageUrls[imageIndex];
-        question.markedAnswerImage = imageUrls[(imageIndex + 1) % imageUrls.length];
-        question.explanationImage = imageUrls[(imageIndex + 2) % imageUrls.length];
+        question.markedAnswerImage =
+          imageUrls[(imageIndex + 1) % imageUrls.length];
+        question.explanationImage =
+          imageUrls[(imageIndex + 2) % imageUrls.length];
         await question.save();
         updatedQuestions += 1;
       }
     }
 
-    console.log(JSON.stringify({
-      success: true,
-      uploadedImages: imageUrls.length,
-      updatedQuizzes: quizzes.length,
-      updatedQuestions,
-      imageUrls,
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          success: true,
+          uploadedImages: imageUrls.length,
+          updatedQuizzes: quizzes.length,
+          updatedQuestions,
+          imageUrls,
+        },
+        null,
+        2,
+      ),
+    );
   } finally {
     await mongoose.disconnect();
   }

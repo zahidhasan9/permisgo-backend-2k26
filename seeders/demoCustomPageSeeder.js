@@ -3,8 +3,20 @@ import mongoose from "mongoose";
 import { connectDB } from "../config/db.js";
 import CmsPage from "../models/CmsPage.js";
 
-const translation = (title, excerpt, content, badge, ctaLabel, seoTitle, seoDescription) => ({
-  title, excerpt, content, seoTitle, seoDescription,
+const translation = (
+  title,
+  excerpt,
+  content,
+  badge,
+  ctaLabel,
+  seoTitle,
+  seoDescription,
+) => ({
+  title,
+  excerpt,
+  content,
+  seoTitle,
+  seoDescription,
   keywords: ["PermisGo", "driving school", "driving lessons"],
   imageAlt: title,
   settings: { badge, ctaLabel },

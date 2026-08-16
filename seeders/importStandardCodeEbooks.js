@@ -12,42 +12,74 @@ const courses = [
   {
     title: "Legal Provisions Regarding Road Traffic",
     cover: "/image/legal-road-traffic.png",
-    topics: ["Road traffic law fundamentals", "Driver responsibilities", "Offences and penalties"],
+    topics: [
+      "Road traffic law fundamentals",
+      "Driver responsibilities",
+      "Offences and penalties",
+    ],
   },
   {
     title: "First Aid for Drivers",
     cover: "/image/help.jpg",
-    topics: ["Protecting an accident scene", "Alerting emergency services", "Assisting injured people"],
+    topics: [
+      "Protecting an accident scene",
+      "Alerting emergency services",
+      "Assisting injured people",
+    ],
   },
   {
     title: "The Driver",
     cover: "/image/the-driver.png",
-    topics: ["Observation and awareness", "Driver behaviour and risk", "Fitness to drive"],
+    topics: [
+      "Observation and awareness",
+      "Driver behaviour and risk",
+      "Fitness to drive",
+    ],
   },
   {
     title: "Precautions When Leaving the Vehicle",
     cover: "/image/precautions-vehicle.png",
-    topics: ["Safe stopping and parking", "Leaving the vehicle safely", "Securing passengers and loads"],
+    topics: [
+      "Safe stopping and parking",
+      "Leaving the vehicle safely",
+      "Securing passengers and loads",
+    ],
   },
   {
     title: "The Road",
     cover: "/image/the-road.png",
-    topics: ["Road layout and markings", "Junctions and roundabouts", "Speed and stopping distance"],
+    topics: [
+      "Road layout and markings",
+      "Junctions and roundabouts",
+      "Speed and stopping distance",
+    ],
   },
   {
     title: "Mechanical Components and Safety",
     cover: "/image/mechanical-components.png",
-    topics: ["Vehicle safety checks", "Tyres brakes and steering", "Warning lights and maintenance"],
+    topics: [
+      "Vehicle safety checks",
+      "Tyres brakes and steering",
+      "Warning lights and maintenance",
+    ],
   },
   {
     title: "Other Road Users",
     cover: "/image/other-road-users.png",
-    topics: ["Pedestrians and cyclists", "Motorcycles and heavy vehicles", "Vulnerable road users"],
+    topics: [
+      "Pedestrians and cyclists",
+      "Motorcycles and heavy vehicles",
+      "Vulnerable road users",
+    ],
   },
   {
     title: "Vehicle Safety Equipment",
     cover: "/image/vehicle-safety.png",
-    topics: ["Seat belts and child restraints", "Lighting and visibility", "Active safety systems"],
+    topics: [
+      "Seat belts and child restraints",
+      "Lighting and visibility",
+      "Active safety systems",
+    ],
   },
   {
     title: "General Regulations",
@@ -57,14 +89,19 @@ const courses = [
   {
     title: "Eco Driving",
     cover: "/image/traffic-hero.png",
-    topics: ["Fuel-efficient driving", "Reducing emissions", "Responsible vehicle use"],
+    topics: [
+      "Fuel-efficient driving",
+      "Reducing emissions",
+      "Responsible vehicle use",
+    ],
   },
 ];
 
 const lessonKinds = [
   {
     suffix: "Essential Knowledge",
-    intro: "Learn the key rules, terminology and observations required for this topic.",
+    intro:
+      "Learn the key rules, terminology and observations required for this topic.",
     bullets: [
       "Identify the rule before acting.",
       "Observe signs, road markings and surrounding traffic.",
@@ -73,7 +110,8 @@ const lessonKinds = [
   },
   {
     suffix: "Practical Application",
-    intro: "Apply the topic in realistic driving situations and build safe decision-making habits.",
+    intro:
+      "Apply the topic in realistic driving situations and build safe decision-making habits.",
     bullets: [
       "Scan early and anticipate developing hazards.",
       "Adjust speed and position before the risk increases.",
@@ -88,12 +126,14 @@ const buildBlocks = (course, topic, kind) => [
     image: course.cover,
     description: `${kind.intro} This lesson is part of ${course.title} and focuses on ${topic.toLowerCase()}.`,
     bulletPoints: kind.bullets,
-    footerText: "Always combine the Highway Code rules with observation and sound judgement.",
+    footerText:
+      "Always combine the Highway Code rules with observation and sound judgement.",
   },
   {
     title: "Remember and check",
     image: "",
-    description: "Before continuing, make sure you can recognise the situation, explain the risk and select the safest response.",
+    description:
+      "Before continuing, make sure you can recognise the situation, explain the risk and select the safest response.",
     bulletPoints: [
       "What information is available?",
       "Who could be affected by your decision?",
@@ -139,13 +179,19 @@ const run = async () => {
         },
       );
 
-      const oldTopicIds = await EbookTopic.find({ course: course._id }).distinct("_id");
+      const oldTopicIds = await EbookTopic.find({
+        course: course._id,
+      }).distinct("_id");
       await EbookLesson.deleteMany({
         $or: [{ course: course._id }, { topic: { $in: oldTopicIds } }],
       });
       await EbookTopic.deleteMany({ course: course._id });
 
-      for (let topicIndex = 0; topicIndex < definition.topics.length; topicIndex += 1) {
+      for (
+        let topicIndex = 0;
+        topicIndex < definition.topics.length;
+        topicIndex += 1
+      ) {
         const topicTitle = definition.topics[topicIndex];
         const topic = await EbookTopic.create({
           course: course._id,
@@ -156,7 +202,11 @@ const run = async () => {
         });
         topicCount += 1;
 
-        for (let kindIndex = 0; kindIndex < lessonKinds.length; kindIndex += 1) {
+        for (
+          let kindIndex = 0;
+          kindIndex < lessonKinds.length;
+          kindIndex += 1
+        ) {
           const kind = lessonKinds[kindIndex];
           await EbookLesson.create({
             course: course._id,

@@ -14,12 +14,28 @@ const source = JSON.parse(
 
 const SERIES_COUNT = 20;
 const QUESTIONS_PER_SERIES = 10;
-const validTopics = new Set(["L", "HAS", "C", "P", "R", "M", "U", "S", "D", "E"]);
+const validTopics = new Set([
+  "L",
+  "HAS",
+  "C",
+  "P",
+  "R",
+  "M",
+  "U",
+  "S",
+  "D",
+  "E",
+]);
 
 const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 if (!mongoUri) throw new Error("MONGO_URI is not configured.");
-if (!Array.isArray(source.questions) || source.questions.length < QUESTIONS_PER_SERIES) {
-  throw new Error("The source dataset does not contain enough valid questions.");
+if (
+  !Array.isArray(source.questions) ||
+  source.questions.length < QUESTIONS_PER_SERIES
+) {
+  throw new Error(
+    "The source dataset does not contain enough valid questions.",
+  );
 }
 
 const normalizeQuestion = (item, quizId, order) => ({
@@ -81,22 +97,40 @@ const run = async () => {
       // reruns deterministic while leaving every other quiz untouched.
       await Question.deleteMany({ quiz: quiz._id });
 
-      const questions = Array.from({ length: QUESTIONS_PER_SERIES }, (_, offset) => {
-        const sourceIndex =
-          (seriesIndex * QUESTIONS_PER_SERIES + offset) % source.questions.length;
-        return normalizeQuestion(source.questions[sourceIndex], quiz._id, offset + 1);
-      });
+      const questions = Array.from(
+        { length: QUESTIONS_PER_SERIES },
+        (_, offset) => {
+          const sourceIndex =
+            (seriesIndex * QUESTIONS_PER_SERIES + offset) %
+            source.questions.length;
+          return normalizeQuestion(
+            source.questions[sourceIndex],
+            quiz._id,
+            offset + 1,
+          );
+        },
+      );
 
       await Question.insertMany(questions);
       importedQuestions += questions.length;
     }
 
     const quizCount = await Quiz.countDocuments({
-      slug: { $in: Array.from({ length: SERIES_COUNT }, (_, index) => `simple-series-${String(index + 1).padStart(2, "0")}`) },
+      slug: {
+        $in: Array.from(
+          { length: SERIES_COUNT },
+          (_, index) => `simple-series-${String(index + 1).padStart(2, "0")}`,
+        ),
+      },
       status: "active",
     });
     const importedQuizIds = await Quiz.find({
-      slug: { $in: Array.from({ length: SERIES_COUNT }, (_, index) => `simple-series-${String(index + 1).padStart(2, "0")}`) },
+      slug: {
+        $in: Array.from(
+          { length: SERIES_COUNT },
+          (_, index) => `simple-series-${String(index + 1).padStart(2, "0")}`,
+        ),
+      },
     }).distinct("_id");
     const questionCount = await Question.countDocuments({
       quiz: { $in: importedQuizIds },

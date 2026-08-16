@@ -9,18 +9,78 @@ const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 if (!mongoUri) throw new Error("MONGO_URI is not configured.");
 
 const signs = [
-  ["Stop", "AB4", "priority", "You must come to a complete stop and give way before proceeding."],
-  ["Give Way", "AB3a", "priority", "Slow down and give priority to traffic on the road you are entering."],
-  ["No Entry", "B1", "prohibition", "Entry is prohibited for all vehicles from this direction."],
-  ["No Parking", "B6a1", "prohibition", "Parking is prohibited on the side of the road where this sign is placed."],
-  ["General Danger", "A14", "warning", "An unspecified hazard is ahead. Slow down and remain alert."],
-  ["Children", "A13a", "warning", "Children may be crossing or present near the road. Reduce speed."],
-  ["Pedestrian Crossing Ahead", "A13b", "warning", "A pedestrian crossing or pedestrian activity is ahead."],
-  ["Dangerous Bend Right", "A1a", "warning", "A dangerous bend to the right is ahead. Adapt your speed and position."],
-  ["Turn Right", "B21a1", "mandatory", "Vehicles must follow the direction indicated and turn right."],
-  ["Pedestrian Crossing", "C20a", "information", "This sign indicates a designated pedestrian crossing."],
-  ["Parking Area", "C1a", "information", "Parking is permitted in the designated area, subject to local restrictions."],
-  ["Roundabout", "AB25", "priority", "A roundabout is ahead. Give way as required and choose the correct lane."],
+  [
+    "Stop",
+    "AB4",
+    "priority",
+    "You must come to a complete stop and give way before proceeding.",
+  ],
+  [
+    "Give Way",
+    "AB3a",
+    "priority",
+    "Slow down and give priority to traffic on the road you are entering.",
+  ],
+  [
+    "No Entry",
+    "B1",
+    "prohibition",
+    "Entry is prohibited for all vehicles from this direction.",
+  ],
+  [
+    "No Parking",
+    "B6a1",
+    "prohibition",
+    "Parking is prohibited on the side of the road where this sign is placed.",
+  ],
+  [
+    "General Danger",
+    "A14",
+    "warning",
+    "An unspecified hazard is ahead. Slow down and remain alert.",
+  ],
+  [
+    "Children",
+    "A13a",
+    "warning",
+    "Children may be crossing or present near the road. Reduce speed.",
+  ],
+  [
+    "Pedestrian Crossing Ahead",
+    "A13b",
+    "warning",
+    "A pedestrian crossing or pedestrian activity is ahead.",
+  ],
+  [
+    "Dangerous Bend Right",
+    "A1a",
+    "warning",
+    "A dangerous bend to the right is ahead. Adapt your speed and position.",
+  ],
+  [
+    "Turn Right",
+    "B21a1",
+    "mandatory",
+    "Vehicles must follow the direction indicated and turn right.",
+  ],
+  [
+    "Pedestrian Crossing",
+    "C20a",
+    "information",
+    "This sign indicates a designated pedestrian crossing.",
+  ],
+  [
+    "Parking Area",
+    "C1a",
+    "information",
+    "Parking is permitted in the designated area, subject to local restrictions.",
+  ],
+  [
+    "Roundabout",
+    "AB25",
+    "priority",
+    "A roundabout is ahead. Give way as required and choose the correct lane.",
+  ],
 ];
 
 const commonsFileUrl = (code) =>
@@ -80,7 +140,9 @@ const run = async () => {
   const folder = [
     String(process.env.CLOUDINARY_FOLDER || "permisgo").replace(/^\/|\/$/g, ""),
     "road-signs",
-  ].filter(Boolean).join("/");
+  ]
+    .filter(Boolean)
+    .join("/");
 
   await mongoose.connect(mongoUri);
   try {

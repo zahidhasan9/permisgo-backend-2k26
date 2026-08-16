@@ -31,7 +31,9 @@ const images = [
 const folder = [
   String(process.env.CLOUDINARY_FOLDER || "permisgo").replace(/^\/|\/$/g, ""),
   "code-ebooks",
-].filter(Boolean).join("/");
+]
+  .filter(Boolean)
+  .join("/");
 
 const run = async () => {
   const uploaded = new Map();

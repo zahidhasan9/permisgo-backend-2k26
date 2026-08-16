@@ -27,7 +27,12 @@ const themes = [
   ["E", "Rules for using the vehicle in relation to ecology"],
 ];
 
-const normalizeQuestion = (item, quizId, order, topic = item.topicCode || "") => ({
+const normalizeQuestion = (
+  item,
+  quizId,
+  order,
+  topic = item.topicCode || "",
+) => ({
   quiz: quizId,
   questionText: String(item.questionText || "").trim(),
   questionImage: item.questionImage || "",
@@ -113,7 +118,9 @@ const run = async () => {
     await replaceQuestions(crashQuiz, crashQuestions);
 
     const thematicIds = await Quiz.find({
-      slug: { $in: themes.map(([code]) => `thematic-series-${code.toLowerCase()}`) },
+      slug: {
+        $in: themes.map(([code]) => `thematic-series-${code.toLowerCase()}`),
+      },
     }).distinct("_id");
     const thematicQuestionCount = await Question.countDocuments({
       quiz: { $in: thematicIds },

@@ -12,14 +12,17 @@ const sourceDirectory = "C:\\Users\\USER\\Downloads";
 const folder = [
   String(process.env.CLOUDINARY_FOLDER || "permisgo").replace(/^\/|\/$/g, ""),
   "knowledge-sheets",
-].filter(Boolean).join("/");
+]
+  .filter(Boolean)
+  .join("/");
 
 const sheets = [
   {
     source: "100 questions Avec photo.pdf",
     publicId: "100-driving-questions-with-photos",
     title: "100 Driving Questions with Photos",
-    description: "Practice 100 visual driving-code questions with road and traffic photographs.",
+    description:
+      "Practice 100 visual driving-code questions with road and traffic photographs.",
     readMinutes: 45,
     order: 20,
     difficulty: "exam-focus",
@@ -29,7 +32,8 @@ const sheets = [
     source: "basic driving.pdf",
     publicId: "basic-driving-guide",
     title: "Basic Driving Guide",
-    description: "A beginner-friendly revision sheet covering essential driving knowledge.",
+    description:
+      "A beginner-friendly revision sheet covering essential driving knowledge.",
     readMinutes: 15,
     order: 21,
     difficulty: "beginner",
@@ -86,11 +90,17 @@ const run = async () => {
       });
     }
 
-    console.log(JSON.stringify({
-      success: true,
-      uploadedPdfs: uploaded.length,
-      knowledgeSheets: records,
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          success: true,
+          uploadedPdfs: uploaded.length,
+          knowledgeSheets: records,
+        },
+        null,
+        2,
+      ),
+    );
   } finally {
     await mongoose.disconnect();
   }

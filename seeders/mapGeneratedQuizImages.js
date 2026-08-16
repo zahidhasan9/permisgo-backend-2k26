@@ -14,7 +14,9 @@ if (!mongoUri) throw new Error("MONGO_URI is not configured.");
 const folder = [
   String(process.env.CLOUDINARY_FOLDER || "permisgo").replace(/^\/|\/$/g, ""),
   "quiz-questions",
-].filter(Boolean).join("/");
+]
+  .filter(Boolean)
+  .join("/");
 
 const categories = [
   {
@@ -27,19 +29,26 @@ const categories = [
     key: "parking",
     file: "parking.png",
     limit: 8,
-    matches: (text) => /park|parking|bus stop|loading zone|footpath/i.test(text),
+    matches: (text) =>
+      /park|parking|bus stop|loading zone|footpath/i.test(text),
   },
   {
     key: "junction-priority",
     file: "junction-priority.png",
     limit: 7,
-    matches: (text) => /priority|right of way|junction|roundabout|merging|intersection|give way/i.test(text),
+    matches: (text) =>
+      /priority|right of way|junction|roundabout|merging|intersection|give way/i.test(
+        text,
+      ),
   },
   {
     key: "driver-safety",
     file: "driver-safety.png",
     limit: 7,
-    matches: (text) => /driver|mirror|blind spot|seatbelt|following distance|overtak|lane|turning/i.test(text),
+    matches: (text) =>
+      /driver|mirror|blind spot|seatbelt|following distance|overtak|lane|turning/i.test(
+        text,
+      ),
   },
 ];
 

@@ -4,8 +4,30 @@ import { protect, authorize } from "../middlewares/authMiddleware.js";
 import testimonialImageUpload from "../middlewares/testimonialUploadMiddleware.js";
 const router = express.Router();
 router.get("/", testimonialController.getTestimonials);
-router.get("/admin/all", protect, authorize("admin"), testimonialController.getAdminTestimonials);
-router.post("/", protect, authorize("admin"), testimonialImageUpload, testimonialController.createTestimonial);
-router.patch("/:id", protect, authorize("admin"), testimonialImageUpload, testimonialController.updateTestimonial);
-router.delete("/:id", protect, authorize("admin"), testimonialController.deleteTestimonial);
+router.get(
+  "/admin/all",
+  protect,
+  authorize("admin"),
+  testimonialController.getAdminTestimonials,
+);
+router.post(
+  "/",
+  protect,
+  authorize("admin"),
+  testimonialImageUpload,
+  testimonialController.createTestimonial,
+);
+router.patch(
+  "/:id",
+  protect,
+  authorize("admin"),
+  testimonialImageUpload,
+  testimonialController.updateTestimonial,
+);
+router.delete(
+  "/:id",
+  protect,
+  authorize("admin"),
+  testimonialController.deleteTestimonial,
+);
 export default router;

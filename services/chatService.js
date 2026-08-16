@@ -23,12 +23,19 @@ const normalizeAttachment = (attachment) => {
 };
 
 export const getChatRecipient = async (currentUser, recipientId) => {
-  if (!mongoose.isValidObjectId(recipientId)) throw new Error("Invalid recipient.");
-  const recipient = await User.findOne({ _id: recipientId, status: "active" }).select("name email role avatar");
-  if (!recipient || !allowedPair(currentUser.role, recipient.role)) throw new Error("This chat recipient is not available.");
+  if (!mongoose.isValidObjectId(recipientId))
+    throw new Error("Invalid recipient.");
+  const recipient = await User.findOne({
+    _id: recipientId,
+    status: "active",
+  }).select("name email role avatar");
+  if (!recipient || !allowedPair(currentUser.role, recipient.role))
+    throw new Error("This chat recipient is not available.");
 
-  const studentId = currentUser.role === "student" ? currentUser._id : recipient._id;
-  const teacherId = currentUser.role === "teacher" ? currentUser._id : recipient._id;
+  const studentId =
+    currentUser.role === "student" ? currentUser._id : recipient._id;
+  const teacherId =
+    currentUser.role === "teacher" ? currentUser._id : recipient._id;
   const hasBooking = await Booking.exists({
     student: studentId,
     teacher: teacherId,
@@ -36,15 +43,21 @@ export const getChatRecipient = async (currentUser, recipientId) => {
   });
 
   if (!hasBooking) {
-    throw new Error("You can only chat with an instructor or student connected through a booking.");
+    throw new Error(
+      "You can only chat with an instructor or student connected through a booking.",
+    );
   }
   return recipient;
 };
 
 export const findOrCreateConversation = async (firstId, secondId) => {
-  let conversation = await Conversation.findOne({ participants: { $all: [firstId, secondId], $size: 2 } });
+  let conversation = await Conversation.findOne({
+    participants: { $all: [firstId, secondId], $size: 2 },
+  });
   if (!conversation) {
-    conversation = await Conversation.create({ participants: [firstId, secondId] });
+    conversation = await Conversation.create({
+      participants: [firstId, secondId],
+    });
   }
   return conversation;
 };
@@ -68,5 +81,13 @@ export const createChatMessage = async (sender, receiverId, payload) => {
   });
   conversation.lastMessage = message._id;
   await conversation.save();
-  return { ...message.toObject(), sender: { _id: sender._id, name: sender.name, avatar: sender.avatar }, receiver: { _id: receiver._id, name: receiver.name, avatar: receiver.avatar } };
+  return {
+    ...message.toObject(),
+    sender: { _id: sender._id, name: sender.name, avatar: sender.avatar },
+    receiver: {
+      _id: receiver._id,
+      name: receiver.name,
+      avatar: receiver.avatar,
+    },
+  };
 };
