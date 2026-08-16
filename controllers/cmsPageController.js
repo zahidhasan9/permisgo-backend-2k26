@@ -79,4 +79,11 @@ export const upsertPage = asyncHandler(async (req, res) => {
   sendResponse(res, 200, "CMS page saved.", page);
 });
 
-export default { getPublicPage, getPublicSitemapPages, getFooterPages, getAdminPages, upsertPage };
+export const deletePage = asyncHandler(async (req, res) => {
+  const slug = cleanSlug(req.params.slug);
+  const page = await CmsPage.findOneAndDelete({ slug });
+  if (!page) { res.statusCode = 404; throw new Error("CMS page not found."); }
+  sendResponse(res, 200, "CMS page deleted.", { slug });
+});
+
+export default { getPublicPage, getPublicSitemapPages, getFooterPages, getAdminPages, upsertPage, deletePage };
