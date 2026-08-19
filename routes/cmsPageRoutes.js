@@ -1,11 +1,13 @@
 import express from "express";
 import controller from "../controllers/cmsPageController.js";
 import { protect, authorize } from "../middlewares/authMiddleware.js";
+import cmsImageUpload from "../middlewares/cmsImageUploadMiddleware.js";
 
 const router = express.Router();
 router.get("/sitemap", controller.getPublicSitemapPages);
 router.get("/footer", controller.getFooterPages);
 router.get("/admin/all", protect, authorize("admin"), controller.getAdminPages);
+router.post("/admin/image", protect, authorize("admin"), cmsImageUpload, controller.uploadCmsImage);
 router.put("/admin/:slug", protect, authorize("admin"), controller.upsertPage);
 router.delete(
   "/admin/:slug",

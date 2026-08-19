@@ -443,6 +443,10 @@ export const updateProfile = async (req, res) => {
       user.avatar = "";
     }
 
+    /*
+    আগে database save হবে।
+    Save সফল হলে পুরোনো image delete হবে।
+    */
     const updatedUser = await user.save();
 
     if (oldAvatarToDelete && oldAvatarToDelete !== updatedUser.avatar) {

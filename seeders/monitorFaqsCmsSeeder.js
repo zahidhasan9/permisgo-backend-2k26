@@ -1,0 +1,19 @@
+import "dotenv/config";
+import path from "path";
+import mongoose from "mongoose";
+import cloudinary from "../config/cloudinary.js";
+import { connectDB } from "../config/db.js";
+import CmsPage from "../models/CmsPage.js";
+
+await connectDB();
+const image = await cloudinary.uploader.upload(path.resolve("../permisgo-fontend/public/image/questions.png"), { folder:"permisgo/cms/monitor-faqs", public_id:"monitor-faqs", overwrite:true, invalidate:true });
+const shared = { heroImage:image.secure_url, heroBackground:"#103677", groupBadgeColor:"#e2233d", groupTitleColor:"#103677", faqCardBackground:"#ffffff", faqHoverBackground:"#eff6ff", ctaButtonUrl:"/contact-us", ctaButtonColor:"#ffffff", ctaButtonTextColor:"#103677" };
+const data = {
+ en: { title:"Monitor FAQs", homeLabel:"Home", guidesTitle:"Explore our guides", guide1Label:"Where are we?", guide2Label:"Monitor FAQs", guide3Label:"Highway Code Glossary", guide4Label:"Driving Licence Glossary", guide5Label:"Disability Support", heroEyebrow:"Instructor help centre", heroTitle:"Monitor FAQs", heroDescription:"Clear answers to the questions our instructors and partners ask most often.", heroImageAlt:"Instructor frequently asked questions", highlights:"Quick answers\nInstructor guidance\nDedicated support", sectionEyebrow:"Frequently asked questions", sectionTitle:"How can we help?", sectionDescription:"Browse by topic. Select a question to reveal the answer.", ctaTitle:"Need more help?", ctaText:"Our friendly team can help you choose the right next step.", ctaButton:"Contact us" },
+ bn: { title:"প্রশিক্ষক FAQ", homeLabel:"হোম", guidesTitle:"আমাদের গাইড দেখুন", guide1Label:"আমরা কোথায়?", guide2Label:"প্রশিক্ষক FAQ", guide3Label:"হাইওয়ে কোড শব্দকোষ", guide4Label:"ড্রাইভিং লাইসেন্স শব্দকোষ", guide5Label:"প্রতিবন্ধী সহায়তা", heroEyebrow:"প্রশিক্ষক সহায়তা কেন্দ্র", heroTitle:"প্রশিক্ষক FAQ", heroDescription:"আমাদের প্রশিক্ষক ও পার্টনারদের সবচেয়ে সাধারণ প্রশ্নের পরিষ্কার উত্তর।", heroImageAlt:"প্রশিক্ষকদের সচরাচর জিজ্ঞাসিত প্রশ্ন", highlights:"দ্রুত উত্তর\nপ্রশিক্ষক নির্দেশনা\nনিবেদিত সহায়তা", sectionEyebrow:"সচরাচর জিজ্ঞাসিত প্রশ্ন", sectionTitle:"আমরা কীভাবে সাহায্য করতে পারি?", sectionDescription:"বিষয় অনুযায়ী দেখুন। উত্তর দেখতে একটি প্রশ্ন নির্বাচন করুন।", ctaTitle:"আরও সাহায্য দরকার?", ctaText:"সঠিক পরবর্তী পদক্ষেপ বেছে নিতে আমাদের দল সাহায্য করবে।", ctaButton:"যোগাযোগ করুন" },
+ fr: { title:"FAQ des moniteurs", homeLabel:"Accueil", guidesTitle:"Découvrir nos guides", guide1Label:"Où sommes-nous ?", guide2Label:"FAQ des moniteurs", guide3Label:"Glossaire du Code de la route", guide4Label:"Glossaire du permis", guide5Label:"Aide au handicap", heroEyebrow:"Centre d’aide des moniteurs", heroTitle:"FAQ des moniteurs", heroDescription:"Des réponses claires aux questions les plus fréquentes de nos moniteurs et partenaires.", heroImageAlt:"Questions fréquentes des moniteurs", highlights:"Réponses rapides\nConseils aux moniteurs\nAssistance dédiée", sectionEyebrow:"Questions fréquentes", sectionTitle:"Comment pouvons-nous vous aider ?", sectionDescription:"Parcourez les thèmes et sélectionnez une question pour afficher la réponse.", ctaTitle:"Besoin d’aide ?", ctaText:"Notre équipe vous aide à choisir la prochaine étape adaptée.", ctaButton:"Nous contacter" }
+};
+const translations = Object.fromEntries(Object.entries(data).map(([lang, settings]) => [lang, { title:settings.title, excerpt:settings.heroDescription, seoTitle:settings.title, seoDescription:settings.heroDescription, imageAlt:settings.heroImageAlt, settings:{ ...shared, ...settings } }]));
+await CmsPage.findOneAndUpdate({ slug:"monitor-faqs" }, { $set:{ translations, status:"published", ogImage:image.secure_url, noIndex:false } }, { upsert:true, runValidators:true, setDefaultsOnInsert:true });
+console.log("Monitor FAQs page CMS data and Cloudinary image saved for EN, BN and FR.");
+await mongoose.disconnect();

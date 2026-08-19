@@ -51,6 +51,10 @@ export const getMyFavoriteTeachers = asyncHandler(async (req, res) => {
   return sendResponse(res, 200, "Favorite teachers fetched.", ordered);
 });
 
+/**
+ * Student profile না থাকলে automatically create করবে।
+ * Profile থাকলে existing profile return করবে।
+ */
 const ensureStudentProfile = async (userId) => {
   const profile = await StudentProfile.findOneAndUpdate(
     { user: userId },
@@ -72,6 +76,10 @@ const ensureStudentProfile = async (userId) => {
   return profile;
 };
 
+/**
+ * Frontend থেকে শুধু allowed profile fields update করতে দেবে।
+ * এতে user ইচ্ছামতো অন্য database field পরিবর্তন করতে পারবে না।
+ */
 const buildProfileUpdate = (body = {}) => {
   const update = {};
 
@@ -119,6 +127,10 @@ export const getDashboard = asyncHandler(async (req, res) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  /**
+   * Profile না থাকলে create হবে।
+   * আগে এখানে new: true থাকার কারণে warning আসছিল।
+   */
   const profile = await ensureStudentProfile(userId);
   const [registrationUser, registrationDocuments] = await Promise.all([
     User.findById(userId)
@@ -507,6 +519,9 @@ export const getDashboard = asyncHandler(async (req, res) => {
 export const getProfile = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
+  /**
+   * নতুন student হলে profile automatically create করবে।
+   */
   await ensureStudentProfile(userId);
 
   const profile = await StudentProfile.findOne({
@@ -537,6 +552,9 @@ export const updateProfile = asyncHandler(async (req, res) => {
     },
   };
 
+  /**
+   * কোনো valid field থাকলেই $set যোগ হবে।
+   */
   if (Object.keys(updateData).length > 0) {
     updateOperation.$set = updateData;
   }

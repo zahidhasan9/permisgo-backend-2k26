@@ -2,31 +2,13 @@ import Appointment from "../models/Appointment.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import sendResponse from "../utils/ApiResponse.js";
-import TeacherProfile from "../models/TeacherProfile.js";
 
 const clean = (value) => String(value ?? "").trim();
 
 export const createAppointment = asyncHandler(async (req, res) => {
-  if (!/^[a-f\d]{24}$/i.test(clean(req.body.instructor))) {
-    throw new ApiError(400, "Please select a valid instructor.");
-  }
-  const teacherProfile = await TeacherProfile.findOne({
-    user: clean(req.body.instructor),
-    verificationStatus: "verified",
-    availabilityStatus: "available",
-  }).populate({
-    path: "user",
-    match: { role: "teacher", status: "active" },
-    select: "name",
-  });
-  if (!teacherProfile?.user)
-    throw new ApiError(400, "The selected instructor is not available.");
-
   const appointmentDate = new Date(req.body.appointmentDate);
   const payload = {
     courseTitle: clean(req.body.courseTitle),
-    instructor: teacherProfile.user._id,
-    instructorName: teacherProfile.user.name,
     appointmentDate,
     appointmentTime: clean(req.body.appointmentTime),
     duration: Number(req.body.duration),
@@ -38,7 +20,6 @@ export const createAppointment = asyncHandler(async (req, res) => {
 
   const required = [
     payload.courseTitle,
-    payload.instructor,
     payload.appointmentTime,
     payload.name,
     payload.email,

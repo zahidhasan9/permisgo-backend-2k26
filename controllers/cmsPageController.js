@@ -1,6 +1,7 @@
 import CmsPage from "../models/CmsPage.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/ApiResponse.js";
+import { getUploadedFileUrl } from "../utils/uploadHelpers.js";
 
 const languages = ["en", "bn", "fr"];
 const cleanSlug = (value) =>
@@ -87,6 +88,12 @@ export const getAdminPages = asyncHandler(async (_req, res) => {
   sendResponse(res, 200, "CMS pages fetched.", pages);
 });
 
+export const uploadCmsImage = asyncHandler(async (req, res) => {
+  sendResponse(res, 201, "CMS image uploaded.", {
+    url: getUploadedFileUrl(req.file),
+  });
+});
+
 export const upsertPage = asyncHandler(async (req, res) => {
   const slug = cleanSlug(req.params.slug || req.body.slug);
   const translations = {};
@@ -148,6 +155,7 @@ export default {
   getPublicSitemapPages,
   getFooterPages,
   getAdminPages,
+  uploadCmsImage,
   upsertPage,
   deletePage,
 };
